@@ -12,7 +12,8 @@
       .m { stroke: #E8B400; stroke-width: 0.6; stroke-dasharray: 5 1.5 0.8 1.5; }
       .v { stroke: #E8B400; stroke-width: 0.6; stroke-dasharray: 3 1.5; }
       .zona { fill: #f3f6f9; }
-      .perfil { fill: none; stroke: #333; stroke-width: 0.6; stroke-linejoin: round; }
+      .h3d { fill: #fff; stroke: #1a1a1a; stroke-width: 0.15; stroke-linejoin: round; }
+      .h3p { stroke: #999; stroke-width: 0.1; stroke-dasharray: 1 0.6; }
       .h1 { font-size: 7px; font-weight: bold; }
       .h2 { font-size: 4.2px; font-weight: bold; }
       .t { font-size: 3.4px; }
@@ -21,7 +22,7 @@
   </defs>
   <rect width="420.0" height="297.0" fill="#fff"/>
   <rect x="5" y="5" width="410.0" height="287.0" fill="none" stroke="#222" stroke-width="0.4"/>
-  <text x="15" y="20" class="h1">Troquel — soporte plegable para portátil (prototipo v1)</text>
+  <text x="15" y="20" class="h1">Troquel — soporte plegable para portátil (prototipo v2)</text>
   <text x="15" y="27" class="t">Escala 1:1 · medidas en mm · imprimir al 100 % en A3 sin ajustar a página</text>
 
   <g transform="translate(30.0 45.0)">
@@ -31,18 +32,18 @@
     <line x1="248.972" y1="1.322" x2="180.000" y2="90.000" class="m"/>
     <line x1="248.972" y1="178.678" x2="180.000" y2="90.000" class="m"/>
     <line x1="70.000" y1="90.000" x2="180.000" y2="90.000" class="m"/>
-    <line x1="35.778" y1="46.000" x2="214.222" y2="46.000" class="m"/>
-    <line x1="35.778" y1="134.000" x2="214.222" y2="134.000" class="m"/>
+    <line x1="0.000" y1="46.000" x2="250.000" y2="46.000" class="m"/>
+    <line x1="0.000" y1="134.000" x2="250.000" y2="134.000" class="m"/>
     <line x1="0.000" y1="90.000" x2="70.000" y2="90.000" class="v"/>
     <line x1="180.000" y1="90.000" x2="250.000" y2="90.000" class="v"/>
-    <line x1="63.000" y1="81.000" x2="187.000" y2="81.000" class="v"/>
-    <line x1="63.000" y1="99.000" x2="187.000" y2="99.000" class="v"/>
+    <line x1="0.000" y1="81.000" x2="250.000" y2="81.000" class="v"/>
+    <line x1="0.000" y1="99.000" x2="250.000" y2="99.000" class="v"/>
     <g class="cota"><line x1="0" y1="-8" x2="250.0" y2="-8" marker-start="url(#f)" marker-end="url(#f)"/><text x="125.0" y="-9.5" text-anchor="middle">250</text></g><g class="cota"><line x1="-8" y1="0" x2="-8" y2="180.0" marker-start="url(#f)" marker-end="url(#f)"/><text x="-9.5" y="90.0" text-anchor="middle" transform="rotate(-90 -9.5 90.0)">180</text></g><g class="cota"><line x1="0" y1="188.0" x2="70.0" y2="188.0" marker-start="url(#f)" marker-end="url(#f)"/><text x="35.0" y="192.5" text-anchor="middle">70</text></g><g class="cota"><line x1="258.0" y1="46.0" x2="258.0" y2="81.0" marker-start="url(#f)" marker-end="url(#f)"/><text x="256.5" y="63.5" text-anchor="middle" transform="rotate(-90 256.5 63.5)">35</text></g><g class="cota"><line x1="258.0" y1="81.0" x2="258.0" y2="99.0" marker-start="url(#f)" marker-end="url(#f)"/><text x="256.5" y="90.0" text-anchor="middle" transform="rotate(-90 256.5 90.0)">18</text></g><g class="cota"><line x1="268.0" y1="0" x2="268.0" y2="90.0" marker-start="url(#f)" marker-end="url(#f)"/><text x="266.5" y="45.0" text-anchor="middle" transform="rotate(-90 266.5 45.0)">90</text></g>
     <text x="125.0" y="64.5" text-anchor="middle" class="s">pared de ranura</text>
     <text x="125.0" y="87.0" text-anchor="middle" class="s">fondo de ranura</text>
     <text x="125.0" y="117.5" text-anchor="middle" class="s">pared de ranura</text>
-    <text x="26.6" y="78.0" text-anchor="middle" class="s">fuelle</text>
-    <text x="223.4" y="78.0" text-anchor="middle" class="s">fuelle</text>
+    <text x="26.6" y="66.0" text-anchor="middle" class="s">fuelle</text>
+    <text x="223.4" y="66.0" text-anchor="middle" class="s">fuelle</text>
     <text x="125.0" y="10" text-anchor="middle" class="s">pata (apoyo en mesa)</text>
     <text x="125.0" y="174.0" text-anchor="middle" class="s">pata (apoyo en mesa)</text>
   </g>
@@ -68,19 +69,33 @@
     <text class="t" x="0" y="90">o microcanal E (canal paralelo a 250)</text>
   </g>
 
-  <!-- perfiles -->
-  <g transform="translate(305 160)">
-    <text class="h2" x="0" y="0">Modo atril (portátil inclinado)</text>
-    <line x1="0" y1="47.074028853269766" x2="100" y2="47.074028853269766" stroke="#bbb" stroke-width="0.3"/>
-    <path class="perfil" d="M -20.25 0.00 L 0.00 -35.07 L 20.25 0.00" transform="translate(45 47.074028853269766)"/>
-    <text class="s" x="0" y="53.074028853269766">Cumbrera central arriba; los fuelles se meten hacia</text>
-    <text class="s" x="0" y="57.074028853269766">adentro y cierran los extremos en triángulo.</text>
+  <!-- vistas 3D -->
+  <g transform="translate(305 150)">
+    <text class="h2" x="0" y="0">Armado — modo atril</text>
+    <g transform="translate(0 5)">
+    <polygon class="h3d" points="76.87,9.20 67.84,0.00 67.10,21.89"/>
+    <polygon class="h3d" points="98.24,24.79 67.84,0.00 67.10,21.89"/>
+    <polygon class="h3d" points="1.76,27.87 76.87,9.20 67.84,0.00 32.03,8.21"/>
+    <line class="h3p" x1="16.74" y1="18.14" x2="72.54" y2="4.79"/>
+    <line class="h3p" x1="28.82" y1="10.30" x2="68.85" y2="1.03"/>
+    <polygon class="h3d" points="1.76,27.87 32.03,8.21 32.86,31.00"/>
+    <polygon class="h3d" points="17.00,48.00 98.24,24.79 67.84,0.00 32.03,8.21"/>
+    <line class="h3p" x1="24.87" y1="27.16" x2="82.89" y2="12.28"/>
+    <line class="h3p" x1="30.59" y1="12.01" x2="70.95" y2="2.54"/>
+    <polygon class="h3d" points="17.00,48.00 32.03,8.21 32.86,31.00"/>
+    </g>
+    <text class="s" x="0" y="58">Cumbrera 70 mm arriba; los fuelles se meten hacia adentro.</text>
   </g>
-  <g transform="translate(305 225)">
-    <text class="h2" x="0" y="0">Modo vertical (ranura)</text>
-    <line x1="0" y1="23.75" x2="100" y2="23.75" stroke="#bbb" stroke-width="0.3"/>
-    <path class="perfil" d="M -17.48 0.00 L -4.05 -15.75 L -4.05 0.00 L 4.05 0.00 L 4.05 -15.75 L 17.48 0.00" transform="translate(45 23.75)"/>
-    <text class="s" x="0" y="29.75">La cumbrera se hunde y forma la ranura en U.</text>
+  <g transform="translate(305 216)">
+    <text class="h2" x="0" y="0">Armado — modo vertical</text>
+    <g transform="translate(0 5)">
+    <polygon class="h3d" points="3.10,23.65 90.58,2.19 83.84,9.31 0.00,30.59"/>
+    <polygon class="h3d" points="6.88,39.68 93.52,16.38 89.78,13.65 4.21,36.15"/>
+    <polygon class="h3d" points="4.21,36.15 89.78,13.65 90.58,2.19 3.10,23.65"/>
+    <polygon class="h3d" points="5.80,27.01 94.42,4.79 93.52,16.38 6.88,39.68"/>
+    <polygon class="h3d" points="11.52,45.81 100.00,21.11 94.42,4.79 5.80,27.01"/>
+    </g>
+    <text class="s" x="0" y="58">Ranura de 18 × 35 mm; diagonales planas.</text>
   </g>
 
   <text x="15" y="285.0" class="s">Diseño inferido de fotografías: verificar primero con un corte en papel o cartulina antes de pasar a cartón.</text>

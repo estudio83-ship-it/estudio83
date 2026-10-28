@@ -65,12 +65,13 @@ def geometria():
     valle.append(((0, A), (E, A)))
     valle.append(((W - E, A), (W, A)))
 
-    # ranura del modo vertical: labios (montaña) y fondo (valle), entre diagonales
+    # ranura del modo vertical: labios (montaña) y fondo (valle), a todo el ancho
+    # (en modo vertical las diagonales quedan planas y la pieza es un perfil extruido)
     for d in (-1, 1):
         y = A + d * (T / 2 + P)
-        montana.append(((x_diag(y), y), (W - x_diag(y), y)))
+        montana.append(((0, y), (W, y)))
         y = A + d * T / 2
-        valle.append(((x_diag(y), y), (W - x_diag(y), y)))
+        valle.append(((0, y), (W, y)))
 
     return cut, montana, valle
 
@@ -147,22 +148,81 @@ def cota_v(y1, y2, x, texto):
             f'transform="rotate(-90 {x-1.5} {ym})">{texto}</text></g>')
 
 
-def perfil_atril(ox, oy, s):
-    """Sección del modo atril: tienda con cumbrera en A, patas a 0 y H (ángulo 60°)."""
-    run = A * math.cos(math.radians(60))
-    alt = A * math.sin(math.radians(60))
-    pts = [(-run, 0), (0, -alt), (run, 0)]
-    d = "M " + " L ".join(f"{ox+x*s:.2f} {oy+y*s:.2f}" for x, y in pts)
-    return d, alt
+HT = 70.0      # alto de la cumbrera en modo atril
 
 
-def perfil_ranura(ox, oy, s):
-    """Sección del modo vertical: faldón inclinado, pared, fondo, pared, faldón."""
-    falda = A - T / 2 - P
-    run = math.sqrt(max(falda**2 - P**2, 0))
-    pts = [(-T/2 - run, 0), (-T/2, -P), (-T/2, 0), (T/2, 0), (T/2, -P), (T/2 + run, 0)]
-    d = "M " + " L ".join(f"{ox+x*s:.2f} {oy+y*s:.2f}" for x, y in pts)
-    return d, run
+def modelo_atril():
+    """Caras 3D del modo atril (x a lo largo, y transversal, z arriba).
+
+    Los dos trapecios centrales giran rígidos sobre las patas; cada fuelle
+    (dos triángulos entre diagonal y valle) se mete hacia adentro.
+    """
+    yf = math.sqrt(A * A - HT * HT)
+    k = E * E + HT * HT
+    q = (2 * HT * HT * E / k, 2 * HT ** 3 / k - HT)   # vértice (0, A) metido adentro
+    def esp(pt):  # simetría respecto al centro de la plancha
+        return (W - pt[0], pt[1], pt[2])
+    c1, c2, r1, qq = (0, -yf, 0), (0, yf, 0), (E, 0, HT), (q[0], 0, q[1])
+    def pliegues(lado):  # hendidos de la ranura que quedan planos sobre el faldón
+        out = []
+        for v in (A - T / 2 - P, A - T / 2):
+            t = v / A
+            y, z = lado * yf * (1 - t), HT * t
+            out.append(((x_diag(v), y, z), (W - x_diag(v), y, z)))
+        return out
+    caras = [
+        ([(0, -yf, 0), (W, -yf, 0), (W - E, 0, HT), (E, 0, HT)], pliegues(-1)),
+        ([(0, yf, 0), (W, yf, 0), (W - E, 0, HT), (E, 0, HT)], pliegues(1)),
+        [c1, r1, qq], [c2, r1, qq],
+        [esp(c1), esp(r1), esp(qq)], [esp(c2), esp(r1), esp(qq)],
+    ]
+    return caras
+
+
+def modelo_ranura():
+    """Caras 3D del modo vertical: el perfil de la ranura extruido a lo ancho."""
+    run = math.sqrt(max((A - T / 2 - P) ** 2 - P ** 2, 0))
+    perfil = [(-T/2 - run, 0), (-T/2, P), (-T/2, 0), (T/2, 0), (T/2, P), (T/2 + run, 0)]
+    return [[(0, a[0], a[1]), (W, a[0], a[1]), (W, b[0], b[1]), (0, b[0], b[1])]
+            for a, b in zip(perfil, perfil[1:])]
+
+
+def vista_3d(caras, caja_w, caja_h, az=208, el=30, dist=800):
+    """Perspectiva en línea fina (hairline) con caras blancas ordenadas por profundidad."""
+    a, e = math.radians(az), math.radians(el)
+    cx, cy = W / 2, 0
+    # base de cámara
+    fwd = (math.cos(e) * math.sin(a), math.cos(e) * math.cos(a), math.sin(e))   # hacia la cámara
+    right = (-math.cos(a), math.sin(a), 0)
+    up = (-math.sin(e) * math.sin(a), -math.sin(e) * math.cos(a), math.cos(e))
+
+    def proy(p):
+        d = (p[0] - cx, p[1] - cy, p[2])
+        z = dist - sum(d[i] * fwd[i] for i in range(3))
+        f = dist / z
+        return (f * sum(d[i] * right[i] for i in range(3)),
+                -f * sum(d[i] * up[i] for i in range(3)), z)
+
+    poli = []
+    for c in caras:
+        c, lineas = c if isinstance(c, tuple) else (c, [])
+        pts = [proy(p) for p in c]
+        lin = [[proy(p)[:2] for p in l] for l in lineas]
+        poli.append((sum(p[2] for p in pts) / len(pts), [(p[0], p[1]) for p in pts], lin))
+    poli.sort(key=lambda t: -t[0])
+    xs = [x for _, ps, _ in poli for x, _ in ps]
+    ys = [y for _, ps, _ in poli for _, y in ps]
+    esc = min(caja_w / (max(xs) - min(xs)), caja_h / (max(ys) - min(ys)))
+    ox = (caja_w - (max(xs) - min(xs)) * esc) / 2 - min(xs) * esc
+    oy = (caja_h - (max(ys) - min(ys)) * esc) / 2 - min(ys) * esc
+    out = []
+    for _, ps, lin in poli:
+        d = " ".join(f"{ox + x * esc:.2f},{oy + y * esc:.2f}" for x, y in ps)
+        out.append(f'<polygon class="h3d" points="{d}"/>')
+        for (x1, y1), (x2, y2) in lin:
+            out.append(f'<line class="h3p" x1="{ox + x1 * esc:.2f}" y1="{oy + y1 * esc:.2f}" '
+                       f'x2="{ox + x2 * esc:.2f}" y2="{oy + y2 * esc:.2f}"/>')
+    return "\n    ".join(out), esc
 
 
 def plano_svg(cut, montana, valle):
@@ -182,9 +242,8 @@ def plano_svg(cut, montana, valle):
         cota_v(0, A, W + 18, f"{A:.0f}"),
     ]
 
-    s = 0.45
-    d_atril, alt = perfil_atril(0, 0, s)
-    d_ran, _ = perfil_ranura(0, 0, s)
+    v_atril, _ = vista_3d(modelo_atril(), 100, 48)
+    v_ranura, _ = vista_3d(modelo_ranura(), 100, 48)
 
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="{PW}mm" height="{PH}mm" viewBox="0 0 {PW} {PH}">
@@ -200,7 +259,8 @@ def plano_svg(cut, montana, valle):
       .m {{ stroke: {HENDIDO_VISTA}; stroke-width: 0.6; stroke-dasharray: 5 1.5 0.8 1.5; }}
       .v {{ stroke: {HENDIDO_VISTA}; stroke-width: 0.6; stroke-dasharray: 3 1.5; }}
       .zona {{ fill: #f3f6f9; }}
-      .perfil {{ fill: none; stroke: #333; stroke-width: 0.6; stroke-linejoin: round; }}
+      .h3d {{ fill: #fff; stroke: #1a1a1a; stroke-width: 0.15; stroke-linejoin: round; }}
+      .h3p {{ stroke: #999; stroke-width: 0.1; stroke-dasharray: 1 0.6; }}
       .h1 {{ font-size: 7px; font-weight: bold; }}
       .h2 {{ font-size: 4.2px; font-weight: bold; }}
       .t {{ font-size: 3.4px; }}
@@ -209,7 +269,7 @@ def plano_svg(cut, montana, valle):
   </defs>
   <rect width="{PW}" height="{PH}" fill="#fff"/>
   <rect x="5" y="5" width="{PW-10}" height="{PH-10}" fill="none" stroke="#222" stroke-width="0.4"/>
-  <text x="15" y="20" class="h1">Troquel — soporte plegable para portátil (prototipo v1)</text>
+  <text x="15" y="20" class="h1">Troquel — soporte plegable para portátil (prototipo v2)</text>
   <text x="15" y="27" class="t">Escala 1:1 · medidas en mm · imprimir al 100 % en A3 sin ajustar a página</text>
 
   <g transform="translate({ox} {oy})">
@@ -220,8 +280,8 @@ def plano_svg(cut, montana, valle):
     <text x="{W/2}" y="{A-T/2-P/2+1}" text-anchor="middle" class="s">pared de ranura</text>
     <text x="{W/2}" y="{A-3}" text-anchor="middle" class="s">fondo de ranura</text>
     <text x="{W/2}" y="{A+T/2+P/2+1}" text-anchor="middle" class="s">pared de ranura</text>
-    <text x="{E*0.38}" y="{A-12}" text-anchor="middle" class="s">fuelle</text>
-    <text x="{W-E*0.38}" y="{A-12}" text-anchor="middle" class="s">fuelle</text>
+    <text x="{E*0.38}" y="{A-24}" text-anchor="middle" class="s">fuelle</text>
+    <text x="{W-E*0.38}" y="{A-24}" text-anchor="middle" class="s">fuelle</text>
     <text x="{W/2}" y="10" text-anchor="middle" class="s">pata (apoyo en mesa)</text>
     <text x="{W/2}" y="{H-6}" text-anchor="middle" class="s">pata (apoyo en mesa)</text>
   </g>
@@ -247,19 +307,20 @@ def plano_svg(cut, montana, valle):
     <text class="t" x="0" y="90">o microcanal E (canal paralelo a {W:.0f})</text>
   </g>
 
-  <!-- perfiles -->
-  <g transform="translate(305 160)">
-    <text class="h2" x="0" y="0">Modo atril (portátil inclinado)</text>
-    <line x1="0" y1="{alt*s+12}" x2="100" y2="{alt*s+12}" stroke="#bbb" stroke-width="0.3"/>
-    <path class="perfil" d="{d_atril}" transform="translate(45 {alt*s+12})"/>
-    <text class="s" x="0" y="{alt*s+18}">Cumbrera central arriba; los fuelles se meten hacia</text>
-    <text class="s" x="0" y="{alt*s+22}">adentro y cierran los extremos en triángulo.</text>
+  <!-- vistas 3D -->
+  <g transform="translate(305 150)">
+    <text class="h2" x="0" y="0">Armado — modo atril</text>
+    <g transform="translate(0 5)">
+    {v_atril}
+    </g>
+    <text class="s" x="0" y="58">Cumbrera {HT:.0f} mm arriba; los fuelles se meten hacia adentro.</text>
   </g>
-  <g transform="translate(305 225)">
-    <text class="h2" x="0" y="0">Modo vertical (ranura)</text>
-    <line x1="0" y1="{P*s+8}" x2="100" y2="{P*s+8}" stroke="#bbb" stroke-width="0.3"/>
-    <path class="perfil" d="{d_ran}" transform="translate(45 {P*s+8})"/>
-    <text class="s" x="0" y="{P*s+14}">La cumbrera se hunde y forma la ranura en U.</text>
+  <g transform="translate(305 216)">
+    <text class="h2" x="0" y="0">Armado — modo vertical</text>
+    <g transform="translate(0 5)">
+    {v_ranura}
+    </g>
+    <text class="s" x="0" y="58">Ranura de {T:.0f} × {P:.0f} mm; diagonales planas.</text>
   </g>
 
   <text x="15" y="{PH-12}" class="s">Diseño inferido de fotografías: verificar primero con un corte en papel o cartulina antes de pasar a cartón.</text>

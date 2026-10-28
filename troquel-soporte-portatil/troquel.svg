@@ -11,14 +11,14 @@
     <line x1="248.972" y1="1.322" x2="180.000" y2="90.000" fill="none" stroke="#FFFF00" stroke-width="0.25"/>
     <line x1="248.972" y1="178.678" x2="180.000" y2="90.000" fill="none" stroke="#FFFF00" stroke-width="0.25"/>
     <line x1="70.000" y1="90.000" x2="180.000" y2="90.000" fill="none" stroke="#FFFF00" stroke-width="0.25"/>
-    <line x1="35.778" y1="46.000" x2="214.222" y2="46.000" fill="none" stroke="#FFFF00" stroke-width="0.25"/>
-    <line x1="35.778" y1="134.000" x2="214.222" y2="134.000" fill="none" stroke="#FFFF00" stroke-width="0.25"/>
+    <line x1="0.000" y1="46.000" x2="250.000" y2="46.000" fill="none" stroke="#FFFF00" stroke-width="0.25"/>
+    <line x1="0.000" y1="134.000" x2="250.000" y2="134.000" fill="none" stroke="#FFFF00" stroke-width="0.25"/>
    </g>
    <g id="HENDIDO_VALLE" inkscape:label="HENDIDO_VALLE">
     <line x1="0.000" y1="90.000" x2="70.000" y2="90.000" fill="none" stroke="#FFFF00" stroke-width="0.25"/>
     <line x1="180.000" y1="90.000" x2="250.000" y2="90.000" fill="none" stroke="#FFFF00" stroke-width="0.25"/>
-    <line x1="63.000" y1="81.000" x2="187.000" y2="81.000" fill="none" stroke="#FFFF00" stroke-width="0.25"/>
-    <line x1="63.000" y1="99.000" x2="187.000" y2="99.000" fill="none" stroke="#FFFF00" stroke-width="0.25"/>
+    <line x1="0.000" y1="81.000" x2="250.000" y2="81.000" fill="none" stroke="#FFFF00" stroke-width="0.25"/>
+    <line x1="0.000" y1="99.000" x2="250.000" y2="99.000" fill="none" stroke="#FFFF00" stroke-width="0.25"/>
    </g>
   </g>
 </svg>
