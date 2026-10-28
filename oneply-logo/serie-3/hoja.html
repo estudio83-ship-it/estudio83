@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>ONEPLY — Serie 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Unbounded:wght@800;900&display=block" rel="stylesheet">
+<style>
+  @font-face { font-family: "Boldonse"; src: url("fonts/Boldonse-Regular.ttf"); }
+  @font-face { font-family: "Geist Mono"; src: url("fonts/GeistMono-Regular.ttf"); }
+  @font-face { font-family: "Instrument Sans"; src: url("fonts/InstrumentSans-Regular.ttf"); font-weight: 400; }
+  @font-face { font-family: "Instrument Sans"; src: url("fonts/InstrumentSans-Bold.ttf"); font-weight: 700; }
+
+  :root {
+    --paper: #EFEBE4;
+    --ink: #1C1916;
+    --kraft: #C29A6B;
+    --bag-black: #201D1A;
+    --kraft-ink: #D8B88E;
+    --bag-red: #A3311F;
+    --red-ink: #F3EADC;
+    --muted: #8A8279;
+    --hair: #CFC8BD;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1680px; height: 1188px; background: var(--paper); }
+  body {
+    padding: 60px 64px 44px;
+    font-family: "Instrument Sans", sans-serif;
+    color: var(--ink);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    row-gap: 34px;
+  }
+
+  header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--hair);
+  }
+  .brand { display: flex; align-items: baseline; gap: 22px; }
+  .brand b { font-family: "Archivo"; font-weight: 900; font-stretch: 112.5%; font-size: 30px; letter-spacing: .01em; }
+  .brand span { font-size: 15px; color: var(--muted); letter-spacing: .01em; }
+  .meta { display: flex; gap: 28px; font-family: "Geist Mono"; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+  main {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 26px 18px;
+  }
+  figure { display: grid; grid-template-rows: 1fr auto; gap: 14px; min-height: 0; }
+  .card { position: relative; overflow: hidden; border-radius: 2px; min-height: 0; }
+  .card svg.art { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .card.kraft { background: var(--kraft); color: var(--ink); }
+  .card.black { background: var(--bag-black); color: var(--kraft-ink); }
+  .card.red   { background: var(--bag-red); color: var(--red-ink); }
+  /* fibra de papel */
+  .card::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: url("grano.png");
+    background-size: 300px 300px;
+    mix-blend-mode: multiply; opacity: .55;
+  }
+  .card.black::after { mix-blend-mode: screen; opacity: .10; }
+  .card.red::after { opacity: .35; }
+
+  figcaption { display: grid; grid-template-columns: 34px 1fr; column-gap: 6px; row-gap: 3px; }
+  figcaption .n { font-family: "Geist Mono"; font-size: 12px; color: var(--muted); padding-top: 2px; }
+  figcaption .t { font-weight: 700; font-size: 15px; letter-spacing: -.005em; }
+  figcaption .d { grid-column: 2; font-size: 12.5px; line-height: 1.35; color: #5E5850; }
+
+  footer {
+    display: flex; justify-content: space-between;
+    font-family: "Geist Mono"; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+    padding-top: 16px; border-top: 1px solid var(--hair);
+  }
+
+  .w { font-family: "Archivo"; fill: currentColor; }
+  .mono { font-family: "Geist Mono"; fill: currentColor; letter-spacing: .18em; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><b>ONEPLY</b><span>Propuestas de logo — serie 3 · 21 a 30</span></div>
+  <div class="meta"><span>Una tinta</span><span>Flexografía sobre kraft</span><span>Octubre 2026</span></div>
+</header>
+
+<main>
+
+  <!-- 21 ESTARCIDO -->
+  <figure>
+    <div class="card kraft">
+      <svg class="art" viewBox="0 0 600 660">
+        <defs>
+          <mask id="m21" maskUnits="userSpaceOnUse">
+            <rect width="1000" height="200" fill="#fff"/>
+            <rect x="70" y="-5" width="10" height="210" fill="#000"/>
+          </mask>
+        </defs>
+        <g transform="translate(50 288.6) scale(.5176)" fill="currentColor">
+          <g mask="url(#m21)">
+            <rect x="18" y="18" width="114" height="124" rx="40" fill="none" stroke="currentColor" stroke-width="36"/>
+          </g>
+          <!-- N -->
+          <rect x="172" y="0" width="36" height="160"/>
+          <rect x="336" y="0" width="36" height="160"/>
+          <polygon points="218,0 266,0 326,160 278,160"/>
+          <!-- E -->
+          <rect x="394" y="0" width="36" height="160"/>
+          <rect x="440" y="0" width="66" height="36"/>
+          <rect x="440" y="62" width="54" height="36"/>
+          <rect x="440" y="124" width="66" height="36"/>
+          <!-- P -->
+          <rect x="528" y="0" width="36" height="160"/>
+          <path d="M574 18 H614 A32 32 0 0 1 614 82 H574" fill="none" stroke="currentColor" stroke-width="36"/>
+          <!-- L -->
+          <rect x="690" y="0" width="36" height="160"/>
+          <rect x="736" y="124" width="62" height="36"/>
+          <!-- Y -->
+          <polygon points="818,0 866,0 887,88 847,88"/>
+          <polygon points="966,0 918,0 897,88 937,88"/>
+          <rect x="874" y="98" width="36" height="62"/>
+        </g>
+        <text class="mono" x="300" y="428" font-size="14" text-anchor="middle">BOLSA · UN PLIEGO</text>
+      </svg>
+    </div>
+    <figcaption><span class="n">21</span><span class="t">Estarcido</span><span class="d">Letras propias tipo plantilla. Cada junta es papel a la vista.</span></figcaption>
+  </figure>
+
+  <!-- 22 BLOQUE -->
+  <figure>
+    <div class="card kraft">
+      <svg class="art" viewBox="0 0 600 660">
+        <text id="t22" x="300" y="336" text-anchor="middle" style="font-family:Boldonse;fill:currentColor" font-size="60">ONEPLY</text>
+        <rect id="r22" x="50" y="358" width="500" height="7" fill="currentColor"/>
+        <text id="a22" class="mono" x="50" y="392" font-size="14">1 PLIEGO</text>
+        <text id="b22" class="mono" x="550" y="392" font-size="14" text-anchor="end" style="letter-spacing:.18em">50 KG</text>
+      </svg>
+    </div>
+    <figcaption><span class="n">22</span><span class="t">Bloque</span><span class="d">Compacta y muy pesada, con una línea de dato al ancho exacto.</span></figcaption>
+  </figure>
+
+  <!-- 23 MITAD -->
+  <figure>
+    <div class="card kraft">
+      <svg class="art" viewBox="0 0 600 660">
+        <defs>
+          <mask id="m23" maskUnits="userSpaceOnUse">
+            <rect width="600" height="660" fill="#fff"/>
+            <text id="t23a" x="182" y="0" text-anchor="middle" class="w" style="font-weight:900;font-stretch:125%;fill:#000" font-size="80">ONE</text>
+          </mask>
+        </defs>
+        <g mask="url(#m23)">
+          <rect x="64" y="270" width="236" height="120" fill="currentColor"/>
+        </g>
+        <rect x="64" y="270" width="472" height="120" fill="none" stroke="currentColor" stroke-width="10" />
+        <text id="t23b" x="418" y="0" text-anchor="middle" class="w" style="font-weight:900;font-stretch:125%" font-size="80">PLY</text>
+      </svg>
+    </div>
+    <figcaption><span class="n">23</span><span class="t">Mitad</span><span class="d">Media tinta, medio papel. La marca se lee como una sola capa.</span></figcaption>
+  </figure>
+
+  <!-- 24 LIGADURA 1P -->
+  <figure>
+    <div class="card black">
+      <svg class="art" viewBox="0 0 600 660">
+        <defs>
+          <mask id="m24" maskUnits="userSpaceOnUse">
+            <rect width="600" height="660" fill="#fff"/>
+            <g transform="translate(300 268) scale(1.04) translate(-100 -100) translate(-14 0)" fill="#000">
+              <polygon points="86,46 86,86 52,103 52,64"/>
+              <rect x="86" y="46" width="40" height="108"/>
+              <path d="M126 66 H130 A27 27 0 0 1 130 120 H126" fill="none" stroke="#000" stroke-width="40"/>
+            </g>
+          </mask>
+        </defs>
+        <path id="sq24" mask="url(#m24)" fill="currentColor"/>
+        <text id="t24" x="300" y="478" text-anchor="middle" class="w" style="font-weight:800;font-stretch:112.5%;letter-spacing:.16em" font-size="36">ONEPLY</text>
+      </svg>
+    </div>
+    <figcaption><span class="n">24</span><span class="t">Ligadura 1P</span><span class="d">El 1 y la P comparten el asta. Ícono para lateral, sello y redes.</span></figcaption>
+  </figure>
+
+  <!-- 25 MODULO -->
+  <figure>
+    <div class="card kraft">
+      <svg class="art" viewBox="0 0 600 660">
+        <g id="g25" fill="currentColor"></g>
+      </svg>
+    </div>
+    <figcaption><span class="n">25</span><span class="t">Módulo</span><span class="d">Letras armadas con bultos en hilera, como una estiba trabada.</span></figcaption>
+  </figure>
+
+  <!-- 26 ANILLO -->
+  <figure>
+    <div class="card red">
+      <svg class="art" viewBox="0 0 600 660">
+        <path id="p26" fill="none" stroke="currentColor" stroke-width="34"/>
+        <text id="t26" x="300" y="478" text-anchor="middle" class="w" style="font-weight:800;font-stretch:125%;letter-spacing:.06em" font-size="40">ONEPLY</text>
+      </svg>
+    </div>
+    <figcaption><span class="n">26</span><span class="t">Anillo</span><span class="d">El corte de un tubo de papel: una sola pared y una sola junta.</span></figcaption>
+  </figure>
+
+  <!-- 27 ANCHO -->
+  <figure>
+    <div class="card kraft">
+      <svg class="art" viewBox="0 0 600 660">
+        <g id="g27">
+          <text id="t27a" class="w" style="font-weight:900;font-stretch:62.5%" font-size="100" x="0" y="0">ONE</text>
+          <text id="t27b" class="w" style="font-weight:900;font-stretch:125%" font-size="100" x="0" y="0">PLY</text>
+        </g>
+        <g id="k27" class="mono" font-size="11" opacity=".55"></g>
+      </svg>
+    </div>
+    <figcaption><span class="n">27</span><span class="t">Ancho</span><span class="d">ONE angosta y PLY ancha, a la misma altura: un bloque cerrado.</span></figcaption>
+  </figure>
+
+  <!-- 28 PUNTO -->
+  <figure>
+    <div class="card black">
+      <svg class="art" viewBox="0 0 600 660">
+        <text id="t28" x="0" y="0" style="font-family:Unbounded;font-weight:900;fill:currentColor" font-size="80">ONEPLY</text>
+        <rect id="r28" fill="currentColor"/>
+      </svg>
+    </div>
+    <figcaption><span class="n">28</span><span class="t">Punto</span><span class="d">Geométrica redonda y un punto final cuadrado: uno y listo.</span></figcaption>
+  </figure>
+
+  <!-- 29 EMBUDO -->
+  <figure>
+    <div class="card kraft">
+      <svg class="art" viewBox="0 0 600 660">
+        <g id="g29" fill="currentColor">
+          <text id="t29" class="w" style="font-weight:900;font-stretch:112.5%" font-size="100" x="0" y="0">ONEPL</text>
+          <path id="y29"/>
+        </g>
+      </svg>
+    </div>
+    <figcaption><span class="n">29</span><span class="t">Embudo</span><span class="d">La Y se vuelve la tolva de llenado. Un solo detalle propio.</span></figcaption>
+  </figure>
+
+  <!-- 30 BOCA -->
+  <figure>
+    <div class="card kraft">
+      <svg class="art" viewBox="0 0 600 660">
+        <defs>
+          <mask id="m30" maskUnits="userSpaceOnUse">
+            <rect width="600" height="660" fill="#fff"/>
+            <text id="t30" x="300" y="0" text-anchor="middle" class="w" style="font-weight:900;font-stretch:112.5%;fill:#000" font-size="80">ONEPLY</text>
+          </mask>
+        </defs>
+        <path id="p30" mask="url(#m30)" fill="currentColor"/>
+      </svg>
+    </div>
+    <figcaption><span class="n">30</span><span class="t">Boca</span><span class="d">Un bloque de tinta con el borde dentado del corte de la bolsa.</span></figcaption>
+  </figure>
+
+</main>
+
+<footer><span>Criterio: Pared Única</span><span>Presentación — no son archivos de imprenta</span><span>Estudio83</span></footer>
+
+<script>
+// grano de papel
+(function () {
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' seed='7'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .33  0 0 0 0 .2  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(#f)'/></svg>`;
+  document.documentElement.style.setProperty('--grain', `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`);
+})();
+
+const $ = (id) => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+
+// Mide la tinta real de un texto (sin márgenes laterales) con canvas, en unidades del SVG.
+function inkBox(el) {
+  const cs = getComputedStyle(el);
+  const c = document.createElement('canvas').getContext('2d');
+  const fs = parseFloat(el.getAttribute('font-size'));
+  const map = { '62.5%': 'extra-condensed', '112.5%': 'semi-expanded', '125%': 'expanded' };
+  c.font = `${cs.fontWeight} ${fs}px ${cs.fontFamily}`;
+  c.fontStretch = map[cs.fontStretch] || 'normal';
+  if (cs.letterSpacing && cs.letterSpacing !== 'normal') c.letterSpacing = cs.letterSpacing;
+  const m = c.measureText(el.textContent);
+  const ls = parseFloat(cs.letterSpacing) || 0;
+  return { x0: -m.actualBoundingBoxLeft, x1: m.actualBoundingBoxRight - (ls > 0 && m.actualBoundingBoxRight > m.width - ls ? ls : 0), cap: c.measureText('H').actualBoundingBoxAscent };
+}
+
+// Ajusta un texto para que su tinta mida `w`, centrado en cx, con la base en `base`.
+function fitInk(el, w, cx, base) {
+  el.setAttribute('text-anchor', 'start');
+  let b = inkBox(el);
+  const fs = parseFloat(el.getAttribute('font-size'));
+  el.setAttribute('font-size', fs * w / (b.x1 - b.x0));
+  b = inkBox(el);
+  el.setAttribute('x', cx - (b.x0 + b.x1) / 2);
+  el.setAttribute('y', base);
+  return b;
+}
+
+function layout() {
+  // 22 BLOQUE
+  const r22 = fitInk($('t22'), 500, 300, 336);
+  // 23 MITAD
+  fitInk($('t23a'), 176, 182, 330 + 0); const c23 = inkBox($('t23a')).cap;
+  $('t23a').setAttribute('y', 330 + c23 / 2);
+  fitInk($('t23b'), 176, 418, 0); const c23b = inkBox($('t23b')).cap;
+  $('t23b').setAttribute('y', 330 + c23b / 2);
+
+  // 24 squircle
+  const S = 216, cx = 300, cy = 268, n = 4.6;
+  let d = '';
+  for (let i = 0; i <= 360; i++) {
+    const a = i * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
+    const x = cx + S / 2 * Math.sign(ca) * Math.pow(Math.abs(ca), 2 / n);
+    const y = cy + S / 2 * Math.sign(sa) * Math.pow(Math.abs(sa), 2 / n);
+    d += (i ? 'L' : 'M') + x.toFixed(2) + ' ' + y.toFixed(2);
+  }
+  $('sq24').setAttribute('d', d + 'Z');
+  fitInk($('t24'), 250, 300, 452);
+
+  // 25 MODULO
+  const L = {
+    O: ['11111','10001','10001','10001','11111'],
+    N: ['10001','11001','10101','10011','10001'],
+    E: ['11111','10000','11110','10000','11111'],
+    P: ['11111','10001','11111','10000','10000'],
+    L: ['10000','10000','10000','10000','11111'],
+    Y: ['10001','10001','11111','00100','00100'],
+  };
+  const cw = 22, ch = 22, gx = 5, gy = 5, lw = 5 * cw + 4 * gx, sp = 34;
+  const g = $('g25'); let ox = 0;
+  for (const ch_ of 'ONEPLY') {
+    L[ch_].forEach((row, r) => {
+      let c = 0;
+      while (c < 5) {
+        if (row[c] === '1') {
+          let e = c; while (e + 1 < 5 && row[e + 1] === '1') e++;
+          if (e - c === 1) e = c; // dos sueltos no se unen: así la N conserva su diagonal
+          const rc = document.createElementNS(NS, 'rect');
+          rc.setAttribute('x', ox + c * (cw + gx));
+          rc.setAttribute('y', r * (ch + gy));
+          rc.setAttribute('width', (e - c + 1) * cw + (e - c) * gx);
+          rc.setAttribute('height', ch);
+          rc.setAttribute('rx', 5);
+          g.appendChild(rc); c = e + 1;
+        } else c++;
+      }
+    });
+    ox += lw + sp;
+  }
+  const tw = ox - sp, th = 5 * ch + 4 * gy, sc = 500 / tw;
+  g.setAttribute('transform', `translate(${300 - tw * sc / 2} ${330 - th * sc / 2}) scale(${sc})`);
+
+  // 26 ANILLO
+  const R = 92, c26 = { x: 300, y: 262 }, gap = 9; // grados de la junta
+  const a0 = (-90 + gap) * Math.PI / 180, a1 = (-90 - gap) * Math.PI / 180;
+  const p = (a) => `${(c26.x + R * Math.cos(a)).toFixed(2)} ${(c26.y + R * Math.sin(a)).toFixed(2)}`;
+  $('p26').setAttribute('d', `M${p(a0)} A${R} ${R} 0 1 1 ${p(a1)}`);
+  fitInk($('t26'), 300, 300, 452);
+
+  // 27 ANCHO
+  const a = $('t27a'), b = $('t27b');
+  const ia = inkBox(a), ib = inkBox(b), gap27 = 12;
+  const total = (ia.x1 - ia.x0) + gap27 + (ib.x1 - ib.x0);
+  const s27 = 500 / total;
+  a.setAttribute('x', -ia.x0); b.setAttribute('x', (ia.x1 - ia.x0) + gap27 - ib.x0);
+  const cap27 = ia.cap * s27;
+  $('g27').setAttribute('transform', `translate(50 ${330 + cap27 / 2}) scale(${s27})`);
+  const k = $('k27');
+  const wa = (ia.x1 - ia.x0) * s27;
+  const top = 330 - cap27 / 2 - 22;
+  const mk = (x, txt, anchor) => { const t = document.createElementNS(NS, 'text'); t.setAttribute('x', x); t.setAttribute('y', top); t.setAttribute('text-anchor', anchor); t.textContent = txt; k.appendChild(t); };
+  mk(50, 'ANCHO 62', 'start'); mk(550, 'ANCHO 125', 'end');
+  const ln = document.createElementNS(NS, 'path');
+  ln.setAttribute('d', `M50 ${top + 8}V${top + 14}H${50 + wa}V${top + 8}M${50 + wa + gap27 * s27} ${top + 8}V${top + 14}H550V${top + 8}`);
+  ln.setAttribute('fill', 'none'); ln.setAttribute('stroke', 'currentColor'); ln.setAttribute('stroke-width', '1');
+  k.appendChild(ln);
+
+  // 28 PUNTO
+  const t28 = $('t28');
+  const i28 = fitInk(t28, 440, 290, 0);
+  const box28 = inkBox(t28);
+  const cap28 = box28.cap;
+  const dot = cap28 * 0.27;
+  const textW = box28.x1 - box28.x0, gap28 = dot * 0.42;
+  const full = textW + gap28 + dot, left = 300 - full / 2;
+  t28.setAttribute('x', left - box28.x0);
+  t28.setAttribute('y', 330 + cap28 / 2);
+  const r = $('r28');
+  r.setAttribute('x', left + textW + gap28); r.setAttribute('y', 330 + cap28 / 2 - dot);
+  r.setAttribute('width', dot); r.setAttribute('height', dot);
+
+  // 29 EMBUDO
+  const t29 = $('t29'); const i29 = inkBox(t29);
+  const cap = i29.cap, stem = cap * 0.25, yw = cap * 0.98, gap29 = cap * 0.07;
+  const yx = i29.x1 + gap29;
+  t29.setAttribute('x', -i29.x0);
+  const yx0 = yx - i29.x0;
+  const neck = cap * 0.62, rim = cap * 0.16;
+  $('y29').setAttribute('d',
+    `M${yx0} ${-cap} H${yx0 + yw} V${-cap + rim} L${yx0 + yw / 2 + stem / 2} ${-cap + neck} V0 H${yx0 + yw / 2 - stem / 2} V${-cap + neck} L${yx0} ${-cap + rim} Z`);
+  const w29 = (i29.x1 - i29.x0) + gap29 + yw, s29 = 490 / w29;
+  $('g29').setAttribute('transform', `translate(${300 - 245} ${330 + cap * s29 / 2}) scale(${s29})`);
+
+  // 30 BOCA
+  const x0 = 64, x1 = 536, yt = 252, yb = 412, tooth = 472 / 24, depth = 13;
+  let d30 = `M${x0} ${yb} V${yt}`;
+  for (let i = 0; i < 24; i++) {
+    d30 += ` L${(x0 + tooth * (i + .5)).toFixed(2)} ${yt - depth} L${(x0 + tooth * (i + 1)).toFixed(2)} ${yt}`;
+  }
+  d30 += ` V${yb} Z`;
+  $('p30').setAttribute('d', d30);
+  fitInk($('t30'), 384, 300, 0); const c30 = inkBox($('t30')).cap;
+  $('t30').setAttribute('y', (yt + yb) / 2 + c30 / 2);
+
+  document.body.dataset.ready = '1';
+}
+
+document.fonts.ready.then(() => requestAnimationFrame(layout));
+</script>
+</body>
+</html>
