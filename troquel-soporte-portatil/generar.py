@@ -102,18 +102,23 @@ def troquel_kongsberg_svg(cut, hend):
 
 def troquel_dxf(hend):
     """DXF R12 mínimo. El DXF usa Y hacia arriba, así que se invierte el eje."""
-    out = ["0", "SECTION", "2", "TABLES", "0", "TABLE", "2", "LAYER", "70", "2"]
+    out = ["0", "SECTION", "2", "HEADER",
+           "9", "$ACADVER", "1", "AC1009",
+           "9", "$INSUNITS", "70", "4",       # milímetros
+           "9", "$MEASUREMENT", "70", "1",    # métrico
+           "0", "ENDSEC",
+           "0", "SECTION", "2", "TABLES", "0", "TABLE", "2", "LAYER", "70", "2"]
     for name, color in (("CORTE", 1), ("HENDIDO", 2)):
         out += ["0", "LAYER", "2", name, "70", "0", "62", str(color), "6", "CONTINUOUS"]
     out += ["0", "ENDTAB", "0", "ENDSEC", "0", "SECTION", "2", "ENTITIES"]
 
     def line(layer, p, q):
-        out.extend(["0", "LINE", "8", layer,
+        out.extend(["0", "LINE", "8", layer, "62", "1" if layer == "CORTE" else "2",
                     "10", f"{p[0]:.4f}", "20", f"{ALTO-p[1]:.4f}", "30", "0",
                     "11", f"{q[0]:.4f}", "21", f"{ALTO-q[1]:.4f}", "31", "0"])
 
     def arc(cx, cy, a0, a1):
-        out.extend(["0", "ARC", "8", "CORTE", "10", f"{cx:.4f}", "20", f"{ALTO-cy:.4f}",
+        out.extend(["0", "ARC", "8", "CORTE", "62", "1", "10", f"{cx:.4f}", "20", f"{ALTO-cy:.4f}",
                     "30", "0", "40", f"{R:.4f}", "50", f"{a0}", "51", f"{a1}"])
 
     line("CORTE", (R, 0), (W - R, 0))
