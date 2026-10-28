@@ -208,8 +208,9 @@ def main():
     (OUT / "troquel.svg").write_text(troquel_svg(cut, hend))
     (OUT / "troquel-kongsberg-xl.svg").write_text(troquel_kongsberg_svg(cut, hend))
     (OUT / "troquel.dxf").write_text(troquel_dxf(hend))
+    (OUT / "troquel-kongsberg-xl.dxf").write_text(troquel_dxf(hend))
     (OUT / "plano.svg").write_text(plano_svg(cut, hend))
-    print("Generados: troquel.svg, troquel-kongsberg-xl.svg, troquel.dxf, plano.svg")
+    print("Generados: troquel.svg, troquel-kongsberg-xl.svg, troquel.dxf, troquel-kongsberg-xl.dxf, plano.svg")
 
 
 if __name__ == "__main__":
