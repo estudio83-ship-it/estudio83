@@ -85,6 +85,21 @@ def troquel_svg(cut, hend):
 '''
 
 
+def troquel_kongsberg_svg(cut, hend):
+    """Solo geometría para la mesa de corte: corte rojo y hendido amarillo, trazos continuos."""
+    lineas = "\n".join(f'    <path d="M {p[0]:.3f} {p[1]:.3f} L {q[0]:.3f} {q[1]:.3f}"/>' for p, q in hend)
+    return f'''<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="{W}mm" height="{ALTO}mm" viewBox="0 0 {W} {ALTO}">
+  <g id="CORTE" fill="none" stroke="{CORTE}" stroke-width="0.1">
+    <path d="{cut}"/>
+  </g>
+  <g id="HENDIDO" fill="none" stroke="{HENDIDO}" stroke-width="0.1">
+{lineas}
+  </g>
+</svg>
+'''
+
+
 def troquel_dxf(hend):
     """DXF R12 mínimo. El DXF usa Y hacia arriba, así que se invierte el eje."""
     out = ["0", "SECTION", "2", "TABLES", "0", "TABLE", "2", "LAYER", "70", "2"]
@@ -186,9 +201,10 @@ def plano_svg(cut, hend):
 def main():
     cut, hend = geometria()
     (OUT / "troquel.svg").write_text(troquel_svg(cut, hend))
+    (OUT / "troquel-kongsberg-xl.svg").write_text(troquel_kongsberg_svg(cut, hend))
     (OUT / "troquel.dxf").write_text(troquel_dxf(hend))
     (OUT / "plano.svg").write_text(plano_svg(cut, hend))
-    print("Generados: troquel.svg, troquel.dxf, plano.svg")
+    print("Generados: troquel.svg, troquel-kongsberg-xl.svg, troquel.dxf, plano.svg")
 
 
 if __name__ == "__main__":
