@@ -30,5 +30,6 @@ El panel no abre PDFs pero sí HTML. Para verlos:
 
     python3 herramientas/pdf_a_html.py ruta/al/archivo.pdf
 
-Genera `archivo.pdf.html` con el PDF y el visor (pdf.js) adentro: funciona sin internet,
-tiene zoom y un botón para descargar el PDF original.
+Genera `archivo.pdf.html`: cada página queda como dibujo vectorial (sin JavaScript, así el
+panel lo muestra) y trae un enlace para descargar el PDF original. Requiere pdftocairo
+(poppler-utils). En el panel, si se ve el código, tocar el ícono del ojo arriba a la derecha.
