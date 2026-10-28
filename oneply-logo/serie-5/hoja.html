@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>OnePly — Sellos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,600..800&family=Figtree:wght@700;800&display=block" rel="stylesheet">
+<style>
+  @font-face { font-family: "Geist Mono"; src: url("fonts/GeistMono-Regular.ttf"); }
+  @font-face { font-family: "Instrument Sans"; src: url("fonts/InstrumentSans-Regular.ttf"); font-weight: 400; }
+  @font-face { font-family: "Instrument Sans"; src: url("fonts/InstrumentSans-Bold.ttf"); font-weight: 700; }
+  :root {
+    --page: #F3F1EA;
+    --forest: #0E3B2C;
+    --green: #1F7A4A;
+    --lime: #B7D63B;
+    --mint: #DCEBD6;
+    --cream: #F6F3EA;
+    --kraft: #C49B6B;
+    --ink1: #1B1A17;
+    --muted: #7A786F;
+    --hair: #D5D2C7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--page); font-family: "Instrument Sans", sans-serif; color: var(--ink1); }
+  .page { width: 1680px; height: 1188px; overflow: hidden; padding: 56px 64px 40px; display: grid; grid-template-rows: auto 1fr auto; row-gap: 30px; break-after: page; }
+  header { display: grid; grid-template-columns: 1fr auto; align-items: end; padding-bottom: 18px; border-bottom: 1px solid var(--hair); }
+  .brand { display: flex; align-items: baseline; gap: 20px; }
+  .brand b { font-family: "Figtree"; font-weight: 800; font-size: 28px; letter-spacing: -.02em; color: var(--forest); }
+  .brand span { font-size: 15px; color: var(--muted); }
+  .meta, footer, .label { font-family: "Geist Mono"; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .meta { display: flex; gap: 26px; }
+  footer { display: flex; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--hair); }
+  h2 { font-family: "Figtree"; font-weight: 800; font-size: 24px; letter-spacing: -.02em; color: var(--forest); line-height: 1.15; }
+
+  /* página 1 */
+  .p1 { display: grid; grid-template-columns: 360px 1fr; gap: 44px; min-height: 0; }
+  .read { display: grid; align-content: start; gap: 26px; }
+  .hook { background: var(--forest); color: var(--cream); padding: 26px 26px 24px; border-radius: 3px; }
+  .hook h2 { color: var(--cream); font-size: 30px; margin-bottom: 10px; }
+  .hook h2 em { font-style: normal; color: var(--lime); }
+  .hook p { font-size: 14px; line-height: 1.5; opacity: .9; }
+  .read ol { list-style: none; display: grid; gap: 13px; counter-reset: i; }
+  .read li { display: grid; grid-template-columns: 28px 1fr; font-size: 13.5px; line-height: 1.45; color: #3E3C36; }
+  .read li::before { counter-increment: i; content: "0" counter(i); font-family: "Geist Mono"; font-size: 11.5px; color: var(--muted); padding-top: 2px; }
+  .read li b { color: var(--ink1); }
+  .pal { display: flex; gap: 8px; }
+  .pal div { flex: 1; height: 58px; border-radius: 3px; display: flex; align-items: flex-end; padding: 6px 7px; font-family: "Geist Mono"; font-size: 9.5px; letter-spacing: .06em; }
+
+  .grid6 { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 22px 18px; min-height: 0; }
+  .card { display: grid; grid-template-rows: 1fr auto; gap: 12px; min-height: 0; }
+  .stage { border-radius: 3px; display: grid; place-items: center; min-height: 0; position: relative; overflow: hidden; }
+  .stage.mint { background: var(--mint); } .stage.cream { background: #fff; } .stage.forest { background: var(--forest); }
+  .stage.kraft { background: var(--kraft); }
+  .stage.kraft::after { content: ""; position: absolute; inset: 0; background: url("../serie-3/grano.png"); background-size: 300px; mix-blend-mode: multiply; opacity: .5; pointer-events: none; }
+  .stage svg { height: 84%; width: auto; display: block; }
+  .stage .mini { position: absolute; right: 14px; bottom: 12px; display: flex; gap: 10px; align-items: flex-end; }
+  .stage .mini svg { height: auto; }
+  .cap { display: grid; grid-template-columns: 26px 1fr; row-gap: 3px; }
+  .cap .n { font-family: "Geist Mono"; font-size: 12px; color: var(--muted); padding-top: 3px; }
+  .cap .t { font-weight: 700; font-size: 16px; }
+  .cap .d { grid-column: 2; font-size: 12.5px; line-height: 1.4; color: #4E4C45; }
+
+  /* página 2 */
+  .p2 { display: grid; grid-template-rows: auto 1fr; gap: 26px; min-height: 0; }
+  .row6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+  .row6 .stage { height: 250px; }
+  .row6 .stage svg { height: 72%; }
+  .sizes { display: flex; justify-content: center; align-items: flex-end; gap: 16px; padding: 10px 0 0; font-family: "Geist Mono"; font-size: 9.5px; color: var(--muted); }
+  .sizes div { display: grid; justify-items: center; gap: 5px; }
+  .lower { display: grid; grid-template-columns: 1fr 1fr 1.25fr; gap: 22px; min-height: 0; }
+  .bagstage { background: #E4E0D5; border-radius: 3px; display: grid; place-items: center; padding: 14px; min-height: 0; }
+  .bagstage svg { height: 100%; max-height: 520px; }
+  .system { display: grid; grid-template-rows: auto 1fr 1fr; gap: 12px; min-height: 0; }
+  .sysrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; min-height: 0; }
+  .sysrow .stage svg { height: 80%; }
+  .note { font-size: 12px; color: var(--muted); line-height: 1.4; }
+</style>
+</head>
+<body>
+
+<section class="page">
+  <header>
+    <div class="brand"><b>OnePly</b><span>Alternativa sello — seis propuestas a partir del tablero de referencias</span></div>
+    <div class="meta"><span>1 / 2</span><span>Octubre 2026</span></div>
+  </header>
+  <div class="p1">
+    <div class="read">
+      <div class="hook">
+        <h2>Una sola <em>hoja</em>.</h2>
+        <p>En español, hoja es la de la planta y la de papel. OnePly es literalmente eso: una bolsa hecha con una sola hoja. El sello junta las dos.</p>
+      </div>
+      <div>
+        <span class="label" style="display:block;margin-bottom:12px">Lo que comparte el tablero</span>
+        <ol>
+          <li><span><b>Verde profundo + lima</b>, casi siempre con la marca en blanco o en lima sobre el oscuro.</span></li>
+          <li><span><b>Hoja y brote</b> como símbolo principal, en formas cerradas y simples.</span></li>
+          <li><span><b>Formas de insignia:</b> círculos con texto alrededor, rosetas, etiquetas. Se leen como garantía.</span></li>
+          <li><span><b>Trazo grueso y parejo</b>, sin degradés: funciona en un color.</span></li>
+          <li><span><b>Letra redonda y amable</b>, en minúsculas o mixtas.</span></li>
+        </ol>
+      </div>
+      <div>
+        <span class="label" style="display:block;margin-bottom:10px">Paleta del sello</span>
+        <div class="pal">
+          <div style="background:var(--forest);color:#fff">BOSQUE</div>
+          <div style="background:var(--green);color:#fff">VERDE</div>
+          <div style="background:var(--lime)">LIMA</div>
+          <div style="background:var(--mint)">MENTA</div>
+          <div style="background:var(--kraft)">KRAFT</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid6" id="g1"></div>
+  </div>
+  <footer><span>Referencias: tablero de Pinterest enviado por el cliente</span><span>Presentación — no son archivos de imprenta</span><span>Estudio83</span></footer>
+</section>
+
+<section class="page">
+  <header>
+    <div class="brand"><b>OnePly</b><span>El sello a una tinta, chico y aplicado</span></div>
+    <div class="meta"><span>2 / 2</span><span>Flexografía sobre kraft</span></div>
+  </header>
+  <div class="p2">
+    <div>
+      <span class="label" style="display:block;margin-bottom:10px">A una tinta sobre kraft — y a 64, 40 y 24 px</span>
+      <div class="row6" id="g2"></div>
+    </div>
+    <div class="lower" id="g3"></div>
+  </div>
+  <footer><span>* Las leyendas «reciclable» y «menos papel» deben validarse con datos del producto antes de imprimirse</span><span>La marca del cliente y los textos de la bolsa son de ejemplo</span><span>Estudio83</span></footer>
+</section>
+
+<script>
+let uid = 0;
+const COLOR = { ink: '#0E3B2C', paper: '#F6F3EA', accent: '#B7D63B', one: false };
+const GREEN = { ink: '#1F7A4A', paper: '#F6F3EA', accent: '#D7EC7A', one: false };
+const ONE = { ink: '#1B1A17', paper: '#C49B6B', accent: '#C49B6B', one: true };
+const ONEW = { ink: '#1B1A17', paper: '#FFFFFF', accent: '#FFFFFF', one: true };
+const NEG = { ink: '#F6F3EA', paper: '#0E3B2C', accent: '#B7D63B', one: false };
+
+// ---------- geometría ----------
+function leafPts(A, B, w, n = 64) {
+  const dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy);
+  const ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+  const side = (s) => { const pts = []; for (let i = 0; i <= n; i++) { const t = i / n; const h = s * w / 2 * Math.pow(Math.sin(Math.PI * t), .85) * (1 - .18 * t);
+      pts.push([A[0] + dx * t + nx * h, A[1] + dy * t + ny * h]); } return pts; };
+  return side(1).concat(side(-1).reverse().slice(1, -1));
+}
+const poly = (p) => 'M' + p.map(q => q[0].toFixed(2) + ' ' + q[1].toFixed(2)).join('L') + 'Z';
+// recorta un polígono con el semiplano a·x + b·y + c >= 0
+function clip(p, a, b, c) {
+  const out = []; const f = (q) => a * q[0] + b * q[1] + c;
+  for (let i = 0; i < p.length; i++) {
+    const P = p[i], Q = p[(i + 1) % p.length], fp = f(P), fq = f(Q);
+    if (fp >= 0) out.push(P);
+    if ((fp >= 0) !== (fq >= 0)) { const t = fp / (fp - fq); out.push([P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t]); }
+  }
+  return out;
+}
+function reflect(p, a, b, c) { return p.map(q => { const d = (a * q[0] + b * q[1] + c) / (a * a + b * b); return [q[0] - 2 * a * d, q[1] - 2 * b * d]; }); }
+const arcText = (id, r, top = true) => top
+  ? `<path id="${id}" d="M${100 - r} 100 A${r} ${r} 0 0 1 ${100 + r} 100" fill="none"/>`
+  : `<path id="${id}" d="M${100 - r} 100 A${r} ${r} 0 0 0 ${100 + r} 100" fill="none"/>`;
+const ringFont = `font-family:Archivo;font-weight:700;font-stretch:112.5%;`;
+const one1 = (x, y, h, fill) => { const s = h / 44; return `<g transform="translate(${x} ${y}) scale(${s})" fill="${fill}"><rect x="-4" y="-22" width="11" height="44"/><polygon points="-4,-22 -4,-10 -16,-4 -16,-15"/></g>`; };
+
+// ---------- sellos (viewBox 0 0 200 200) ----------
+const SEALS = {
+  // 1 · Hoja calada: sello circular con texto alrededor
+  1: (c, legend = 'ONEPLY · UNA SOLA HOJA · BOLSA DE UN PLIEGO · ') => {
+    const id = 'p' + (uid++); const r = 77, C = 2 * Math.PI * r;
+    return `<circle cx="100" cy="100" r="97" fill="${c.ink}"/>
+      <circle cx="100" cy="100" r="68" fill="none" stroke="${c.paper}" stroke-width="1.6"/>
+      <path id="${id}" d="M${100 - r} 100 A${r} ${r} 0 1 1 ${100 + r} 100 A${r} ${r} 0 1 1 ${100 - r} 100" fill="none"/>
+      <text style="${ringFont}" font-size="11.2" fill="${c.paper}"><textPath href="#${id}" textLength="${(C - 2).toFixed(1)}" lengthAdjust="spacing">${legend}</textPath></text>
+      <path d="${poly(leafPts([66, 136], [136, 64], 58))}" fill="${c.accent}"/>
+      ${one1(101, 101, 46, c.ink)}`;
+  },
+  // 2 · Hoja plegada: la punta de la hoja se dobla como papel
+  2: (c) => {
+    const L = leafPts([50, 132], [150, 34], 66);
+    // pliegue perpendicular al eje, a 30 unidades de la punta
+    const ux = .7139, uy = -.7003, px = 150 - ux * 30, py = 34 - uy * 30;
+    const a = ux, b = uy, cc = -(a * px + b * py);
+    const keep = clip(L, -a, -b, -cc); const tip = clip(L, a, b, cc); const flap = reflect(tip, a, b, cc);
+    return `<rect x="4" y="4" width="192" height="192" rx="46" fill="${c.ink}"/>
+      <path d="${poly(keep)}" fill="${c.paper}"/>
+      <path d="${poly(flap)}" fill="${c.one ? c.paper : c.accent}" stroke="${c.ink}" stroke-width="3.2" stroke-linejoin="round"/>
+      <text x="100" y="172" text-anchor="middle" style="font-family:Figtree;font-weight:800;letter-spacing:-.02em" font-size="31" fill="${c.paper}">OnePly</text>`;
+  },
+  // 3 · Brote: el 1 crece y su bandera es una hoja
+  3: (c) => `<circle cx="100" cy="100" r="97" fill="${c.ink}"/>
+      <rect x="93" y="66" width="16" height="72" rx="2" fill="${c.paper}"/>
+      <path d="${poly(leafPts([96, 70], [50, 34], 34))}" fill="${c.accent}"/>
+      <path d="${poly(leafPts([106, 92], [142, 66], 24))}" fill="${c.accent}"/>
+      <rect x="70" y="138" width="62" height="5" rx="2.5" fill="${c.paper}"/>
+      <text x="100" y="172" text-anchor="middle" style="font-family:Figtree;font-weight:800;letter-spacing:-.02em" font-size="24" fill="${c.paper}">OnePly</text>`,
+  // 4 · Roseta: sello de garantía con borde ondulado
+  4: (c) => {
+    const t1 = 'r' + (uid++), t2 = 'r' + (uid++);
+    let d = ''; for (let i = 0; i <= 360; i++) { const a = i * Math.PI / 180, r = 93 + 4.5 * Math.cos(30 * a);
+      d += (i ? 'L' : 'M') + (100 + r * Math.cos(a)).toFixed(2) + ' ' + (100 + r * Math.sin(a)).toFixed(2); }
+    return `<path d="${d}Z" fill="${c.ink}"/>
+      <circle cx="100" cy="100" r="71" fill="none" stroke="${c.paper}" stroke-width="1.6"/>
+      ${arcText(t1, 76.5, true)}${arcText(t2, 86.5, false)}
+      <text style="${ringFont}letter-spacing:.2em" font-size="11.5" fill="${c.paper}" text-anchor="middle"><textPath href="#${t1}" startOffset="50%">ONEPLY</textPath></text>
+      <text style="${ringFont}letter-spacing:.2em" font-size="11.5" fill="${c.paper}" text-anchor="middle"><textPath href="#${t2}" startOffset="50%">UNA SOLA HOJA</textPath></text>
+      <circle cx="18.5" cy="100" r="2.6" fill="${c.paper}"/><circle cx="181.5" cy="100" r="2.6" fill="${c.paper}"/>
+      <text x="96" y="133" text-anchor="middle" style="font-family:Archivo;font-weight:800;font-stretch:100%" font-size="94" fill="${c.paper}">1</text>
+      <path d="${poly(leafPts([110, 70], [140, 44], 22))}" fill="${c.accent}"/>`;
+  },
+  // 5 · Bolsa-hoja: la silueta de la bolsa con una hoja calada
+  5: (c) => `<path d="M30 54 L54 26 Q100 20 170 26 L174 178 Q100 186 26 178 Z" fill="${c.ink}"/>
+      <path d="M30 46 L46 28 L30 28 Z" fill="${c.one ? c.ink : c.accent}"/>
+      <path d="${poly(leafPts([66, 132], [138, 52], 62))}" fill="${c.paper}"/>
+      <path d="M72 126 L124 68" stroke="${c.ink}" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+      <text x="100" y="166" text-anchor="middle" style="font-family:Figtree;font-weight:800;letter-spacing:-.02em" font-size="24" fill="${c.paper}">OnePly</text>`,
+  // 6 · Anillo de hoja: una hoja que se cierra en círculo
+  6: (c) => {
+    const R = 80, a0 = -62 * Math.PI / 180, a1 = -26 * Math.PI / 180;
+    const P = (a, r = R) => [100 + r * Math.cos(a), 100 + r * Math.sin(a)];
+    const s = P(a1), e = P(a0);
+    const tip = P(-4 * Math.PI / 180, 104), base = P(-50 * Math.PI / 180, 80);
+    return `<path d="M${s[0].toFixed(2)} ${s[1].toFixed(2)} A${R} ${R} 0 1 1 ${e[0].toFixed(2)} ${e[1].toFixed(2)}" fill="none" stroke="${c.one ? c.ink : c.ink}" stroke-width="17" stroke-linecap="butt"/>
+      <path d="${poly(leafPts(base, tip, 30))}" fill="${c.one ? c.ink : c.accentRing || c.accent}"/>
+      <text x="100" y="106" text-anchor="middle" style="font-family:Figtree;font-weight:800;letter-spacing:-.02em" font-size="33" fill="${c.ink}">OnePly</text>
+      <text x="100" y="128" text-anchor="middle" style="font-family:'Geist Mono';letter-spacing:.16em" font-size="8.6" fill="${c.ink}">UNA SOLA HOJA</text>`;
+  },
+};
+const sv = (k, c, extra = '', arg) => `<svg viewBox="0 0 200 200" ${extra}>${SEALS[k](c, arg)}</svg>`;
+
+// colores por sello sobre fondo claro (el 6 es abierto: lleva tinta en el texto y el anillo)
+const C6 = { ink: '#0E3B2C', paper: '#F6F3EA', accent: '#7DB83A', one: false };
+
+const INFO = [
+  [1, 'Hoja calada', 'El sello circular clásico: el texto alrededor y la hoja con el 1 calado en el centro.', 'mint', COLOR],
+  [2, 'Hoja plegada', 'La punta de la hoja se dobla como papel: naturaleza y pliegue en un solo gesto.', 'cream', COLOR],
+  [3, 'Brote', 'El 1 crece desde el suelo y su bandera es una hoja. El más amable y directo.', 'mint', GREEN],
+  [4, 'Roseta', 'Sello de garantía con borde ondulado, «ONEPLY» arriba y «UNA SOLA HOJA» abajo.', 'cream', COLOR],
+  [5, 'Bolsa-hoja', 'La silueta de la bolsa con la válvula, y una hoja calada en el centro.', 'mint', COLOR],
+  [6, 'Anillo de hoja', 'Una hoja que se cierra en círculo alrededor del nombre. Sin fondo: el más liviano.', 'cream', C6],
+];
+
+document.getElementById('g1').innerHTML = INFO.map(([k, t, d, bg, c]) => `
+  <div class="card"><div class="stage ${bg}">${sv(k, c)}
+    <div class="mini">${sv(k, k === 6 ? { ...ONEW, paper: '#fff' } : ONEW, 'width="34" height="34"')}</div></div>
+  <div class="cap"><span class="n">0${k}</span><span class="t">${t}</span><span class="d">${d}</span></div></div>`).join('');
+
+document.getElementById('g2').innerHTML = INFO.map(([k, t]) => `
+  <div><div class="stage kraft">${sv(k, ONE)}</div>
+    <div class="sizes">${[64, 40, 24].map(s => `<div>${sv(k, ONEW, `width="${s}" height="${s}"`)}${s}</div>`).join('')}<div style="color:var(--ink1);font-size:10.5px;align-self:center;margin-left:6px">0${k} ${t}</div></div></div>`).join('');
+
+// bolsas
+function bag(k) {
+  return `<div class="bagstage"><svg viewBox="0 0 300 430">
+    <defs><filter id="gr${k}"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="3" seed="3"/><feColorMatrix values="0 0 0 0 .4 0 0 0 0 .28 0 0 0 0 .16 0 0 0 .28 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+    <linearGradient id="sh${k}" x1="0" x2="1"><stop offset="0" stop-opacity=".10"/><stop offset=".12" stop-opacity="0"/><stop offset=".88" stop-opacity="0"/><stop offset="1" stop-opacity=".12"/></linearGradient></defs>
+    <path d="M18 22 Q150 8 282 22 L286 408 Q150 422 14 408 Z" fill="#C49B6B"/>
+    <path d="M18 22 Q150 8 282 22 L286 408 Q150 422 14 408 Z" filter="url(#gr${k})"/>
+    <path d="M18 22 Q150 8 282 22 L286 408 Q150 422 14 408 Z" fill="url(#sh${k})"/>
+    <path d="M18 22 L62 22 L18 66 Z" fill="#000" opacity=".10"/>
+    <rect x="44" y="70" width="212" height="84" fill="none" stroke="#1B1A17" stroke-width="2.5" stroke-dasharray="7 6" opacity=".5"/>
+    <text x="150" y="117" text-anchor="middle" style="font-family:'Geist Mono';font-size:12px;letter-spacing:.14em" fill="#1B1A17" opacity=".6">MARCA DEL CLIENTE</text>
+    <text x="150" y="200" text-anchor="middle" style="font-family:Archivo;font-weight:800;font-size:30px" fill="#1B1A17">CEMENTO</text>
+    <text x="150" y="223" text-anchor="middle" style="font-family:'Geist Mono';font-size:11px;letter-spacing:.16em" fill="#1B1A17">PORTLAND NORMAL · CPN 40</text>
+    <text x="40" y="330" style="font-family:Archivo;font-weight:800;font-size:42px" fill="#1B1A17">50 kg</text>
+    <svg x="196" y="282" width="78" height="78" viewBox="0 0 200 200">${SEALS[k]({ ...ONE, paper: 'transparent' === 'x' ? '' : '#C49B6B' })}</svg>
+    </svg></div>`;
+}
+document.getElementById('g3').innerHTML = bag(1) + bag(4) + `
+  <div class="system">
+    <span class="label">El sello como sistema: misma forma, distintas leyendas*</span>
+    <div class="sysrow">
+      <div class="stage mint">${sv(1, COLOR, '', 'ONEPLY · UNA SOLA HOJA · BOLSA DE UN PLIEGO · ')}</div>
+      <div class="stage mint">${sv(1, GREEN, '', 'ONEPLY · 100% RECICLABLE · PAPEL DE FIBRA · ')}</div>
+      <div class="stage mint">${sv(1, COLOR, '', 'ONEPLY · MENOS PAPEL · MISMA RESISTENCIA · ')}</div>
+    </div>
+    <div class="sysrow">
+      <div class="stage forest">${sv(1, NEG)}</div>
+      <div class="stage forest">${sv(4, NEG)}</div>
+      <div class="stage forest">${sv(3, NEG)}</div>
+    </div>
+  </div>`;
+
+document.fonts.ready.then(() => requestAnimationFrame(() => { document.body.dataset.ready = '1'; }));
+</script>
+</body>
+</html>
