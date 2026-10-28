@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartocor · Flyer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --kraft: #b8864f;
+    --kraft-deep: #8d5f33;
+    --paper: #ecd9b9;
+    --ink: #1c140d;
+    --ink-soft: #3a2a1b;
+    --accent: #1f5fa8;
+    --accent-ink: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #444; }
+  body { font-family: "Hanken Grotesk", system-ui, sans-serif; color: var(--ink); }
+
+  /* A4 a 96 dpi: 794 × 1123 px */
+  .sheet {
+    width: 794px; height: 1123px; margin: 0 auto;
+    background: var(--kraft); position: relative; overflow: hidden;
+    display: grid; grid-template-rows: auto auto minmax(0,1fr) auto auto;
+  }
+
+  .top { padding: 56px 56px 0; display: flex; justify-content: space-between; align-items: flex-start; }
+  .wordmark { font-weight: 700; font-size: 44px; letter-spacing: -0.04em; line-height: 1; }
+  .group { font-size: 15px; line-height: 1.35; text-align: right; color: var(--ink-soft); font-weight: 500; }
+
+  .head { padding: 40px 56px 32px; }
+  h1 { font-weight: 500; font-size: 92px; line-height: 0.9; letter-spacing: -0.05em; }
+  .lead { margin-top: 24px; font-size: 20px; line-height: 1.4; max-width: 38ch; letter-spacing: -0.005em; }
+
+  /* el corte de la plancha, a sangre */
+  .section { min-height: 0; }
+  .section svg { display: block; width: 100%; height: 100%; }
+
+  .flutes { padding: 28px 56px 32px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; align-items: start; }
+  .flute .pic { height: 86px; display: flex; align-items: flex-end; }
+  .flute svg { display: block; width: 100%; height: auto; }
+  .flute b { display: block; margin-top: 14px; font-size: 24px; font-weight: 500; letter-spacing: -0.03em; }
+  .flute span { display: block; font-size: 15px; line-height: 1.35; margin-top: 2px; color: var(--ink-soft); }
+
+  .foot {
+    background: var(--ink); color: var(--paper);
+    padding: 36px 56px 40px; display: grid; grid-template-columns: 1fr 190px; gap: 40px; align-items: center;
+  }
+  .foot h2 { font-weight: 500; font-size: 40px; line-height: 0.95; letter-spacing: -0.04em; }
+  .foot p { margin-top: 14px; font-size: 17px; line-height: 1.45; max-width: 36ch; }
+  .cta {
+    display: inline-block; margin-top: 20px; background: var(--accent); color: var(--accent-ink);
+    font-size: 19px; font-weight: 500; padding: 14px 22px; text-decoration: none;
+  }
+  .contact { margin-top: 18px; font-size: 16px; line-height: 1.5; }
+  .stamp svg { display: block; width: 190px; height: 190px; }
+</style>
+</head>
+<body>
+<main class="sheet">
+  <header class="top">
+    <div class="wordmark">cartocor</div>
+    <div class="group">Cartón corrugado<br>Argentina y Chile</div>
+  </header>
+
+  <section class="head">
+    <h1>Cajas a la<br>medida exacta</h1>
+    <p class="lead">Diseñamos y fabricamos cajas, bandejas y exhibidores de cartón corrugado para la industria, el agro y el consumo masivo.</p>
+  </section>
+
+  <section class="section" aria-label="Corte de una plancha de cartón corrugado">
+    <svg id="big" viewBox="0 0 794 200" preserveAspectRatio="none" role="img" aria-label="Corte ampliado de cartón corrugado: dos caras lisas y la onda entre ellas"></svg>
+  </section>
+
+  <section class="flutes" id="flutes" aria-label="Tipos de onda"></section>
+  <footer class="foot">
+      <div>
+        <h2>Pedí tu caja<br>con tus medidas</h2>
+        <p>Contanos qué llevás, cuánto pesa y cómo viaja. Te proponemos la onda, el diseño y la impresión.</p>
+        <a class="cta" href="https://www.cartocor.com.ar">cartocor.com.ar</a>
+        <div class="contact">ventas@cartocor.com.ar · +54 11 0000-0000</div>
+      </div>
+      <div class="stamp"><svg id="stamp" viewBox="0 0 200 200" role="img" aria-label="Sello del fabricante impreso en el fondo de cada caja"></svg></div>
+  </footer>
+</main>
+
+<script>
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs, parent) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  };
+  // onda senoidal entre y0 e y1
+  const wave = (x0, x1, y0, y1, pitch) => {
+    const mid = (y0 + y1) / 2, amp = (y1 - y0) / 2;
+    let d = '';
+    for (let x = x0; x <= x1; x += 2) {
+      const y = mid - amp * Math.cos(((x - x0) / pitch) * Math.PI * 2);
+      d += (d ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+    }
+    return d;
+  };
+  // corte de cartón: cara, onda(s), cara
+  const board = (svg, w, layers, liner, pitch, colors) => {
+    let y = 0;
+    el('rect', { x: 0, y, width: w, height: liner, fill: colors.paper }, svg);
+    y += liner;
+    layers.forEach((h, i) => {
+      el('rect', { x: 0, y, width: w, height: h, fill: colors.air }, svg);
+      el('path', { d: wave(-pitch, w + pitch, y + colors.stroke / 2, y + h - colors.stroke / 2, pitch * (i ? 0.8 : 1)), fill: 'none', stroke: colors.medium, 'stroke-width': colors.stroke, 'stroke-linejoin': 'round', 'vector-effect': 'non-scaling-stroke' }, svg);
+      y += h;
+      el('rect', { x: 0, y, width: w, height: liner, fill: colors.paper }, svg);
+      y += liner;
+    });
+    return y;
+  };
+
+  // corte grande a sangre
+  board(document.getElementById('big'), 794, [156], 22, 120,
+    { paper: '#ecd9b9', air: '#8d5f33', medium: '#1c140d', stroke: 14 });
+
+  // las cuatro ondas, a escala entre sí
+  const flutes = [
+    { name: 'Onda E', mm: 1.5, use: 'Envases de góndola y exhibidores', layers: [1.5] },
+    { name: 'Onda B', mm: 3, use: 'Cajas de producto y estuches', layers: [3] },
+    { name: 'Onda C', mm: 4, use: 'Cajas de despacho', layers: [4] },
+    { name: 'Doble BC', mm: 7, use: 'Cargas pesadas y agro', layers: [4, 3] },
+  ];
+  const host = document.getElementById('flutes');
+  const scale = 12; // px por mm
+  flutes.forEach(f => {
+    const fig = document.createElement('figure');
+    fig.className = 'flute';
+    const liner = 0.35 * scale;
+    const h = f.layers.reduce((a, b) => a + b * scale, 0) + liner * (f.layers.length + 1);
+    const svg = el('svg', { viewBox: `0 0 160 ${h}`, role: 'img', 'aria-label': `${f.name}, ${f.mm} mm` });
+    board(svg, 160, f.layers.map(l => l * scale), liner, f.layers[0] * scale * 1.6,
+      { paper: '#ecd9b9', air: '#8d5f33', medium: '#1c140d', stroke: 3 });
+    const pic = document.createElement('div'); pic.className = 'pic'; pic.appendChild(svg); fig.appendChild(pic);
+    fig.insertAdjacentHTML('beforeend', `<b>${f.name}</b><span>${String(f.mm).replace('.', ',')} mm · ${f.use}</span>`);
+    host.appendChild(fig);
+  });
+
+  // sello del fabricante
+  const st = document.getElementById('stamp');
+  el('circle', { cx: 100, cy: 100, r: 96, fill: '#ecd9b9' }, st);
+  el('circle', { cx: 100, cy: 100, r: 66, fill: '#1c140d' }, st);
+  el('path', { id: 'ring', d: 'M100,100 m-75,0 a75,75 0 1,1 150,0 a75,75 0 1,1 -150,0', fill: 'none' }, st);
+  const t = el('text', { 'font-size': 14, 'font-weight': 700, textLength: 466, lengthAdjust: 'spacing', 'dominant-baseline': 'middle', fill: '#1c140d', 'font-family': 'Hanken Grotesk' }, st);
+  const tp = el('textPath', { href: '#ring', startOffset: '0', textLength: 466, lengthAdjust: 'spacing' }, t);
+  tp.textContent = 'Cartón corrugado · Hecho en Argentina · Cajas a medida ·';
+  const c = el('text', { x: 100, y: 100, 'text-anchor': 'middle', 'font-size': 26, 'font-weight': 700, fill: '#ecd9b9', 'font-family': 'Hanken Grotesk', 'letter-spacing': -1 }, st);
+  c.textContent = 'cartocor';
+  const c2 = el('text', { x: 100, y: 122, 'text-anchor': 'middle', 'font-size': 13, fill: '#ecd9b9', 'font-family': 'Hanken Grotesk' }, st);
+  c2.textContent = 'Onda E · B · C · BC';
+</script>
+</body>
+</html>
