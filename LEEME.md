@@ -24,3 +24,11 @@ Figma no se puede dejar resuelto desde un archivo del repositorio:
 - La red del entorno en la nube tiene que permitir los dominios de Figma
   (en la sesión: menú del entorno → Edit → Network access → Allowed domains).
 Recomendación: probar primero taste-skill + Playwright, y después sumar Figma.
+
+## Ver PDFs en el panel de previsualización
+El panel no abre PDFs pero sí HTML. Para verlos:
+
+    python3 herramientas/pdf_a_html.py ruta/al/archivo.pdf
+
+Genera `archivo.pdf.html` con el PDF y el visor (pdf.js) adentro: funciona sin internet,
+tiene zoom y un botón para descargar el PDF original.
