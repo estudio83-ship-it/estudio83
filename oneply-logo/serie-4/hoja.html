@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>OnePly — Serie 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,600..800&family=Hanken+Grotesk:wght@600;700;800&family=Schibsted+Grotesk:wght@600;700;800&family=Figtree:wght@600;700;800&display=block" rel="stylesheet">
+<style>
+  @font-face { font-family: "Geist Mono"; src: url("fonts/GeistMono-Regular.ttf"); }
+  @font-face { font-family: "Instrument Sans"; src: url("fonts/InstrumentSans-Regular.ttf"); font-weight: 400; }
+  @font-face { font-family: "Instrument Sans"; src: url("fonts/InstrumentSans-Bold.ttf"); font-weight: 700; }
+
+  :root {
+    --paper: #F4F2EE;
+    --ink: #15171C;
+    --ultra: #2D3FD3;
+    --kraft: #C49B6B;
+    --kraft-light: #D9BC95;
+    --muted: #7D7A75;
+    --hair: #D6D2CB;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); font-family: "Instrument Sans", sans-serif; color: var(--ink); }
+  .page {
+    width: 1680px; height: 1188px; overflow: hidden;
+    padding: 56px 64px 40px;
+    display: grid; grid-template-rows: auto 1fr auto; row-gap: 30px;
+    break-after: page;
+  }
+  header { display: grid; grid-template-columns: 1fr auto; align-items: end; padding-bottom: 18px; border-bottom: 1px solid var(--hair); }
+  .brand { display: flex; align-items: baseline; gap: 20px; }
+  .brand b { font-family: "Hanken Grotesk"; font-weight: 800; font-size: 28px; letter-spacing: -.01em; }
+  .brand span { font-size: 15px; color: var(--muted); }
+  .meta, footer, .label { font-family: "Geist Mono"; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .meta { display: flex; gap: 26px; }
+  footer { display: flex; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--hair); }
+  h2 { font-family: "Hanken Grotesk"; font-weight: 700; font-size: 22px; letter-spacing: -.01em; margin-bottom: 6px; }
+  .lead { font-size: 14px; line-height: 1.45; color: #4F4C47; max-width: 60ch; }
+
+  /* ---------- página 1: benchmark ---------- */
+  .bench { display: grid; grid-template-columns: 1fr 470px; gap: 48px; min-height: 0; }
+  .logos { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 16px; min-height: 0; }
+  .lg { display: grid; grid-template-rows: 1fr auto; gap: 10px; min-height: 0; }
+  .lg .tile { background: #fff; border-radius: 2px; display: grid; place-items: center; padding: 22px; min-height: 0; }
+  .lg .tile img { max-width: 78%; max-height: 92px; object-fit: contain; }
+  .lg .tile.dark { background: #1d3a24; }
+  .lg .tile.sage { background: #8fb3a1; }
+  .lg p { font-size: 12.5px; line-height: 1.35; color: #4F4C47; }
+  .lg p b { color: var(--ink); font-size: 13.5px; display: block; margin-bottom: 1px; }
+  .tag { display: inline-block; font-family: "Geist Mono"; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; margin-right: 4px; vertical-align: 1px; }
+  .t-fold { background: var(--ink); color: #fff; }
+  .t-nat { background: #DCD6CC; color: var(--ink); }
+
+  .side { display: grid; grid-template-rows: auto auto 1fr; gap: 30px; min-height: 0; }
+  .insights { list-style: none; display: grid; gap: 16px; counter-reset: i; }
+  .insights li { display: grid; grid-template-columns: 30px 1fr; font-size: 14px; line-height: 1.45; color: #3E3B37; }
+  .insights li::before { counter-increment: i; content: "0" counter(i); font-family: "Geist Mono"; font-size: 12px; color: var(--muted); padding-top: 2px; }
+  .insights b { color: var(--ink); }
+
+  .colors { display: grid; gap: 10px; }
+  .crow { display: grid; grid-template-columns: 130px 1fr; align-items: center; font-size: 13px; }
+  .chips { display: flex; gap: 6px; }
+  .chip { width: 34px; height: 34px; border-radius: 50%; }
+  .chip.free { width: 34px; border: 1.5px dashed var(--ultra); background: var(--ultra); }
+  .crow.own { color: var(--ultra); font-weight: 700; }
+
+  .map { position: relative; border: 1px solid var(--hair); background: #fff; min-height: 0; }
+  .map .ax { position: absolute; font-family: "Geist Mono"; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .map .dot { position: absolute; transform: translate(-50%, -50%); font-size: 12px; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .map .dot i { width: 9px; height: 9px; border-radius: 50%; background: var(--ink); display: block; }
+  .map .dot.us { color: var(--ultra); font-weight: 700; }
+  .map .dot.us i { width: 14px; height: 14px; background: var(--ultra); box-shadow: 0 0 0 6px rgba(45, 63, 211, .14); }
+
+  /* ---------- página 2: propuestas ---------- */
+  .props { display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; min-height: 0; }
+  .prop { display: grid; grid-template-rows: 1.25fr .8fr .8fr auto auto; gap: 8px; min-height: 0; }
+  .panel { border-radius: 2px; display: grid; place-items: center; min-height: 0; position: relative; overflow: hidden; }
+  .panel.white { background: #fff; }
+  .panel.ultra { background: var(--ultra); color: #fff; --front: #fff; --back: rgba(255,255,255,.55); }
+  .panel.kraft { background: var(--kraft); color: var(--ink); }
+  .panel.kraft::after { content: ""; position: absolute; inset: 0; background: url("../serie-3/grano.png"); background-size: 300px; mix-blend-mode: multiply; opacity: .5; pointer-events: none; }
+  .panel .lbl { position: absolute; left: 12px; top: 10px; font-family: "Geist Mono"; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; opacity: .55; }
+  .sizes { display: flex; align-items: flex-end; gap: 18px; padding: 12px 14px; background: #fff; border-radius: 2px; }
+  .sizes .s { display: grid; justify-items: center; gap: 6px; font-family: "Geist Mono"; font-size: 9.5px; color: var(--muted); }
+  .cap { display: grid; grid-template-columns: 28px 1fr; row-gap: 4px; padding-top: 6px; }
+  .cap .n { font-family: "Geist Mono"; font-size: 12px; color: var(--muted); padding-top: 3px; }
+  .cap .t { font-weight: 700; font-size: 16px; }
+  .cap .d { grid-column: 2; font-size: 12.5px; line-height: 1.38; color: #4F4C47; }
+  .cap .why { grid-column: 2; font-size: 12px; line-height: 1.38; color: var(--ultra); }
+
+  /* lockups */
+  .lock { display: flex; align-items: center; color: var(--ink); --front: var(--ultra); --back: var(--kraft); }
+  .panel.ultra .lock { color: #fff; --front: #fff; --back: rgba(255,255,255,.5); }
+  .panel.kraft .lock, .lock.one { color: var(--ink); --front: var(--ink); --back: var(--ink); }
+  .lock svg { display: block; flex: none; }
+  .wm { line-height: 1; white-space: nowrap; }
+  .wA { font-family: "Archivo"; font-weight: 700; letter-spacing: -.025em; }
+  .wB { font-family: "Schibsted Grotesk"; font-weight: 700; letter-spacing: -.03em; }
+  .wC { font-family: "Figtree"; font-weight: 700; letter-spacing: -.03em; }
+  .wD { font-family: "Hanken Grotesk"; font-weight: 700; letter-spacing: -.03em; }
+  .wE { font-family: "Hanken Grotesk"; font-weight: 600; letter-spacing: -.02em; }
+
+  /* ---------- página 3: comparación ---------- */
+  .cmp { display: grid; grid-template-rows: auto 1fr; gap: 26px; min-height: 0; }
+  .shelf { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+  .shelf .cell { background: #fff; height: 118px; display: grid; place-items: center; padding: 16px; border-radius: 2px; position: relative; }
+  .shelf .cell img { max-width: 82%; max-height: 54px; object-fit: contain; }
+  .shelf .cell.dark { background: #1d3a24; } .shelf .cell.sage { background: #8fb3a1; }
+  .shelf .cell.us { outline: 1.5px solid var(--ultra); outline-offset: -1.5px; }
+  .shelf .cell .k { position: absolute; left: 10px; top: 8px; font-family: "Geist Mono"; font-size: 9.5px; letter-spacing: .12em; color: var(--muted); }
+  .shelf .cell.us .k { color: var(--ultra); }
+
+  .bags { display: grid; grid-template-columns: repeat(3, 1fr) 1.15fr; gap: 26px; min-height: 0; }
+  .bagwrap { display: grid; grid-template-rows: 1fr auto; gap: 10px; min-height: 0; }
+  .bagstage { background: #E6E1D8; border-radius: 2px; display: grid; place-items: center; min-height: 0; padding: 18px; }
+  .seals { display: grid; grid-template-rows: auto repeat(3, 1fr); gap: 12px; min-height: 0; }
+  .seal-row { background: #fff; border-radius: 2px; display: grid; grid-template-columns: repeat(2, 1fr); place-items: center; min-height: 0; }
+  .seal-row > div { display: grid; place-items: center; width: 100%; height: 100%; }
+  .seal-row > div.k { background: var(--kraft); position: relative; }
+</style>
+</head>
+<body>
+
+<!-- ======================= PÁGINA 1 ======================= -->
+<section class="page">
+  <header>
+    <div class="brand"><b>OnePly</b><span>Benchmark — cómo se ven los líderes del papel y el envase</span></div>
+    <div class="meta"><span>1 / 3</span><span>Octubre 2026</span></div>
+  </header>
+
+  <div class="bench">
+    <div class="logos">
+      <div class="lg"><div class="tile"><img src="ref/logo-mondi.png"></div><p><b>Mondi</b><span class="tag t-fold">Pliegue</span>Cinta de papel doblada en naranja y nombre en minúscula itálica.</p></div>
+      <div class="lg"><div class="tile"><img src="ref/logo-smurfitwestrock.png"></div><p><b>Smurfit Westrock</b><span class="tag t-fold">Pliegue</span>Emblema con franjas plegadas, azul petróleo y marino, nombre en dos líneas.</p></div>
+      <div class="lg"><div class="tile"><img src="ref/logo-klabin.png"></div><p><b>Klabin</b><span class="tag t-fold">Pliegue</span>Una K geométrica con un triángulo doblado, en verde.</p></div>
+      <div class="lg"><div class="tile"><img src="ref/logo-ip.png"></div><p><b>International Paper</b><span class="tag t-fold">Capas</span>Franjas verdes apiladas que forman IP y grotesca en dos líneas.</p></div>
+      <div class="lg"><div class="tile"><img src="ref/logo-dssmith.png"></div><p><b>DS Smith</b><span class="tag t-fold">Pliegue</span>Una D hecha con una cinta doblada, en degradé cálido.</p></div>
+      <div class="lg"><div class="tile"><img src="ref/logo-billerud.png"></div><p><b>Billerud</b><span class="tag t-nat">Naturaleza</span>Corona verde y mayúsculas finas y espaciadas.</p></div>
+      <div class="lg"><div class="tile"><img src="ref/logo-storaenso.png"></div><p><b>Stora Enso</b><span class="tag t-nat">Naturaleza</span>Flor o sol en rojo y naranja, con nombre geométrico.</p></div>
+      <div class="lg"><div class="tile dark"><img src="ref/logo-segezha.png"></div><p><b>Segezha</b><span class="tag t-nat">Naturaleza</span>Espiral de anillos de árbol y minúscula.</p></div>
+      <div class="lg"><div class="tile"><img src="ref/logo-gascogne.png"></div><p><b>Gascogne</b><span class="tag t-nat">Naturaleza</span>Pino estilizado en rojo y humanista gris.</p></div>
+    </div>
+
+    <div class="side">
+      <div>
+        <h2>Lo que dicen las marcas del sector</h2>
+        <ol class="insights">
+          <li><span><b>El pliegue es el idioma del papel.</b> Cinco de nueve dibujan papel doblado o en capas. OnePly puede usarlo con su propia vuelta: <b>un solo pliegue</b>, una sola capa.</span></li>
+          <li><span><b>Símbolo + nombre amable.</b> Todas usan minúsculas o mixtas y letra limpia. Las mayúsculas pesadas de las series anteriores se ven más de obra que de papelera.</span></li>
+          <li><span><b>Los colores ya están tomados:</b> verde (4), naranja y rojo (4), azul petróleo (1). El <b>azul ultramar</b> está libre y contrasta muy bien con el kraft.</span></li>
+          <li><span><b>OnePly es una marca de producto, no de grupo.</b> En la bolsa convive con la marca del cemento, como las líneas QuickFill de Billerud o SolmixBag de Mondi. Necesita una versión sello, chica y a una tinta.</span></li>
+        </ol>
+      </div>
+
+      <div class="colors">
+        <span class="label">Mapa de color</span>
+        <div class="crow"><span>Verdes</span><div class="chips"><i class="chip" style="background:#5FB548"></i><i class="chip" style="background:#9DBF1E"></i><i class="chip" style="background:#0E5C4F"></i><i class="chip" style="background:#2E7D32"></i></div></div>
+        <div class="crow"><span>Naranjas y rojos</span><div class="chips"><i class="chip" style="background:#EC6B12"></i><i class="chip" style="background:#E2401C"></i><i class="chip" style="background:#D9241F"></i><i class="chip" style="background:#E8A13A"></i></div></div>
+        <div class="crow"><span>Azul petróleo</span><div class="chips"><i class="chip" style="background:#0F5D86"></i><i class="chip" style="background:#0D1E43"></i></div></div>
+        <div class="crow own"><span>Libre → OnePly</span><div class="chips"><i class="chip free"></i><i class="chip" style="background:var(--kraft)"></i><i class="chip" style="background:var(--ink)"></i></div></div>
+      </div>
+
+      <div class="map" id="map">
+        <span class="ax" style="left:14px;top:50%;transform:translateY(-50%) rotate(-90deg);transform-origin:left top;margin-top:44px">Naturaleza</span>
+        <span class="ax" style="right:14px;top:12px">Pliegue / geometría</span>
+        <span class="ax" style="left:50%;top:10px;transform:translateX(-50%)">Grupo corporativo</span>
+        <span class="ax" style="left:50%;bottom:10px;transform:translateX(-50%)">Producto técnico</span>
+      </div>
+    </div>
+  </div>
+
+  <footer><span>Logos de terceros capturados de sus sitios oficiales, octubre 2026 — uso interno de referencia</span><span>Cartocor y Arcor no se pudieron consultar (acceso bloqueado)</span><span>Estudio83</span></footer>
+</section>
+
+<!-- ======================= PÁGINA 2 ======================= -->
+<section class="page">
+  <header>
+    <div class="brand"><b>OnePly</b><span>Propuestas adaptadas a la industria papelera — A a E</span></div>
+    <div class="meta"><span>2 / 3</span><span>Color + una tinta sobre kraft</span></div>
+  </header>
+
+  <div class="props" id="props"></div>
+
+  <footer><span>Color principal propuesto: azul ultramar · kraft · tinta</span><span>Presentación — no son archivos de imprenta</span><span>Estudio83</span></footer>
+</section>
+
+<!-- ======================= PÁGINA 3 ======================= -->
+<section class="page">
+  <header>
+    <div class="brand"><b>OnePly</b><span>Comparación — junto a los líderes y sobre la bolsa</span></div>
+    <div class="meta"><span>3 / 3</span><span>Octubre 2026</span></div>
+  </header>
+
+  <div class="cmp">
+    <div>
+      <span class="label" style="display:block;margin-bottom:12px">En la misma góndola: misma altura, mismo fondo</span>
+      <div class="shelf" id="shelf"></div>
+    </div>
+    <div class="bags" id="bags"></div>
+  </div>
+
+  <footer><span>La marca del cliente y los textos de la bolsa son de ejemplo</span><span>El sello OnePly va a una tinta, a no menos de 25 mm de ancho</span><span>Estudio83</span></footer>
+</section>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+let uid = 0;
+
+// ---------- símbolos (viewBox 0 0 100 100). F = frente del papel, B = dorso ----------
+const SYM = {
+  // A · Uno plegado: una tira que se dobla una vez y forma el 1
+  A: () => {
+    const id = 'mA' + (uid++);
+    return `<defs><mask id="${id}" maskUnits="userSpaceOnUse"><rect width="100" height="100" fill="#fff"/>
+      <polygon points="48,6 80,19.3 54.5,44.8 22.5,31.5" fill="#000" stroke="#000" stroke-width="7" stroke-linejoin="round"/></mask></defs>
+      <polygon points="48,6 80,19.3 80,96 48,96" fill="var(--front)" mask="url(#${id})"/>
+      <polygon points="48,6 80,19.3 54.5,44.8 22.5,31.5" fill="var(--back)"/>`;
+  },
+  // B · Tubo: un pliego que se cierra sobre sí mismo, con su junta
+  B: () => `
+      <path d="M66 17 H34 A17 17 0 0 0 17 34 V66 A17 17 0 0 0 34 83 H66 A17 17 0 0 0 83 66 V34 A17 17 0 0 0 66 17 H58"
+            fill="none" stroke="var(--back)" stroke-width="15" stroke-dasharray="0 5 22 400" pathLength="400"/>
+      <path d="M66 17 H34 A17 17 0 0 0 17 34 V66 A17 17 0 0 0 34 83 H66 A17 17 0 0 0 83 66 V34 A17 17 0 0 0 66 17"
+            fill="none" stroke="var(--front)" stroke-width="15" stroke-dasharray="0 32 368" pathLength="400"/>`,
+  // C · Bobina: la bobina que desenrolla un solo pliego y dibuja la P
+  C: () => {
+    const id = 'mC' + (uid++);
+    return `<defs><mask id="${id}" maskUnits="userSpaceOnUse"><rect width="100" height="100" fill="#fff"/>
+      <circle cx="58" cy="38" r="17" fill="none" stroke="#000" stroke-width="3"/>
+      <circle cx="58" cy="38" r="7" fill="#000"/></mask></defs>
+      <g mask="url(#${id})" fill="var(--front)">
+        <circle cx="58" cy="38" r="29"/>
+        <polygon points="29,38 45,38 45,86 29,95"/>
+      </g>`;
+  },
+  // D · O plegada: la O es una hoja con la esquina doblada
+  D: () => {
+    const id = 'mD' + (uid++);
+    return `<defs><mask id="${id}" maskUnits="userSpaceOnUse"><rect width="100" height="100" fill="#fff"/>
+      <rect x="21" y="21" width="58" height="58" rx="13" fill="#000"/>
+      <polygon points="63,-6 106,37 106,-6" fill="#000"/>
+      <polygon points="63,0 100,37 63,37" fill="#000" stroke="#000" stroke-width="7" stroke-linejoin="round"/></mask></defs>
+      <rect x="0" y="0" width="100" height="100" rx="30" fill="var(--front)" mask="url(#${id})"/>
+      <polygon points="66,3 97,34 66,34" fill="var(--back)"/>`;
+  },
+  // E · Hoja 1: una hoja con el 1 calado — menos papel, misma resistencia
+  E: () => {
+    const id = 'mE' + (uid++);
+    return `<defs><mask id="${id}" maskUnits="userSpaceOnUse"><rect width="100" height="100" fill="#fff"/>
+      <rect x="49" y="30" width="11" height="44" fill="#000"/>
+      <polygon points="49,30 49,42 37,48 37,37" fill="#000"/></mask></defs>
+      <path d="M8 92 C8 40 40 8 92 8 C92 60 60 92 8 92 Z" fill="var(--front)" mask="url(#${id})"/>`;
+  },
+};
+
+function svg(k, size) { return `<svg viewBox="0 0 100 100" width="${size}" height="${size}">${SYM[k]()}</svg>`; }
+
+// lockup: símbolo + nombre. h = alto del símbolo en px
+function lockup(k, h, extra = '') {
+  const fs = { A: .74, B: .7, C: .74, D: .0, E: .7 }[k];
+  if (k === 'D') {
+    // la O plegada reemplaza a la O del nombre
+    return `<div class="lock ${extra}" style="gap:${h * .04}px">${svg('D', h * .72)}<span class="wm wD" style="font-size:${h * 1.09}px;margin-top:${-h * .02}px">nePly</span></div>`;
+  }
+  return `<div class="lock ${extra}" style="gap:${h * .22}px">${svg(k, h)}<span class="wm w${k}" style="font-size:${h * fs}px">OnePly</span></div>`;
+}
+
+// ---------- página 2 ----------
+const P = [
+  ['A', 'Uno plegado', 'Una tira de papel que se dobla una sola vez y forma el 1. El frente es azul y el dorso, kraft.', 'Habla el idioma del sector (el pliegue) pero con un solo pliegue: es exactamente el producto.'],
+  ['B', 'Tubo', 'El pliego que se cierra sobre sí mismo, con su junta a la vista, como en la tubera.', 'Nace del proceso real de fabricación de la bolsa. Se reconoce en la planta y en el cliente.'],
+  ['C', 'Bobina', 'Una bobina que desenrolla un solo pliego y, al hacerlo, dibuja la P.', 'El ícono más claro de la industria papelera, convertido en letra. Muy fuerte en tamaño chico.'],
+  ['D', 'O plegada', 'La O del nombre es una hoja con la esquina doblada. Sola, funciona como ícono.', 'La más sobria y corporativa, en la línea de Billerud o International Paper.'],
+  ['E', 'Hoja 1', 'Una hoja con el 1 calado: un pliego, menos papel, la misma resistencia.', 'Toma el código verde del sector pero en azul, y suma el mensaje de sustentabilidad.'],
+];
+document.getElementById('props').innerHTML = P.map(([k, t, d, why]) => `
+  <div class="prop">
+    <div class="panel white"><span class="lbl">Color</span>${lockup(k, 58)}</div>
+    <div class="panel ultra"><span class="lbl">Negativo</span>${lockup(k, 44)}</div>
+    <div class="panel kraft"><span class="lbl">Una tinta · kraft</span>${lockup(k, 44)}</div>
+    <div class="sizes">
+      <div class="s"><div class="lock">${svg(k, 56)}</div>56</div>
+      <div class="s"><div class="lock">${svg(k, 32)}</div>32</div>
+      <div class="s"><div class="lock">${svg(k, 20)}</div>20</div>
+      <div class="s"><div class="lock one">${svg(k, 20)}</div>1 tinta</div>
+    </div>
+    <div class="cap"><span class="n">${k}</span><span class="t">${t}</span><span class="d">${d}</span><span class="why">${why}</span></div>
+  </div>`).join('');
+
+// ---------- página 3: góndola ----------
+const comp = [['mondi'], ['smurfitwestrock'], ['klabin'], ['ip'], ['dssmith'], ['billerud'], ['storaenso'], ['segezha', 'dark'], ['gascogne']];
+let shelf = comp.map(([n, c]) => `<div class="cell ${c || ''}"><img src="ref/logo-${n}.png"></div>`);
+const ours = ['A', 'B', 'C', 'D', 'E'].map(k => `<div class="cell us"><span class="k">${k}</span>${lockup(k, 40)}</div>`);
+// intercalamos: competencia y propuestas mezcladas, como en una feria
+const order = [shelf[0], ours[0], shelf[1], shelf[2], ours[2], shelf[3], shelf[4],
+               shelf[5], ours[1], shelf[6], ours[3], shelf[7], ours[4], shelf[8]];
+document.getElementById('shelf').innerHTML = order.join('');
+
+// ---------- página 3: bolsas ----------
+function seal(k, w) {
+  // sello de producto para la bolsa: una tinta, ancho total = w
+  const tag = `<span style="font-family:'Geist Mono';font-size:${w * .041}px;letter-spacing:.12em;white-space:nowrap">BOLSA DE UN PLIEGO</span>`;
+  const box = `width:${w}px;border:${Math.max(1.2, w * .009)}px solid var(--ink);border-radius:${w * .045}px;padding:${w * .055}px ${w * .06}px;color:var(--ink);box-sizing:border-box`;
+  if (k === 'D') return `<div style="${box};display:grid;justify-items:start;gap:${w * .03}px">${lockup('D', w * .2, 'one')}${tag}</div>`;
+  const sz = w * .25;
+  return `<div style="${box};display:flex;align-items:center;gap:${w * .05}px">
+      <div class="lock one">${svg(k, sz)}</div>
+      <div style="display:grid;gap:${w * .02}px"><span class="wm w${k}" style="font-size:${sz * .6}px">OnePly</span>${tag}</div>
+    </div>`;
+}
+
+function bag(k) {
+  return `<div class="bagwrap"><div class="bagstage">
+    <svg viewBox="0 0 300 430" style="height:100%;max-height:520px">
+      <defs>
+        <filter id="g${k}"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="3" seed="3"/><feColorMatrix values="0 0 0 0 .4 0 0 0 0 .28 0 0 0 0 .16 0 0 0 .28 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+        <linearGradient id="sh${k}" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".10"/><stop offset=".12" stop-opacity="0"/><stop offset=".88" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></linearGradient>
+      </defs>
+      <path id="b${k}" d="M18 22 Q150 8 282 22 L286 408 Q150 422 14 408 Z" fill="#C49B6B"/>
+      <path d="M18 22 Q150 8 282 22 L286 408 Q150 422 14 408 Z" filter="url(#g${k})"/>
+      <path d="M18 22 Q150 8 282 22 L286 408 Q150 422 14 408 Z" fill="url(#sh${k})"/>
+      <path d="M18 22 L62 22 L18 66 Z" fill="#000" opacity=".10"/>
+      <rect x="44" y="72" width="212" height="88" fill="none" stroke="#15171C" stroke-width="2.5" stroke-dasharray="7 6" opacity=".55"/>
+      <text x="150" y="122" text-anchor="middle" style="font-family:'Geist Mono';font-size:12px;letter-spacing:.14em" fill="#15171C" opacity=".6">MARCA DEL CLIENTE</text>
+      <text x="150" y="208" text-anchor="middle" style="font-family:'Archivo';font-weight:800;font-size:30px;letter-spacing:-.01em" fill="#15171C">CEMENTO</text>
+      <text x="150" y="232" text-anchor="middle" style="font-family:'Geist Mono';font-size:11px;letter-spacing:.16em" fill="#15171C">PORTLAND NORMAL · CPN 40</text>
+      <text x="150" y="296" text-anchor="middle" style="font-family:'Archivo';font-weight:800;font-size:44px" fill="#15171C">50 kg</text>
+      <foreignObject x="80" y="322" width="140" height="74"><div xmlns="http://www.w3.org/1999/xhtml" style="display:grid;place-items:center;height:100%">${seal(k, 138)}</div></foreignObject>
+    </svg></div>
+    <div class="cap" style="padding-top:0"><span class="n">${k}</span><span class="t" style="font-size:14px">Sello sobre la bolsa del cliente</span></div></div>`;
+}
+document.getElementById('bags').innerHTML = ['A', 'C', 'D'].map(bag).join('') + `
+  <div class="seals"><span class="label">El sello a una tinta, en blanco y sobre kraft</span>
+    ${['A', 'C', 'D'].map(k => `<div class="seal-row"><div>${seal(k, 220)}</div><div class="k">${seal(k, 220)}</div></div>`).join('')}
+  </div>`;
+
+// ---------- página 1: mapa ----------
+const pts = [
+  ['Mondi', .72, .30], ['Smurfit Westrock', .80, .18], ['Klabin', .66, .40], ['International Paper', .86, .26], ['DS Smith', .60, .22],
+  ['Billerud', .30, .30], ['Stora Enso', .16, .22], ['Segezha', .30, .42], ['Gascogne', .14, .36],
+  ['QuickFill · SolmixBag', .50, .74],
+];
+const map = document.getElementById('map');
+map.insertAdjacentHTML('beforeend', `<svg style="position:absolute;inset:0;width:100%;height:100%"><line x1="50%" y1="8%" x2="50%" y2="92%" stroke="#D6D2CB"/><line x1="6%" y1="50%" x2="94%" y2="50%" stroke="#D6D2CB"/></svg>`);
+pts.forEach(([n, x, y]) => map.insertAdjacentHTML('beforeend', `<span class="dot" style="left:${x * 100}%;top:${y * 100}%"><i style="${n.startsWith('Quick') ? 'background:#fff;border:1.5px solid #15171C' : ''}"></i>${n}</span>`));
+map.insertAdjacentHTML('beforeend', `<span class="dot us" style="left:76%;top:72%"><i></i>OnePly</span>`);
+
+document.fonts.ready.then(() => requestAnimationFrame(() => { document.body.dataset.ready = '1'; }));
+</script>
+</body>
+</html>
