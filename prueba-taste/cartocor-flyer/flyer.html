@@ -6,115 +6,76 @@
 <title>Cartocor · Flyer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* Paleta "Orange, sky, lime" en proporciones, con los colores del cartón:
-     el naranja pasa a kraft, el celeste es la tinta flexo, el negro se mantiene. */
+  /* Estilo de página de producto: blanco, una sola cosa protagonista, texto centrado, links azules. */
   :root {
-    --kraft: #c98a4b;
-    --paper: #ead2ad;
-    --sky: #4db3ff;
-    --ink: #111111;
-    --ink-on-dark: #ead2ad;
-    --accent: #de194b;
-    --accent-ink: #ffffff;
-    --m: 32px; /* margen único de la hoja */
+    --bg: #ffffff;
+    --tile: #f5f5f7;
+    --ink: #1d1d1f;
+    --muted: #6e6e73;
+    --link: #0066cc;
+    --kraft-top: #dcae78;
+    --kraft-left: #c8935a;
+    --kraft-right: #b07a43;
+    --tape: #e9c99e;
+    --print: #1d1d1f;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { background: #3a3a3a; }
-  body { font-family: "Chivo", system-ui, sans-serif; color: var(--ink); letter-spacing: -0.01em; }
+  html, body { background: #d2d2d7; }
+  body { font-family: "Inter", system-ui, sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
 
-  /* A4 a 96 dpi */
-  .sheet { width: 794px; height: 1123px; margin: 0 auto; position: relative; overflow: hidden;
-           display: grid; grid-template-rows: 424px 56px 292px 1fr; }
+  .sheet { width: 794px; height: 1123px; margin: 0 auto; background: var(--bg); position: relative; overflow: hidden;
+           padding: 44px 40px 40px; display: flex; flex-direction: column; align-items: center; text-align: center; }
 
-  /* 1 · el nombre de lado a lado */
-  .hero { background: var(--kraft); position: relative; padding: var(--m); }
-  .hero .tl { position: absolute; left: var(--m); top: var(--m); width: 34ch; }
-  .hero .tl p { font-size: 19px; line-height: 1.35; }
-  .hero .tl a { display: inline-block; margin-top: 16px; background: var(--accent); color: var(--accent-ink);
-                font-weight: 700; font-size: 17px; padding: 13px 20px; text-decoration: none; }
-  .hero .tr { position: absolute; right: var(--m); top: var(--m); text-align: right; font-weight: 700; font-size: 15px; line-height: 1.4; }
-  .hero .bl, .hero .br { position: absolute; bottom: 24px; font-size: 16px; font-weight: 700; }
-  .hero .bl { left: var(--m); }
-  .hero .br { right: var(--m); }
-  .hero h1 { position: absolute; left: var(--m); right: var(--m); top: 178px; }
-  .hero h1 svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .brand { font-weight: 600; font-size: 19px; letter-spacing: -0.02em; }
+  h1 { margin-top: 30px; font-weight: 700; font-size: 66px; line-height: 1.02; letter-spacing: -0.035em; }
+  .sub { margin-top: 10px; font-size: 24px; line-height: 1.3; font-weight: 500; letter-spacing: -0.015em; color: var(--muted); }
+  .links { margin-top: 18px; display: flex; gap: 28px; justify-content: center; align-items: center; font-size: 18px; }
+  .links a { color: var(--link); text-decoration: none; }
+  .links a.btn { background: var(--link); color: #fff; padding: 9px 20px; border-radius: 980px; }
 
-  /* el canto de la plancha */
-  .edge { background: var(--kraft); }
-  .edge svg { display: block; width: 100%; height: 100%; }
+  .hero { margin-top: 18px; width: 100%; }
+  .hero svg { display: block; margin: 0 auto; width: 520px; height: auto; }
 
-  /* 2 · dos cifras gigantes, cortadas por el borde */
-  .compare { background: var(--ink); color: var(--ink-on-dark); position: relative; overflow: hidden;
-             padding: 28px var(--m) 0; }
-  .compare .row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-  .compare h2 { font-weight: 900; text-transform: uppercase; font-size: 30px; line-height: 0.92; letter-spacing: -0.04em; }
-  .compare .row p { font-size: 16px; line-height: 1.4; }
-  .specimens { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 26px; }
-  .spec + .spec { text-align: right; }
-  .spec small { display: block; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-  .spec b { display: block; font-weight: 900; font-size: 236px; line-height: 0.8; letter-spacing: -0.06em; white-space: nowrap; }
+  .specs { margin-top: 6px; width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .spec svg { display: block; margin: 0 auto 14px; width: 120px; height: auto; }
+  .spec b { display: block; font-size: 40px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+  .spec b small { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin-left: 2px; }
+  .spec span { display: block; margin-top: 8px; font-size: 15px; line-height: 1.4; color: var(--muted); }
+  .spec span strong { color: var(--ink); font-weight: 600; }
 
-  /* 3 · el cupón para llenar a mano */
-  .coupon-field { background: var(--sky); padding: 32px var(--m); display: flex; align-items: center; }
-  .coupon { position: relative; width: 100%; height: 100%; background: var(--paper);
-            display: grid; grid-template-columns: 46% 1fr; }
-  .coupon::before, .coupon::after { content: ""; position: absolute; left: calc(46% - 16px); width: 32px; height: 32px;
-            border-radius: 50%; background: var(--sky); }
-  .coupon::before { top: -16px; }
-  .coupon::after { bottom: -16px; }
-  .coupon .left { padding: 32px 30px; display: flex; flex-direction: column; justify-content: space-between;
-                  border-right: 6px dotted var(--sky); }
-  .coupon h2 { font-weight: 900; text-transform: uppercase; font-size: 40px; line-height: 0.9; letter-spacing: -0.045em; }
-  .coupon .left p { font-size: 16px; line-height: 1.4; }
-  .coupon .left p b { font-weight: 700; }
-  .coupon .right { padding: 22px 26px; display: grid; gap: 6px; align-content: center; }
-  .field { background: #f6e8d2; height: 42px; display: flex; align-items: center; padding: 0 14px; font-size: 16px; font-weight: 700; }
-  .field span { font-weight: 400; margin-left: auto; color: #6b4a26; }
-  .send { background: var(--ink); color: var(--ink-on-dark); height: 46px; display: flex; align-items: center;
-          justify-content: space-between; padding: 0 16px; font-weight: 700; font-size: 16px; }
+  .tile { margin-top: auto; width: 100%; background: var(--tile); border-radius: 28px; padding: 30px 36px;
+          display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; text-align: left; }
+  .tile h2 { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+  .tile p { margin-top: 8px; font-size: 16px; line-height: 1.45; color: var(--muted); max-width: 40ch; }
+  .tile .contact { text-align: right; font-size: 16px; line-height: 1.6; }
+  .tile .contact a { color: var(--link); text-decoration: none; font-weight: 500; }
 </style>
 </head>
 <body>
 <main class="sheet">
-  <section class="hero">
-    <div class="tl">
-      <p>Cajas, bandejas y exhibidores de cartón corrugado, hechos a la medida de lo que llevás.</p>
-      <a href="https://www.cartocor.com.ar">Pedí cotización</a>
-    </div>
-    <div class="tr">Grupo Arcor<br>Argentina y Chile</div>
-    <h1><svg id="name" viewBox="0 0 730 120" role="img" aria-label="Cartocor"><text id="nametext" x="0" y="0">CARTOCOR</text></svg></h1>
-    <div class="bl">Cartón corrugado para la industria, el agro y el consumo masivo</div>
-    <div class="br">cartocor.com.ar</div>
-  </section>
+  <div class="brand">Cartocor</div>
 
-  <div class="edge" aria-hidden="true"><svg id="edge" viewBox="0 0 794 64" preserveAspectRatio="none"></svg></div>
+  <h1>Cartón corrugado.<br>A la medida exacta.</h1>
+  <p class="sub">Cajas y envases para la industria, el agro y el consumo masivo.</p>
+  <div class="links">
+    <a class="btn" href="https://www.cartocor.com.ar">Pedí cotización</a>
+    <a href="https://www.cartocor.com.ar">Conocé más ›</a>
+  </div>
 
-  <section class="compare">
-    <div class="row">
-      <h2>De la góndola<br>al camión</h2>
-      <p>La misma caja cambia según lo que carga. Elegimos la onda justa: ni un milímetro de más, ni uno de menos.</p>
-    </div>
-    <div class="specimens">
-      <div class="spec"><small>Onda E · 1,5 mm, para la góndola</small><b>1,5</b></div>
-      <div class="spec"><small>Doble BC · 7 mm, para el camión</small><b>7</b></div>
-    </div>
-  </section>
+  <div class="hero"><svg id="box" viewBox="0 0 520 470" role="img" aria-label="Caja de cartón corrugado cerrada con cinta, impresa con la marca"></svg></div>
 
-  <section class="coupon-field">
-    <div class="coupon">
-      <div class="left">
-        <h2>Tu caja,<br>tus medidas</h2>
-        <p>Completá el cupón, sacale una foto y mandala a <b>ventas@cartocor.com.ar</b></p>
-      </div>
-      <div class="right">
-        <div class="field">Medidas <span>____ × ____ × ____ cm</span></div>
-        <div class="field">Qué lleva <span>________________</span></div>
-        <div class="field">Peso por caja <span>_______ kg</span></div>
-        <div class="field">Cantidad al mes <span>_______ u.</span></div>
-        <div class="send"><span>Te respondemos con la propuesta</span><span>→</span></div>
-      </div>
+  <section class="specs" aria-label="Tipos de onda" id="specs"></section>
+
+  <section class="tile">
+    <div>
+      <h2>Plantas en Argentina,<br>Chile y Perú.</h2>
+      <p>Diseño, impresión flexográfica y fabricación de cajas de cartón corrugado. Parte de Grupo Arcor.</p>
+    </div>
+    <div class="contact">
+      <a href="https://www.cartocor.com.ar">cartocor.com.ar ›</a><br>
+      ventas@cartocor.com.ar
     </div>
   </section>
 </main>
@@ -122,30 +83,69 @@
 <script>
   const NS = 'http://www.w3.org/2000/svg';
   const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); parent && parent.appendChild(n); return n; };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
-  // canto de la plancha: cara, onda, cara
-  const edge = document.getElementById('edge');
-  el('rect', { x: 0, y: 0, width: 794, height: 64, fill: '#111111' }, edge);
-  el('rect', { x: 0, y: 0, width: 794, height: 10, fill: '#ead2ad' }, edge);
-  el('rect', { x: 0, y: 54, width: 794, height: 10, fill: '#ead2ad' }, edge);
-  let d = '';
-  for (let x = -40; x <= 834; x += 2) d += (d ? 'L' : 'M') + x + ' ' + (32 - 19 * Math.cos(x / 48 * Math.PI * 2)).toFixed(1);
-  el('path', { d, fill: 'none', stroke: '#ead2ad', 'stroke-width': 7, 'vector-effect': 'non-scaling-stroke' }, edge);
+  // caja isométrica: x hacia la derecha, y hacia la izquierda, z hacia arriba
+  const box = document.getElementById('box');
+  const L = 250, W = 190, H = 205, c = Math.cos(Math.PI / 6), s = 0.5;
+  const O = { x: 260 - (L - W) * c / 2, y: 445 };
+  const P = (x, y, z) => [O.x + x * c - y * c, O.y - x * s - y * s - z];
+  const poly = (pts, fill) => el('polygon', { points: pts.map(p => p.join(',')).join(' '), fill }, box);
 
-  // el nombre ocupa exactamente el ancho entre márgenes
-  const fit = () => {
-    const t = document.getElementById('nametext');
-    t.setAttribute('font-family', 'Chivo'); t.setAttribute('font-weight', 900);
-    t.setAttribute('font-size', 100); t.setAttribute('letter-spacing', -5);
-    const s = 730 / t.getBBox().width;
-    t.setAttribute('font-size', (100 * s).toFixed(2));
-    t.setAttribute('letter-spacing', (-5 * s).toFixed(2));
-    const b = t.getBBox();
-    t.setAttribute('x', (-b.x).toFixed(2));
-    t.setAttribute('y', (-b.y).toFixed(2));
-    document.getElementById('name').setAttribute('viewBox', `0 0 730 ${b.height.toFixed(1)}`);
-  };
-  document.fonts.ready.then(fit);
+  el('ellipse', { cx: O.x + (L - W) * c / 2, cy: O.y + 6, rx: 235, ry: 22, fill: '#ececef' }, box);
+  poly([P(0,0,0), P(0,W,0), P(0,W,H), P(0,0,H)], css('--kraft-left'));    // cara izquierda
+  poly([P(0,0,0), P(L,0,0), P(L,0,H), P(0,0,H)], css('--kraft-right'));   // cara derecha
+  poly([P(0,0,H), P(L,0,H), P(L,W,H), P(0,W,H)], css('--kraft-top'));     // tapa
+
+  // cinta sobre la unión de las solapas, bajando por la cara izquierda
+  const t = 20;
+  poly([P(0,W/2-t,H), P(L,W/2-t,H), P(L,W/2+t,H), P(0,W/2+t,H)], css('--tape'));
+  poly([P(0,W/2-t,H), P(0,W/2+t,H), P(0,W/2+t,H-62), P(0,W/2-t,H-62)], css('--tape'));
+  el('line', { x1: P(0,W/2,H)[0], y1: P(0,W/2,H)[1], x2: P(L,W/2,H)[0], y2: P(L,W/2,H)[1], stroke: '#c79b66', 'stroke-width': 2 }, box);
+
+  // impresión flexo en la cara derecha
+  const [rx, ry] = P(26, 0, 70);
+  const g = el('g', { transform: `matrix(${c} ${-s} 0 1 ${rx} ${ry})` }, box);
+  el('text', { x: 0, y: 0, 'font-family': 'Inter', 'font-weight': 700, 'font-size': 40, 'letter-spacing': -1.2, fill: css('--print') }, g).textContent = 'cartocor';
+  el('text', { x: 2, y: 30, 'font-family': 'Inter', 'font-weight': 500, 'font-size': 15, fill: css('--print') }, g).textContent = 'Cartón corrugado · Doble BC';
+
+  // flechas "este lado arriba" en la cara izquierda
+  const [lx, ly] = P(0, W - 36, 64);
+  const g2 = el('g', { transform: `matrix(${c} ${s} 0 1 ${lx} ${ly})`, fill: css('--print') }, box);
+  [0, 26].forEach(dx => {
+    el('rect', { x: dx + 6, y: -30, width: 6, height: 34 }, g2);
+    el('polygon', { points: `${dx},-28 ${dx + 9},-44 ${dx + 18},-28` }, g2);
+  });
+  el('rect', { x: -2, y: 10, width: 46, height: 6 }, g2);
+
+  // las tres ondas, dibujadas a escala entre sí
+  const specs = [
+    { mm: '1,5', name: 'Onda E', use: 'Envases de góndola y exhibidores', layers: [1.5] },
+    { mm: '4', name: 'Onda C', use: 'Cajas de despacho', layers: [4] },
+    { mm: '7', name: 'Doble BC', use: 'Cargas pesadas y agro', layers: [4, 3] },
+  ];
+  const host = document.getElementById('specs');
+  const k = 8, liner = 3, w = 120;
+  specs.forEach(f => {
+    const div = document.createElement('div'); div.className = 'spec';
+    const h = 7 * k + liner * 3; // misma caja para las tres, alineadas abajo
+    const svg = el('svg', { viewBox: `0 0 ${w} ${h}`, 'aria-hidden': 'true' });
+    const total = f.layers.reduce((a, b) => a + b * k, 0) + liner * (f.layers.length + 1);
+    let y = h - total;
+    el('rect', { x: 0, y, width: w, height: liner, fill: css('--kraft-right') }, svg); y += liner;
+    f.layers.forEach(l => {
+      const hh = l * k, pitch = l * k * 1.5;
+      el('rect', { x: 0, y, width: w, height: hh, fill: '#f3e3cc' }, svg);
+      let d = '';
+      for (let x = 0; x <= w; x += 1) d += (d ? 'L' : 'M') + x + ' ' + (y + hh / 2 - (hh / 2 - 1) * Math.cos(x / pitch * Math.PI * 2)).toFixed(2);
+      el('path', { d, fill: 'none', stroke: css('--kraft-right'), 'stroke-width': 2 }, svg);
+      y += hh;
+      el('rect', { x: 0, y, width: w, height: liner, fill: css('--kraft-right') }, svg); y += liner;
+    });
+    div.appendChild(svg);
+    div.insertAdjacentHTML('beforeend', `<b>${f.mm}<small>mm</small></b><span><strong>${f.name}.</strong> ${f.use}.</span>`);
+    host.appendChild(div);
+  });
 </script>
 </body>
 </html>
