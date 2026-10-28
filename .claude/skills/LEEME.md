@@ -1,13 +1,13 @@
 # Skills del repositorio
 
-Copiar acá la carpeta de la skill que está en la PC:
+La skill taste-skill ya está copiada acá con su nombre real:
 
-    C:\Users\DiegoL\.claude\skills\taste-skill   →   .claude/skills/taste-skill
+    .claude/skills/design-taste-frontend/SKILL.md
+    .claude/skills/design-taste-frontend/... (resto de los archivos de la skill)
 
-Tiene que quedar así:
+Para actualizarla, volver a copiarla desde la PC:
 
-    .claude/skills/taste-skill/SKILL.md
-    .claude/skills/taste-skill/... (resto de los archivos de la skill)
+    C:\Users\DiegoL\.claude\skills\design-taste-frontend   →   .claude/skills/design-taste-frontend
 
 Claude Code carga automáticamente toda skill que esté en .claude/skills/ del repositorio,
 tanto en la PC como en la nube.
