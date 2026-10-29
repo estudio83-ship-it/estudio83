@@ -137,3 +137,65 @@
     white-space: nowrap;
   }
 }
+
+/* materiales reales: plástico negro, placa verde, metal, etiqueta, kapton y cable rojo */
+.fk {
+  --fk-sel: #1b6ef3;
+  --fk-void-deep: #08080a;
+  --fk-logo: #f4f4f1;
+}
+.iso[data-theme="light"] .fk {
+  --fk-sel: #1b6ef3;
+  --fk-void-deep: #08080a;
+}
+.fk-m-black {
+  --anatomy-paper: #2b2b2e; --anatomy-face: #2b2b2e; --anatomy-top: #3b3b3f;
+  --anatomy-shade-0: #1c1c1f; --anatomy-shade-1: #232326; --anatomy-shade-2: #2a2a2d; --anatomy-shade-3: #313135;
+  --anatomy-lit-top: #4a4a50; --anatomy-lit-shade: #36363b;
+  --anatomy-mid: #6a6a70; --anatomy-lo: #55555b; --anatomy-faint: #44444a; --anatomy-dot: #a0a0a6;
+  --fk-void: var(--fk-void-deep);
+}
+.fk-m-green {
+  --anatomy-paper: #2f7d45; --anatomy-face: #2f7d45; --anatomy-top: #3d9656;
+  --anatomy-shade-0: #215a31; --anatomy-shade-1: #286a3a; --anatomy-shade-2: #2f7843; --anatomy-shade-3: #36864c;
+  --anatomy-lit-top: #4fae69; --anatomy-lit-shade: #34894b;
+  --anatomy-mid: #a9d8b4; --anatomy-lo: #7fbf8f; --anatomy-faint: #5ea771; --anatomy-dot: #e9e2b0;
+}
+.fk-m-metal {
+  --anatomy-paper: #c9cacd; --anatomy-face: #d6d7da; --anatomy-top: #e6e7ea;
+  --anatomy-shade-0: #9c9ea3; --anatomy-shade-1: #aeb0b4; --anatomy-shade-2: #bfc1c5; --anatomy-shade-3: #cfd1d4;
+  --anatomy-lit-top: #f2f3f5; --anatomy-lit-shade: #c4c6ca;
+  --anatomy-mid: #6f7277; --anatomy-lo: #8a8d92; --anatomy-faint: #a6a8ad; --anatomy-dot: #3a3b3e;
+}
+.fk-m-label {
+  --anatomy-paper: #eef0ee; --anatomy-face: #f6f7f5; --anatomy-top: #fbfbfa;
+  --anatomy-shade-0: #cfd2d0; --anatomy-shade-1: #dadddb; --anatomy-shade-2: #e4e7e5; --anatomy-shade-3: #edefed;
+  --anatomy-mid: #8a8d8b; --anatomy-lo: #9fa3a1; --anatomy-faint: #c2c5c3; --anatomy-dot: #2e2f30;
+}
+.fk-m-amber {
+  --anatomy-paper: #d99a2b; --anatomy-top: #e8ad42;
+  --anatomy-shade-0: #b77a17; --anatomy-shade-1: #c5861d; --anatomy-shade-2: #d29224; --anatomy-shade-3: #dd9e2e;
+  --anatomy-lit-top: #f2be5c; --anatomy-lit-shade: #d8982a;
+}
+.fk-m-red {
+  --anatomy-top: #e2524b; --anatomy-shade-0: #9d231f; --anatomy-shade-1: #b12d28; --anatomy-shade-2: #c43832; --anatomy-shade-3: #d4443d;
+}
+.fk-m-metal .fk-cone { fill: #2c2c30; }
+.fk-m-metal .fk-cap { fill: #3e3e43; }
+.fk-logo .iso-face-text {
+  fill: var(--fk-logo);
+  font-family: Verdana, "DejaVu Sans", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+/* atenuar sin transparencia: nada debe verse a través de otra pieza */
+.fk-stage[data-focus] .it:not([data-on]) { filter: var(--fk-dim); }
+.fk { --fk-dim: grayscale(0.9) brightness(1.35) contrast(0.55); }
+.iso:not([data-theme="light"]) .fk { --fk-dim: grayscale(0.9) brightness(0.6); }
+.iso:not([data-theme="light"]) .fk .fk-m-black {
+  --anatomy-paper: #303034; --anatomy-face: #303034; --anatomy-top: #45454b;
+  --anatomy-shade-0: #222226; --anatomy-shade-1: #2a2a2e; --anatomy-shade-2: #323236; --anatomy-shade-3: #3a3a3f;
+  --anatomy-lit-top: #55555c; --anatomy-lit-shade: #3e3e44;
+}
+.fk .it[data-on] .iso-edge { stroke: var(--fk-sel); stroke-width: 1.1px; }
+.iso:not([data-theme="light"]) .fk { --fk-sel: #7fb2ff; }
