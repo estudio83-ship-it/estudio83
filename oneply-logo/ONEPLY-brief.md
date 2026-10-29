@@ -92,6 +92,14 @@ Paleta del sello: **bosque** `#0E3B2C`, **verde** `#1F7A4A`, **lima** `#B7D63B`,
 
 **Sistema de sellos:** la misma forma con distintas leyendas ("UNA SOLA HOJA", "100% RECICLABLE*", "MENOS PAPEL*"). *Las leyendas marcadas deben validarse con datos del producto.
 
+### Aplicación sobre una bolsa real (carpeta `bolsa/`)
+Montaje sobre una foto de una bolsa Loma Negra CPC40 de 25 kg (uso interno), con el sello impreso como tinta sobre el kraft:
+1. **Fila de certificaciones:** el sello "Hoja calada" chico, al lado de ISO e INTI. Es el más discreto y no suma tinta.
+2. **Firma sobre la marca:** el logo "Bobina" con la bajada, arriba del logo del cliente. Es el más legible.
+3. **Roseta en zona libre:** junto al hexágono, en diálogo con el sello del cliente. Es el más visible.
+4. **Calado en la banda roja:** el logo "Uno plegado" calado en la tinta roja del cliente, sin sumar color.
+5. **Sello en verde:** necesita una tinta extra, pero destaca más.
+
 ## 6. Decisiones y preferencias hasta ahora
 
 - Nombre: **"OnePly"**, en mayúsculas y minúsculas. Se lee mejor "One Ply" que "ONEPLY".
@@ -129,6 +137,7 @@ Repositorio `estudio83`, carpeta `oneply-logo/`:
 - `serie-3/`: propuestas 21 a 30 y el criterio "Pared Única".
 - `serie-4/`: benchmark, propuestas A a E y comparación sobre la bolsa (3 páginas).
 - `serie-5/`: alternativa sello, propuestas 01 a 06 y aplicación (2 páginas).
+- `bolsa/`: el sello aplicado sobre una bolsa real, en 5 ubicaciones.
 - Las series 1 y 2 se hicieron en otro chat, en otro contenedor, y no están en el repositorio.
 
 ### Fuentes consultadas

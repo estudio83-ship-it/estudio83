@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>OnePly — En la bolsa</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@800&display=block" rel="stylesheet">
+<style>
+  @font-face { font-family: "Geist Mono"; src: url("../serie-5/fonts/GeistMono-Regular.ttf"); }
+  @font-face { font-family: "Instrument Sans"; src: url("../serie-5/fonts/InstrumentSans-Regular.ttf"); font-weight: 400; }
+  @font-face { font-family: "Instrument Sans"; src: url("../serie-5/fonts/InstrumentSans-Bold.ttf"); font-weight: 700; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #F3F1EA; font-family: "Instrument Sans", sans-serif; color: #1B1A17; }
+  .page { width: 1680px; height: 1188px; overflow: hidden; padding: 52px 56px 38px; display: grid; grid-template-rows: auto 1fr auto; row-gap: 26px; }
+  header { display: grid; grid-template-columns: 1fr auto; align-items: end; padding-bottom: 16px; border-bottom: 1px solid #D5D2C7; }
+  .brand { display: flex; align-items: baseline; gap: 20px; }
+  .brand b { font-family: "Figtree"; font-weight: 800; font-size: 28px; letter-spacing: -.02em; color: #0E3B2C; }
+  .brand span { font-size: 15px; color: #7A786F; }
+  .meta, footer { font-family: "Geist Mono"; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #7A786F; }
+  .meta { display: flex; gap: 26px; }
+  footer { display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid #D5D2C7; }
+  main { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; min-height: 0; }
+  .v { display: grid; grid-template-rows: 1fr 168px 112px; gap: 10px; min-height: 0; }
+  .bag { background: #fff; border-radius: 3px; display: grid; place-items: center; min-height: 0; overflow: hidden; padding: 14px; }
+  .bag img { max-height: 100%; max-width: 100%; display: block; }
+  .det { border-radius: 3px; overflow: hidden; background: #ddd; }
+  .det img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cap { display: grid; grid-template-columns: 26px 1fr; row-gap: 3px; }
+  .cap .n { font-family: "Geist Mono"; font-size: 12px; color: #7A786F; padding-top: 3px; }
+  .cap .t { font-weight: 700; font-size: 15px; }
+  .cap .d { grid-column: 2; font-size: 12.3px; line-height: 1.38; color: #4E4C45; }
+  .cap .tag { grid-column: 2; font-family: "Geist Mono"; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #1F6B3F; margin-top: 2px; }
+</style>
+</head>
+<body>
+<section class="page">
+  <header>
+    <div class="brand"><b>OnePly</b><span>El sello aplicado sobre una bolsa real del mercado</span></div>
+    <div class="meta"><span>Montaje de presentación</span><span>Octubre 2026</span></div>
+  </header>
+  <main>
+    <div class="v"><div class="bag"><img src="bolsa-v1.png"></div><div class="det"><img src="bolsa-v1-detalle.png"></div>
+      <div class="cap"><span class="n">01</span><span class="t">En la fila de certificaciones</span><span class="d">Sello «Hoja calada» chico, al lado de ISO e INTI. Se lee como un respaldo técnico más.</span><span class="tag">Sin tinta extra · el más discreto</span></div></div>
+    <div class="v"><div class="bag"><img src="bolsa-v4.png"></div><div class="det"><img src="bolsa-v4-detalle.png"></div>
+      <div class="cap"><span class="n">02</span><span class="t">Firma sobre la marca</span><span class="d">Logo «Bobina» con la bajada «Bolsa de un pliego · Una sola hoja», arriba del logo del cliente.</span><span class="tag">Sin tinta extra · el más legible</span></div></div>
+    <div class="v"><div class="bag"><img src="bolsa-v2.png"></div><div class="det"><img src="bolsa-v2-detalle.png"></div>
+      <div class="cap"><span class="n">03</span><span class="t">Roseta en zona libre</span><span class="d">Sello de garantía mediano en el espacio libre junto al hexágono, en diálogo con el sello del cliente.</span><span class="tag">Sin tinta extra · el más visible</span></div></div>
+    <div class="v"><div class="bag"><img src="bolsa-v3.png"></div><div class="det"><img src="bolsa-v3-detalle.png"></div>
+      <div class="cap"><span class="n">04</span><span class="t">Calado en la banda roja</span><span class="d">Logo «Uno plegado» calado en la tinta roja del cliente: se ve el kraft, sin sumar color.</span><span class="tag">Usa la tinta del cliente</span></div></div>
+    <div class="v"><div class="bag"><img src="bolsa-v5.png"></div><div class="det"><img src="bolsa-v5-detalle.png"></div>
+      <div class="cap"><span class="n">05</span><span class="t">Sello en verde</span><span class="d">El mismo sello en un verde propio. Destaca más y suma el mensaje sustentable.</span><span class="tag">Requiere una tinta extra</span></div></div>
+  </main>
+  <footer><span>Foto de base: bolsa Loma Negra · uso interno, solo para visualizar la aplicación</span><span>Montaje digital — el resultado en flexografía debe validarse con prueba de impresión</span><span>Estudio83</span></footer>
+</section>
+<script>Promise.all([document.fonts.ready, ...[...document.images].map(i => i.decode())]).then(() => document.body.dataset.ready = '1');</script>
+</body>
+</html>
