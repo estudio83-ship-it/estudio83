@@ -5,7 +5,6 @@ Los SVG, las fuentes y la imagen de referencia se incrustan, así el archivo
 funciona solo, sin carpetas al lado.
 """
 import base64
-import json
 from pathlib import Path
 
 AQUI = Path(__file__).parent
@@ -110,23 +109,32 @@ def vista_logo(l):
         f'<figure class="version {fondo}">{img(n, t)}<figcaption><span>{t}</span>{descarga(n, "SVG ↓")}</figcaption></figure>'
         for t, n, fondo in l["versiones"]
     )
-    fondos = json.dumps({k: SVG[v] for k, v in l["fondos"].items()})
+    i = l["id"]
+    radios = "".join(
+        f'<input type="radio" class="sr" name="fondo-{i}" id="f-{i}-{f}"{" checked" if f == "blanco" else ""}>' for f in ("blanco", "verde", "kraft")
+    )
+    logos = "".join(f'<div class="hero-logo {f}">{img(n, l["nombre"])}</div>' for f, n in l["fondos"].items())
     esc = l["escala"]
+    fijos = "".join(
+        f'<figure>{img(esc["reducido"] if t < esc["umbral"] else esc["normal"], f"{t} px", estilo=f"height:{t}px")}<figcaption>{t} px</figcaption></figure>'
+        for t in (128, 64, 32, 24, 16)
+    )
     a = l["apps"]
     return f'''
-<section class="vista" id="v-{l["id"]}" data-vista="{l["id"]}" hidden>
-  <div class="hero" data-fondos='{fondos}'>
+<section class="vista" id="v-{i}" data-vista="{i}">
+  <div class="hero">
+    {radios}
     <div class="hero-txt">
       <span class="num">{l["etiqueta"]} · Refinamiento</span>
       <h2>{l["nombre"]}</h2>
       <p class="lema">{l["lema"]}</p>
       <div class="fondos" role="group" aria-label="Fondo">
-        <button class="on" data-fondo="blanco">Blanco</button>
-        <button data-fondo="verde">Verde selva</button>
-        <button data-fondo="kraft">Kraft</button>
+        <label for="f-{i}-blanco">Blanco</label>
+        <label for="f-{i}-verde">Verde selva</label>
+        <label for="f-{i}-kraft">Kraft</label>
       </div>
     </div>
-    <div class="hero-logo blanco">{img(l["fondos"]["blanco"], l["nombre"])}</div>
+    <div class="hero-logos">{logos}</div>
   </div>
 
   <div class="bloque dos-col">
@@ -146,11 +154,12 @@ def vista_logo(l):
 
   <div class="bloque escala-bloque">
     <div><p class="eyebrow">Escala</p><h3>De la fachada al favicon</h3>
-      <p class="gris">Mové el control para ver el símbolo a distintos tamaños. Debajo de {esc["umbral"]} px se activa automáticamente la versión reducida, diseñada para mantener la lectura.</p>
-      <label class="rango">Tamaño <input type="range" min="12" max="240" value="120" data-normal="{SVG[esc["normal"]]}" data-reducido="{SVG[esc["reducido"]]}" data-umbral="{esc["umbral"]}"><output>120 px</output></label>
-      <p class="estado">Versión completa</p>
+      <p class="gris">El símbolo a distintos tamaños. Debajo de {esc["umbral"]} px se usa la versión reducida, diseñada para mantener la lectura.</p>
+      <div class="con-js" hidden><label class="rango">Tamaño <input type="range" min="12" max="240" value="120" data-normal="{SVG[esc["normal"]]}" data-reducido="{SVG[esc["reducido"]]}" data-umbral="{esc["umbral"]}"><output>120 px</output></label>
+      <p class="estado">Versión completa</p></div>
     </div>
-    <div class="escala-vista">{img(esc["normal"], "Símbolo en escala", "escala-img", "height:120px")}</div>
+    <div class="escala-vista sin-js">{fijos}</div>
+    <div class="escala-vista con-js" hidden>{img(esc["normal"], "Símbolo en escala", "escala-img", "height:120px")}</div>
   </div>
 
   <div class="bloque"><p class="eyebrow">Aplicaciones</p><h3>En uso</h3></div>
@@ -166,7 +175,7 @@ def vista_logo(l):
 def vista_comparar():
     cols = "".join(
         f'''<div class="comp-col">
-      <button class="comp-titulo" data-ir="{l["id"]}">{l["etiqueta"]} · {l["nombre"]} →</button>
+      <label class="comp-titulo" for="t-{l["id"]}">{l["etiqueta"]} · {l["nombre"]} →</label>
       <div class="comp-panel blanco">{img(l["fondos"]["blanco"], l["nombre"])}</div>
       <div class="comp-panel verde">{img(l["fondos"]["verde"], l["nombre"] + " negativo")}</div>
       <div class="comp-panel kraft">{img(l["fondos"]["kraft"], l["nombre"] + " sobre kraft")}</div>
@@ -175,7 +184,7 @@ def vista_comparar():
         for l in LOGOS
     )
     return f'''
-<section class="vista" id="v-comparar" data-vista="comparar" hidden>
+<section class="vista" id="v-comparar" data-vista="comparar">
   <div class="bloque dos-col">
     <div><p class="eyebrow">Lado a lado</p><h2 class="h2-chico">Dos caminos sólidos para decidir.</h2></div>
     <p class="gris">Araucaria preserva la memoria de la marca y la proyecta con una silueta inconfundible del territorio. Anillos construye un signo nuevo y propio, nacido del producto y su materia. Ambos comparten paleta, tipografía y lógica de sistema.</p>
@@ -196,14 +205,14 @@ def vista_comparar():
 
 def vista_ronda1():
     tarjetas = "".join(
-        f'''<figure class="r1 {'elegida' if ir else ''}" {f'data-ir="{ir}" tabindex="0" role="button"' if ir else ''}>
+        f'''<{'label' if ir else 'div'} class="r1 {'elegida' if ir else ''}"{f' for="t-{ir}"' if ir else ''}>
       <div class="r1-logo">{img(n, t)}</div>
-      <figcaption><span class="num">{num}</span><b>{t}</b><span class="gris">{d}</span>{'<em>Seleccionada → ver refinamiento</em>' if ir else ''}</figcaption>
-    </figure>'''
+      <div class="r1-txt"><span class="num">{num}</span><b>{t}</b><span class="gris">{d}</span>{'<em>Seleccionada → ver refinamiento</em>' if ir else ''}</div>
+    </{'label' if ir else 'div'}>'''
         for num, t, n, d, ir in RONDA1
     )
     return f'''
-<section class="vista" id="v-ronda1" data-vista="ronda1" hidden>
+<section class="vista" id="v-ronda1" data-vista="ronda1">
   <div class="bloque dos-col">
     <div><p class="eyebrow">Primera instancia</p><h2 class="h2-chico">De cinco caminos a dos.</h2></div>
     <p class="gris">La primera presentación exploró cinco caminos a partir de la investigación sobre la compañía y su territorio. Avanzaron Araucaria, por su continuidad con la identidad vigente y su arraigo territorial, y Anillos, por su capacidad de diferenciación.</p>
@@ -218,10 +227,34 @@ def vista_ronda1():
 
 def nav():
     items = "".join(
-        f'<a href="#{l["id"]}" data-nav="{l["id"]}"><img src="{SVG[l["mini"]]}" alt=""><span>{l["nombre"]}</span></a>' for l in LOGOS
+        f'<label for="t-{l["id"]}" data-nav="{l["id"]}"><img src="{SVG[l["mini"]]}" alt=""><span>{l["nombre"]}</span></label>' for l in LOGOS
     )
-    return (items + '<a href="#comparar" data-nav="comparar"><span class="ico">⇆</span><span>Lado a lado</span></a>'
-            '<a href="#ronda1" data-nav="ronda1"><span class="ico">5</span><span>Primera instancia</span></a>')
+    return (items + '<label for="t-comparar" data-nav="comparar"><span class="ico">⇆</span><span>Lado a lado</span></label>'
+            '<label for="t-ronda1" data-nav="ronda1"><span class="ico">5</span><span>Primera instancia</span></label>')
+
+
+VISTAS = [l["id"] for l in LOGOS] + ["comparar", "ronda1"]
+
+
+def pestanas():
+    return "".join(
+        f'<input type="radio" class="sr" name="vista" id="t-{v}"{" checked" if k == 0 else ""}>' for k, v in enumerate(VISTAS)
+    )
+
+
+def css_pestanas():
+    """Las vistas se muestran con CSS según la pestaña marcada: no dependen de JavaScript."""
+    reglas = []
+    for v in VISTAS:
+        reglas.append(f"#t-{v}:checked ~ main #v-{v} {{ display: block; }}")
+        reglas.append(f'#t-{v}:checked ~ header label[data-nav="{v}"] {{ background: var(--verde); color: var(--crudo); }}')
+        reglas.append(f'#t-{v}:checked ~ header label[data-nav="{v}"] img {{ background: var(--crudo); border-radius: 50%; padding: 2px; }}')
+        reglas.append(f'#t-{v}:focus-visible ~ header label[data-nav="{v}"] {{ outline: 2px solid var(--tierra); outline-offset: 2px; }}')
+    for l in LOGOS:
+        for f in ("blanco", "verde", "kraft"):
+            reglas.append(f"#f-{l['id']}-{f}:checked ~ .hero-logos .{f} {{ display: grid; }}")
+            reglas.append(f'#f-{l["id"]}-{f}:checked ~ .hero-txt label[for="f-{l["id"]}-{f}"] {{ background: var(--verde); color: var(--crudo); border-color: var(--verde); }}')
+    return "\n  ".join(reglas)
 
 
 HTML = f'''<!doctype html>
@@ -254,23 +287,26 @@ HTML = f'''<!doctype html>
   .marca {{ font: 600 17px/1.1 "Fraunces", serif; color: var(--verde); white-space: nowrap; }}
   .marca small {{ display: block; font: 500 11px/1.4 "Instrument Sans"; letter-spacing: .12em; text-transform: uppercase; color: var(--gris); }}
   nav {{ display: flex; gap: 6px; margin-left: auto; overflow-x: auto; scrollbar-width: none; }}
-  nav a {{ display: flex; align-items: center; gap: 10px; padding: 8px 14px 8px 10px; border-radius: 999px; text-decoration: none; color: var(--tinta); font-size: 14px; font-weight: 600; white-space: nowrap; border: 1px solid transparent; transition: background .2s, border-color .2s; }}
-  nav a img {{ height: 28px; width: 28px; object-fit: contain; }}
-  nav a .ico {{ width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: #fff; color: var(--verde); font-size: 14px; }}
-  nav a:hover {{ border-color: var(--linea); }}
-  nav a[aria-current="page"] {{ background: var(--verde); color: var(--crudo); }}
-  nav a[aria-current="page"] img {{ background: var(--crudo); border-radius: 50%; padding: 2px; }}
+  [hidden] {{ display: none !important; }}
+  .sr {{ position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }}
+  {css_pestanas()}
+  nav label {{ display: flex; align-items: center; gap: 10px; padding: 8px 14px 8px 10px; border-radius: 999px; text-decoration: none; color: var(--tinta); font-size: 14px; font-weight: 600; white-space: nowrap; border: 1px solid transparent; transition: background .2s, border-color .2s; }}
+  nav label img {{ height: 28px; width: 28px; object-fit: contain; }}
+  nav label .ico {{ width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: #fff; color: var(--verde); font-size: 14px; }}
+  nav label {{ cursor: pointer; user-select: none; }}
+  nav label:hover {{ border-color: var(--linea); }}
 
   main {{ max-width: 1240px; margin: 0 auto; padding: 0 32px 80px; }}
-  .vista {{ animation: entrar .45s ease both; }}
+  .vista {{ display: none; animation: entrar .45s ease both; }}
   @keyframes entrar {{ from {{ opacity: 0; transform: translateY(10px); }} to {{ opacity: 1; transform: none; }} }}
 
   .hero {{ display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; align-items: center; padding: 56px 0 40px; }}
   .hero h2 {{ font-size: clamp(56px, 8vw, 104px); line-height: .95; }}
   .lema {{ font-size: 20px; color: var(--gris); margin: 16px 0 28px; max-width: 26ch; }}
   .fondos {{ display: flex; gap: 6px; flex-wrap: wrap; }}
-  .fondos button {{ border: 1px solid var(--linea); background: #fff; border-radius: 999px; padding: 7px 14px; font-size: 13px; color: var(--tinta); }}
-  .fondos button.on {{ background: var(--verde); color: var(--crudo); border-color: var(--verde); }}
+  .fondos label {{ cursor: pointer; user-select: none;  border: 1px solid var(--linea); background: #fff; border-radius: 999px; padding: 7px 14px; font-size: 13px; color: var(--tinta); }}
+  .hero-logos {{ display: grid; }}
+  .hero-logos .hero-logo {{ display: none; grid-area: 1 / 1; }}
   .hero-logo {{ border-radius: 18px; min-height: 380px; display: grid; place-items: center; padding: 48px; transition: background .35s; }}
   .hero-logo img {{ width: 100%; max-width: 560px; height: auto; }}
   .blanco {{ background: var(--blanco); }} .verde {{ background: var(--verde); }} .kraft {{ background: var(--kraft); }} .crudo {{ background: #EAE0CD; }}
@@ -309,6 +345,9 @@ HTML = f'''<!doctype html>
   .estado {{ font-size: 13px; color: var(--tierra); font-weight: 600; margin-top: 10px; }}
   .escala-vista {{ background: #fff; border-radius: 14px; height: 300px; display: grid; place-items: center; overflow: hidden; }}
   .escala-img {{ width: auto; transition: height .08s; }}
+  .sin-js {{ display: flex; align-items: flex-end; justify-content: center; gap: 28px; padding: 24px; }}
+  .sin-js figure {{ margin: 0; display: grid; justify-items: center; gap: 8px; font-size: 11px; color: var(--gris); }}
+  .sin-js img {{ width: auto; }}
 
   .apps {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }}
   .app {{ margin: 0; border-radius: 12px; min-height: 330px; display: grid; grid-template-rows: 1fr auto; place-items: center; padding: 24px 16px 12px; }}
@@ -333,7 +372,7 @@ HTML = f'''<!doctype html>
 
   .comp {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }}
   .comp-col {{ display: grid; gap: 12px; }}
-  .comp-titulo {{ background: none; border: 0; text-align: left; padding: 0; font: 600 26px/1.1 "Fraunces", serif; color: var(--verde); }}
+  .comp-titulo {{ cursor: pointer; font: 600 26px/1.1 "Fraunces", serif; color: var(--verde); }}
   .comp-titulo:hover {{ color: var(--tierra); }}
   .comp-panel {{ border-radius: 12px; min-height: 220px; display: grid; place-items: center; padding: 32px; }}
   .comp-panel > img {{ max-width: 82%; max-height: 150px; }}
@@ -342,14 +381,14 @@ HTML = f'''<!doctype html>
   .pasos li::before {{ content: counter(p, decimal-leading-zero); font: 600 17px/1.5 "Fraunces", serif; color: var(--tierra); }}
 
   .ronda1 {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }}
-  .r1 {{ margin: 0; background: #fff; border-radius: 12px; overflow: hidden; display: grid; grid-template-rows: 170px auto; opacity: .6; }}
+  .r1 {{ margin: 0; text-decoration: none; color: inherit; background: #fff; border-radius: 12px; overflow: hidden; display: grid; grid-template-rows: 170px auto; opacity: .6; }}
   .r1.elegida {{ opacity: 1; outline: 2px solid var(--verde); cursor: pointer; transition: transform .2s; }}
-  .r1.elegida:hover, .r1.elegida:focus-visible {{ transform: translateY(-3px); }}
+  .r1.elegida:hover {{ transform: translateY(-3px); }}
   .r1-logo {{ display: grid; place-items: center; padding: 20px; border-bottom: 1px solid var(--linea); }}
   .r1-logo img {{ max-width: 100%; max-height: 120px; }}
-  .r1 figcaption {{ padding: 14px 16px 18px; display: grid; gap: 4px; font-size: 13px; }}
-  .r1 figcaption .num {{ margin: 0; }}
-  .r1 figcaption b {{ font: 600 19px/1.2 "Fraunces", serif; color: var(--verde); }}
+  .r1-txt {{ padding: 14px 16px 18px; display: grid; gap: 4px; font-size: 13px; align-content: start; }}
+  .r1-txt .num {{ margin: 0; }}
+  .r1-txt b {{ font: 600 19px/1.2 "Fraunces", serif; color: var(--verde); }}
   .r1 em {{ font-style: normal; font-weight: 600; color: var(--tierra); margin-top: 6px; }}
   .vigente {{ display: grid; grid-template-columns: 180px 1fr; gap: 24px; align-items: center; }}
   .vigente img {{ width: 100%; border-radius: 8px; }}
@@ -375,6 +414,7 @@ HTML = f'''<!doctype html>
 </style>
 </head>
 <body>
+{pestanas()}
 <header>
   <div class="barra">
     <div class="marca">Papel Misionero<small>Estudio 83 · Identidad · Segunda instancia</small></div>
@@ -388,45 +428,28 @@ HTML = f'''<!doctype html>
 </main>
 <div class="pie"><span>Estudio 83 · Propuesta confidencial preparada para Cartocor — Grupo Arcor</span><span class="teclas">Navegá con <kbd>←</kbd> <kbd>→</kbd></span></div>
 <script>
+// Mejoras opcionales: la navegación funciona sin JavaScript.
 (() => {{
-  const orden = [...document.querySelectorAll("[data-vista]")].map(v => v.dataset.vista);
-  const mostrar = (id, subir = true) => {{
-    if (!orden.includes(id)) id = orden[0];
-    document.querySelectorAll("[data-vista]").forEach(v => v.hidden = v.dataset.vista !== id);
-    document.querySelectorAll("[data-nav]").forEach(a => {{
-      if (a.dataset.nav === id) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
-    }});
-    if (subir) window.scrollTo({{ top: 0 }});
+  const pestanas = [...document.querySelectorAll('input[name="vista"]')];
+  const elegir = id => {{
+    const t = document.getElementById("t-" + id);
+    if (t) {{ t.checked = true; window.scrollTo({{ top: 0 }}); }}
   }};
-  const ir = id => {{ if (location.hash !== "#" + id) location.hash = id; else mostrar(id); }};
-  window.addEventListener("hashchange", () => mostrar(location.hash.slice(1)));
-  mostrar(location.hash.slice(1), false);
-
+  if (location.hash) elegir(location.hash.slice(1));
+  pestanas.forEach(t => t.addEventListener("change", () => window.scrollTo({{ top: 0 }})));
   document.addEventListener("keydown", e => {{
-    if (e.target.closest("input, textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target.closest("input[type=range], textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-    const actual = orden.indexOf(document.querySelector("[data-vista]:not([hidden])").dataset.vista);
-    const paso = e.key === "ArrowRight" ? 1 : -1;
-    ir(orden[(actual + paso + orden.length) % orden.length]);
-  }});
-  document.querySelectorAll("[data-ir]").forEach(el => {{
-    el.addEventListener("click", () => ir(el.dataset.ir));
-    el.addEventListener("keydown", e => {{ if (e.key === "Enter" || e.key === " ") {{ e.preventDefault(); ir(el.dataset.ir); }} }});
-  }});
-
-  // Fondo del logo principal
-  document.querySelectorAll(".hero").forEach(h => {{
-    const fondos = JSON.parse(h.dataset.fondos);
-    const caja = h.querySelector(".hero-logo");
-    h.querySelectorAll("[data-fondo]").forEach(b => b.addEventListener("click", () => {{
-      h.querySelectorAll("[data-fondo]").forEach(x => x.classList.toggle("on", x === b));
-      caja.className = "hero-logo " + b.dataset.fondo;
-      caja.querySelector("img").src = fondos[b.dataset.fondo];
-    }}));
+    if (e.target.matches('input[type=radio]')) e.preventDefault();
+    const k = pestanas.findIndex(t => t.checked);
+    const sig = pestanas[(k + (e.key === "ArrowRight" ? 1 : -1) + pestanas.length) % pestanas.length];
+    sig.checked = true; window.scrollTo({{ top: 0 }});
   }});
 
   // Control de escala: debajo del umbral usa la versión reducida
   document.querySelectorAll(".escala-bloque").forEach(bl => {{
+    bl.querySelectorAll(".con-js").forEach(x => x.hidden = false);
+    bl.querySelector(".sin-js").hidden = true;
     const r = bl.querySelector("input"), o = bl.querySelector("output"), est = bl.querySelector(".estado"), im = bl.querySelector(".escala-img");
     const umbral = +r.dataset.umbral;
     const act = () => {{
