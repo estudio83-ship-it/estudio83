@@ -1,8 +1,10 @@
-"""Arma navegable.html: la presentación interactiva, navegable por logo, en un solo archivo.
+"""Arma la presentación interactiva, navegable por logo, en dos versiones.
 
 Uso:  python3 generar.py && python3 armar_navegable.py
-Los SVG, las fuentes y la imagen de referencia se incrustan, así el archivo
-funciona solo, sin carpetas al lado.
+
+- navegable.html: liviana, toma los SVG, las fuentes y la referencia de las
+  carpetas vecinas. Es la que se abre en el panel de vista previa.
+- navegable-completo.html: un solo archivo con todo incrustado, para enviar.
 """
 import base64
 from pathlib import Path
@@ -14,9 +16,15 @@ def uri(ruta, tipo):
     return f"data:{tipo};base64," + base64.b64encode((AQUI / ruta).read_bytes()).decode()
 
 
-SVG = {p.stem: uri(p.relative_to(AQUI), "image/svg+xml") for p in sorted((AQUI / "svg").glob("*.svg"))}
-FUENTES = {n: uri(f"fuentes/{n}.woff", "font/woff") for n in ("InstrumentSans-500", "InstrumentSans-600", "Fraunces-600")}
-REFERENCIA = uri("referencia/logo-actual.png", "image/png")
+def recursos(incrustar):
+    """Rutas a los archivos, o su contenido incrustado como data URI."""
+    ref = (lambda ruta, tipo: uri(ruta, tipo)) if incrustar else (lambda ruta, tipo: ruta)
+    svg = {p.stem: ref(f"svg/{p.name}", "image/svg+xml") for p in sorted((AQUI / "svg").glob("*.svg"))}
+    fuentes = {n: ref(f"fuentes/{n}.woff", "font/woff") for n in ("InstrumentSans-500", "InstrumentSans-600", "Fraunces-600")}
+    return svg, fuentes, ref("referencia/logo-actual.png", "image/png")
+
+
+SVG, FUENTES, REFERENCIA = recursos(incrustar=False)
 
 # Contenido de cada logo. Los textos están escritos para el cliente.
 LOGOS = [
@@ -257,7 +265,8 @@ def css_pestanas():
     return "\n  ".join(reglas)
 
 
-HTML = f'''<!doctype html>
+def pagina():
+    return f'''<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -467,5 +476,8 @@ HTML = f'''<!doctype html>
 </html>
 '''
 
-(AQUI / "navegable.html").write_text(HTML, encoding="utf-8")
-print(f"navegable.html: {len(HTML) / 1024:.0f} KB")
+for archivo, incrustar in (("navegable.html", False), ("navegable-completo.html", True)):
+    SVG, FUENTES, REFERENCIA = recursos(incrustar)
+    html = pagina()
+    (AQUI / archivo).write_text(html, encoding="utf-8")
+    print(f"{archivo}: {len(html) / 1024:.0f} KB")
