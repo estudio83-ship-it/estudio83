@@ -42,8 +42,6 @@ async function png(nombre) {
   const pres = new pptxgen();
   pres.layout = "LAYOUT_WIDE"; // 13.33 x 7.5
   pres.title = "Papel Misionero · marcas finalistas";
-  pres.author = "Estudio 83";
-  pres.company = "Estudio 83";
   pres.theme = { headFontFace: THEME.headFontFace, bodyFontFace: THEME.bodyFontFace };
   const C = pres.SchemeColor;
 
@@ -53,7 +51,6 @@ async function png(nombre) {
     objects: [
       { placeholder: { options: { name: "title", type: "title", x: 0.8, y: 2.4, w: 11.7, h: 1.6, fontSize: 48, bold: true, color: C.background2, valign: "bottom", margin: 0, align: "left" }, text: "" } },
       { placeholder: { options: { name: "body", type: "body", x: 0.8, y: 4.15, w: 11.7, h: 1.0, fontSize: 18, color: C.accent1, valign: "top", margin: 0 }, text: "" } },
-      { text: { text: "ESTUDIO 83 · PARA CARTOCOR", options: { x: 0.8, y: 6.6, w: 8, h: 0.4, fontSize: 11, charSpacing: 4, color: C.accent5, margin: 0 } } },
     ],
   });
   pres.defineSlideMaster({
@@ -71,7 +68,7 @@ async function png(nombre) {
     objects: [
       { placeholder: { options: { name: "title", type: "title", x: 0.5, y: 0.4, w: 9.5, h: 0.75, fontSize: 30, bold: true, color: C.text1, valign: "middle", margin: 0, align: "left" }, text: "" } },
       { placeholder: { options: { name: "body", type: "body", x: 0.5, y: 1.1, w: 9.5, h: 0.4, fontSize: 12, charSpacing: 3, color: C.accent6, valign: "top", margin: 0 }, text: "" } },
-      { text: { text: "ESTUDIO 83 · PAPEL MISIONERO", options: { x: 0.5, y: 7.0, w: 6, h: 0.3, fontSize: 10, charSpacing: 3, color: C.accent6, margin: 0 } } },
+      { text: { text: "PAPEL MISIONERO", options: { x: 0.5, y: 7.0, w: 6, h: 0.3, fontSize: 10, charSpacing: 3, color: C.accent6, margin: 0 } } },
     ],
     slideNumber: { x: 12.3, y: 7.0, w: 0.55, h: 0.3, fontSize: 10, color: C.accent6, align: "right" },
   });
