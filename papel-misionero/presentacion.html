@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Papel Misionero — Propuestas de logo</title>
+<style>
+  @font-face { font-family: "Instrument Sans"; font-weight: 500; src: url(fuentes/InstrumentSans-500.woff) format("woff"); }
+  @font-face { font-family: "Instrument Sans"; font-weight: 600; src: url(fuentes/InstrumentSans-600.woff) format("woff"); }
+  @font-face { font-family: "Fraunces"; font-weight: 600; src: url(fuentes/Fraunces-600.woff) format("woff"); }
+  :root {
+    --verde: #1F3A2B; --kraft: #B98A57; --kraft-osc: #8E6538; --tierra: #B0452B; --crudo: #F2EADB;
+    --tinta: #1B1F1C; --gris: #6B6A63;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--crudo); color: var(--tinta); font: 500 16px/1.5 "Instrument Sans", sans-serif; }
+  .lamina { max-width: 1200px; margin: 0 auto; padding: 72px 48px; }
+  header { display: grid; grid-template-columns: 1.4fr 1fr; gap: 48px; align-items: end; border-bottom: 1.5px solid var(--verde); padding-bottom: 40px; }
+  h1 { font: 600 64px/1 "Fraunces", serif; letter-spacing: -0.02em; margin: 0; color: var(--verde); }
+  .eyebrow { font-weight: 600; font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: var(--tierra); margin: 0 0 16px; }
+  header p { margin: 0; color: var(--gris); max-width: 46ch; }
+  .contexto { display: grid; grid-template-columns: 200px 1fr; gap: 32px; align-items: center; padding: 40px 0; border-bottom: 1px solid #d8cdb9; }
+  .contexto img { width: 200px; border-radius: 6px; display: block; }
+  .contexto p { margin: 0 0 8px; max-width: 70ch; }
+  .contexto small { color: var(--gris); }
+  section.prop { padding: 64px 0; border-bottom: 1px solid #d8cdb9; }
+  .prop-head { display: grid; grid-template-columns: 80px 1fr 1.2fr; gap: 24px; align-items: baseline; margin-bottom: 32px; }
+  .num { font: 600 56px/1 "Fraunces", serif; color: var(--kraft); }
+  h2 { font: 600 32px/1.1 "Fraunces", serif; margin: 0; color: var(--verde); }
+  .prop-head p { margin: 0; color: var(--gris); }
+  .grilla { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .panel { border-radius: 10px; display: grid; place-items: center; padding: 40px; min-height: 240px; }
+  .panel img { max-width: 100%; height: auto; display: block; }
+  .blanco { background: #fff; } .verde { background: var(--verde); } .kraft { background: var(--kraft); }
+  .fila { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+  .fila .panel { min-height: 180px; padding: 28px; }
+  .bolsa { width: 230px; height: 300px; background: linear-gradient(90deg, #a87a49, var(--kraft) 18%, #c49766 50%, var(--kraft) 82%, #a87a49); border-radius: 4px 4px 2px 2px; position: relative; display: grid; place-items: center; box-shadow: 0 14px 30px -18px rgba(0,0,0,.5); }
+  .bolsa::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 22px; background: repeating-linear-gradient(90deg, #9c6f40 0 6px, transparent 6px 12px); opacity: .5; }
+  .bolsa img { width: 72%; }
+  .paleta { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 64px 0 0; }
+  .color { border-radius: 10px; height: 140px; padding: 16px; display: flex; flex-direction: column; justify-content: flex-end; font-size: 13px; }
+  .color b { font-weight: 600; font-size: 15px; }
+  footer { padding-top: 48px; color: var(--gris); font-size: 13px; }
+  @media (max-width: 760px) {
+    .lamina { padding: 40px 16px; }
+    header, .contexto, .prop-head, .grilla, .fila { grid-template-columns: 1fr; }
+    h1 { font-size: 42px; }
+    .paleta { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<main class="lamina">
+  <header>
+    <div>
+      <p class="eyebrow">Cartocor · Grupo Arcor — Estudio 83</p>
+      <h1>Papel Misionero.<br>Nueva identidad.</h1>
+    </div>
+    <p>Tres caminos para renovar la marca de la planta de papel kraft de Puerto Leoni, Misiones. Todos parten del símbolo que la empresa ya tiene: la araucaria, el árbol nativo de la selva misionera.</p>
+  </header>
+
+  <div class="contexto">
+    <img src="referencia/logo-actual.png" alt="Logo actual de Papel Misionero: araucaria y las letras PM">
+    <div>
+      <p><b>Punto de partida.</b> El logo actual combina una araucaria dibujada con trazo fino y las iniciales PM en serif. Es reconocible pero se pierde en tamaños chicos y en impresión flexográfica sobre kraft.</p>
+      <p><b>Lo que sabemos de la empresa:</b> 50 años en Misiones, parte de Grupo Arcor desde 2017, única productora nacional de papel kraft 100% de fibra virgen de pino, forestación propia, certificación PEFC y una reserva natural de 10.300 ha con la comunidad Mbya Guaraní.</p>
+      <small>Objetivo: un símbolo más sólido, que se imprima bien sobre bolsas y bobinas, y que conserve el árbol como ancla de la marca.</small>
+    </div>
+  </div>
+
+  <section class="prop">
+    <div class="prop-head">
+      <span class="num">A</span>
+      <h2>Araucaria</h2>
+      <p>La araucaria redibujada con un trazo único y parejo: tronco y tres niveles de ramas en candelabro. Logotipo en mayúsculas espaciadas. Es la evolución más directa del logo actual.</p>
+    </div>
+    <div class="grilla">
+      <div class="panel blanco"><img src="svg/A-araucaria-color.svg" alt="Propuesta A en color"></div>
+      <div class="panel blanco"><img src="svg/A-araucaria-vertical.svg" alt="Propuesta A vertical"></div>
+    </div>
+    <div class="fila">
+      <div class="panel verde"><img src="svg/A-araucaria-negativo.svg" alt="Propuesta A en negativo"></div>
+      <div class="panel blanco"><img src="svg/A-simbolo.svg" alt="Símbolo A" style="width:110px"></div>
+      <div class="panel blanco"><div class="bolsa"><img src="svg/A-araucaria-monocromo.svg" alt="Propuesta A sobre bolsa kraft"></div></div>
+    </div>
+  </section>
+
+  <section class="prop">
+    <div class="prop-head">
+      <span class="num">B</span>
+      <h2>Pliego</h2>
+      <p>La araucaria vive dentro de un pliego de papel kraft con la esquina doblada: el bosque y el producto en un solo signo. Funciona como ícono de app, sello o etiqueta de bobina.</p>
+    </div>
+    <div class="grilla">
+      <div class="panel blanco"><img src="svg/B-pliego-color.svg" alt="Propuesta B en color"></div>
+      <div class="panel blanco"><img src="svg/B-simbolo.svg" alt="Símbolo B" style="width:150px"></div>
+    </div>
+    <div class="fila">
+      <div class="panel verde"><img src="svg/B-pliego-negativo.svg" alt="Propuesta B en negativo"></div>
+      <div class="panel blanco"><img src="svg/B-pliego-monocromo.svg" alt="Propuesta B monocromo"></div>
+      <div class="panel blanco"><div class="bolsa"><img src="svg/B-pliego-monocromo.svg" alt="Propuesta B sobre bolsa kraft"></div></div>
+    </div>
+  </section>
+
+  <section class="prop">
+    <div class="prop-head">
+      <span class="num">C</span>
+      <h2>Misionero</h2>
+      <p>Un logotipo con carácter editorial: la primera «i» de misionero se convierte en araucaria, su punto es la copa. La marca entera es el símbolo. En rojo tierra colorada, por el suelo de Misiones.</p>
+    </div>
+    <div class="grilla">
+      <div class="panel blanco"><img src="svg/C-misionero-color.svg" alt="Propuesta C en color"></div>
+      <div class="panel verde"><img src="svg/C-misionero-negativo.svg" alt="Propuesta C en negativo"></div>
+    </div>
+    <div class="fila">
+      <div class="panel kraft"><img src="svg/C-misionero-monocromo.svg" alt="Propuesta C sobre kraft"></div>
+      <div class="panel blanco"><img src="svg/C-misionero-monocromo.svg" alt="Propuesta C monocromo"></div>
+      <div class="panel blanco"><div class="bolsa"><img src="svg/C-misionero-monocromo.svg" alt="Propuesta C sobre bolsa kraft"></div></div>
+    </div>
+  </section>
+
+  <div class="paleta">
+    <div class="color" style="background:var(--verde);color:var(--crudo)"><b>Verde selva</b>#1F3A2B</div>
+    <div class="color" style="background:var(--kraft);color:var(--tinta)"><b>Kraft</b>#B98A57</div>
+    <div class="color" style="background:var(--kraft-osc);color:var(--crudo)"><b>Kraft oscuro</b>#8E6538</div>
+    <div class="color" style="background:var(--tierra);color:var(--crudo)"><b>Tierra colorada</b>#B0452B</div>
+    <div class="color" style="background:var(--crudo);color:var(--tinta);border:1px solid #d8cdb9"><b>Papel crudo</b>#F2EADB</div>
+  </div>
+
+  <footer>Tipografías: Fraunces SemiBold e Instrument Sans (licencia OFL). Archivos vectoriales con textos en trazos en la carpeta svg/.</footer>
+</main>
+</body>
+</html>
