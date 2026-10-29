@@ -10,137 +10,417 @@
   @font-face { font-family: "Fraunces"; font-weight: 600; src: url(fuentes/Fraunces-600.woff) format("woff"); }
   :root {
     --verde: #1F3A2B; --kraft: #B98A57; --kraft-osc: #8E6538; --tierra: #B0452B; --crudo: #F2EADB;
-    --tinta: #1B1F1C; --gris: #6B6A63;
+    --tinta: #1B1F1C; --gris: #64625A; --linea: #D8CDB9;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--crudo); color: var(--tinta); font: 500 16px/1.5 "Instrument Sans", sans-serif; }
-  .lamina { max-width: 1200px; margin: 0 auto; padding: 72px 48px; }
-  header { display: grid; grid-template-columns: 1.4fr 1fr; gap: 48px; align-items: end; border-bottom: 1.5px solid var(--verde); padding-bottom: 40px; }
-  h1 { font: 600 64px/1 "Fraunces", serif; letter-spacing: -0.02em; margin: 0; color: var(--verde); }
-  .eyebrow { font-weight: 600; font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: var(--tierra); margin: 0 0 16px; }
-  header p { margin: 0; color: var(--gris); max-width: 46ch; }
-  .contexto { display: grid; grid-template-columns: 200px 1fr; gap: 32px; align-items: center; padding: 40px 0; border-bottom: 1px solid #d8cdb9; }
-  .contexto img { width: 200px; border-radius: 6px; display: block; }
-  .contexto p { margin: 0 0 8px; max-width: 70ch; }
-  .contexto small { color: var(--gris); }
-  section.prop { padding: 64px 0; border-bottom: 1px solid #d8cdb9; }
-  .prop-head { display: grid; grid-template-columns: 80px 1fr 1.2fr; gap: 24px; align-items: baseline; margin-bottom: 32px; }
-  .num { font: 600 56px/1 "Fraunces", serif; color: var(--kraft); }
-  h2 { font: 600 32px/1.1 "Fraunces", serif; margin: 0; color: var(--verde); }
-  .prop-head p { margin: 0; color: var(--gris); }
+  body { margin: 0; background: var(--crudo); color: var(--tinta); font: 500 16px/1.55 "Instrument Sans", sans-serif; }
+  .lamina { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+  h1, h2, h3 { font-family: "Fraunces", serif; font-weight: 600; color: var(--verde); margin: 0; letter-spacing: -0.015em; }
+  .eyebrow { font-weight: 600; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--tierra); margin: 0 0 18px; }
+  p { margin: 0 0 12px; }
+  .gris { color: var(--gris); }
+
+  /* Portada */
+  .portada { min-height: 92vh; display: grid; grid-template-rows: auto 1fr auto; padding: 56px 0 48px; border-bottom: 1.5px solid var(--verde); }
+  .portada .top { display: flex; justify-content: space-between; font-size: 13px; color: var(--gris); }
+  .portada h1 { font-size: clamp(56px, 9vw, 120px); line-height: .95; align-self: center; }
+  .portada h1 span { color: var(--kraft); }
+  .portada .pie { display: grid; grid-template-columns: 1.3fr 1fr; gap: 48px; align-items: end; }
+  .portada .pie p { max-width: 52ch; margin: 0; }
+
+  /* Secciones */
+  section { padding: 96px 0; border-bottom: 1px solid var(--linea); }
+  .cab { display: grid; grid-template-columns: 1fr 1.25fr; gap: 56px; margin-bottom: 48px; align-items: end; }
+  .cab h2 { font-size: 48px; line-height: 1.02; }
+  .cab p { margin: 0; color: var(--gris); max-width: 60ch; }
+
+  .cifras { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--linea); }
+  .cifra { padding: 28px 24px 28px 0; border-bottom: 1px solid var(--linea); }
+  .cifra b { display: block; font: 600 44px/1 "Fraunces", serif; color: var(--verde); margin-bottom: 10px; letter-spacing: -0.02em; }
+  .cifra span { font-size: 14px; color: var(--gris); }
+
+  .linea-tiempo { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; margin-top: 64px; }
+  .hito { border-left: 1.5px solid var(--kraft); padding: 0 16px 0 14px; }
+  .hito b { display: block; font: 600 22px/1 "Fraunces", serif; color: var(--tierra); margin-bottom: 8px; }
+  .hito span { font-size: 13.5px; line-height: 1.45; display: block; }
+
+  .tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .ficha { background: #fff; border-radius: 12px; padding: 28px; }
+  .ficha h3 { font-size: 24px; margin-bottom: 12px; }
+  .ficha p { font-size: 15px; color: var(--gris); }
+  .ficha.verde { background: var(--verde); color: var(--crudo); }
+  .ficha.verde h3 { color: var(--crudo); }
+  .ficha.verde p { color: #C9D2C8; }
+  .ficha .tag { font-size: 11px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--tierra); margin-bottom: 14px; display: block; }
+  .ficha.verde .tag { color: var(--kraft); }
+
+  .familia { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 16px; }
+  .familia div { border: 1px solid var(--linea); border-radius: 10px; padding: 18px; font-size: 14px; text-align: center; background: #fff; }
+  .familia .yo { background: var(--verde); color: var(--crudo); border-color: var(--verde); font-weight: 600; }
+
+  .diag { display: grid; grid-template-columns: 220px 1fr; gap: 40px; align-items: start; }
+  .diag img { width: 100%; border-radius: 10px; display: block; }
+  .diag ul { margin: 0; padding: 0; list-style: none; }
+  .diag li { padding: 14px 0; border-bottom: 1px solid var(--linea); display: grid; grid-template-columns: 160px 1fr; gap: 16px; }
+  .diag li b { color: var(--verde); }
+
+  .insights { counter-reset: ins; }
+  .insight { display: grid; grid-template-columns: 70px 1fr 1fr 160px; gap: 28px; padding: 26px 0; border-top: 1px solid var(--linea); align-items: baseline; }
+  .insight::before { counter-increment: ins; content: "0" counter(ins); font: 600 26px/1 "Fraunces", serif; color: var(--kraft); }
+  .insight h3 { font-size: 24px; }
+  .insight p { margin: 0; color: var(--gris); font-size: 15px; }
+  .insight .va { font-size: 13px; font-weight: 600; color: var(--tierra); }
+
+  /* Propuestas */
+  .prop .cab .num { font: 600 15px/1 "Instrument Sans", sans-serif; letter-spacing: .2em; color: var(--tierra); display: block; margin-bottom: 14px; }
+  .prop .cab h2 { font-size: 64px; }
+  .claves { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .claves span { font-size: 12.5px; border: 1px solid var(--kraft); color: var(--kraft-osc); border-radius: 99px; padding: 4px 12px; }
   .grilla { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
-  .panel { border-radius: 10px; display: grid; place-items: center; padding: 40px; min-height: 240px; }
+  .panel { border-radius: 12px; display: grid; place-items: center; padding: 44px; min-height: 260px; overflow: hidden; position: relative; }
   .panel img { max-width: 100%; height: auto; display: block; }
-  .blanco { background: #fff; } .verde { background: var(--verde); } .kraft { background: var(--kraft); }
+  .panel .rot { position: absolute; left: 16px; bottom: 12px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .55; }
+  .blanco { background: #fff; } .verde { background: var(--verde); color: var(--crudo); } .kraft { background: var(--kraft); } .crudo { background: #EAE0CD; }
   .fila { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
-  .fila .panel { min-height: 180px; padding: 28px; }
-  .bolsa { width: 230px; height: 300px; background: linear-gradient(90deg, #a87a49, var(--kraft) 18%, #c49766 50%, var(--kraft) 82%, #a87a49); border-radius: 4px 4px 2px 2px; position: relative; display: grid; place-items: center; box-shadow: 0 14px 30px -18px rgba(0,0,0,.5); }
-  .bolsa::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 22px; background: repeating-linear-gradient(90deg, #9c6f40 0 6px, transparent 6px 12px); opacity: .5; }
-  .bolsa img { width: 72%; }
-  .paleta { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 64px 0 0; }
-  .color { border-radius: 10px; height: 140px; padding: 16px; display: flex; flex-direction: column; justify-content: flex-end; font-size: 13px; }
-  .color b { font-weight: 600; font-size: 15px; }
-  footer { padding-top: 48px; color: var(--gris); font-size: 13px; }
-  @media (max-width: 760px) {
-    .lamina { padding: 40px 16px; }
-    header, .contexto, .prop-head, .grilla, .fila { grid-template-columns: 1fr; }
-    h1 { font-size: 42px; }
-    .paleta { grid-template-columns: repeat(2, 1fr); }
+  .fila .panel { min-height: 300px; padding: 28px; }
+
+  /* Mockups */
+  .bolsa { width: 200px; height: 270px; position: relative; display: grid; place-items: center; border-radius: 3px;
+    background: linear-gradient(90deg, #9F7446, var(--kraft) 14%, #C79B69 50%, var(--kraft) 86%, #9F7446);
+    box-shadow: 0 18px 30px -18px rgba(0,0,0,.55); }
+  .bolsa::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 18px; background: repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0 5px, transparent 5px 10px); }
+  .bolsa::after { content: "50 KG"; position: absolute; bottom: 16px; font: 600 11px/1 "Instrument Sans"; letter-spacing: .2em; color: var(--verde); opacity: .75; }
+  .bolsa img { width: 74%; margin-top: -18px; }
+  .bobina { width: 230px; height: 230px; border-radius: 50%; display: grid; place-items: center; position: relative;
+    background: repeating-radial-gradient(circle, #B58654 0 2px, #A97B4A 2px 4px); box-shadow: 0 18px 30px -18px rgba(0,0,0,.55); }
+  .bobina::after { content: ""; position: absolute; width: 46px; height: 46px; border-radius: 50%; background: #6B4A2A; box-shadow: inset 0 0 0 7px #8E6538; }
+  .bobina .etiqueta { position: absolute; top: 22px; background: #fff; border-radius: 6px; padding: 10px 14px; width: 150px; display: grid; place-items: center; box-shadow: 0 4px 10px -6px rgba(0,0,0,.4); }
+  .bobina .etiqueta img { max-height: 54px; }
+  .avatar { width: 150px; height: 150px; border-radius: 34px; background: var(--verde); display: grid; place-items: center; box-shadow: 0 18px 30px -20px rgba(0,0,0,.6); }
+  .avatar img { width: 62%; }
+
+  /* Comparativa */
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 16px 12px; border-bottom: 1px solid var(--linea); }
+  th { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--gris); font-weight: 600; }
+  td:first-child { font-family: "Fraunces", serif; font-weight: 600; color: var(--verde); font-size: 19px; }
+  .pts { letter-spacing: 3px; color: var(--kraft); white-space: nowrap; }
+  .pts i { color: var(--linea); font-style: normal; }
+  tr.destacada td { background: #fff; }
+  .tabla { overflow-x: auto; }
+
+  .paleta { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .color { border-radius: 12px; height: 170px; padding: 18px; display: flex; flex-direction: column; justify-content: flex-end; font-size: 13px; }
+  .color b { font-weight: 600; font-size: 16px; }
+  .tipos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .tipo { background: #fff; border-radius: 12px; padding: 32px; }
+  .tipo .muestra { font-size: 64px; line-height: 1; color: var(--verde); margin: 8px 0 16px; }
+
+  .reco { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .reco > * { min-width: 0; }
+  .reco-logo { background: #fff; border-radius: 16px; padding: clamp(24px, 5vw, 64px); display: grid; place-items: center; }
+  .reco-logo img { max-width: 100%; height: auto; }
+  .pasos { counter-reset: p; list-style: none; padding: 0; margin: 0; }
+  .pasos li { counter-increment: p; display: grid; grid-template-columns: 48px 1fr; padding: 16px 0; border-top: 1px solid var(--linea); }
+  .pasos li::before { content: counter(p, decimal-leading-zero); font: 600 18px/1.4 "Fraunces", serif; color: var(--tierra); }
+
+  .fuentes { font-size: 13px; color: var(--gris); columns: 2; column-gap: 48px; }
+  .fuentes a { color: var(--gris); }
+  footer { padding: 48px 0 64px; font-size: 13px; color: var(--gris); display: flex; justify-content: space-between; gap: 24px; }
+
+  @media (max-width: 860px) {
+    .lamina { padding: 0 16px; }
+    .cab, .portada .pie, .grilla, .fila, .tres, .dos, .diag, .reco, .tipos { grid-template-columns: 1fr; }
+    .cifras { grid-template-columns: 1fr 1fr; }
+    .linea-tiempo { grid-template-columns: 1fr 1fr; row-gap: 24px; }
+    .familia, .paleta { grid-template-columns: 1fr 1fr; }
+    .insight { grid-template-columns: 1fr; gap: 8px; }
+    .diag li { grid-template-columns: 1fr; gap: 4px; }
+    .prop .cab h2 { font-size: 44px; }
+    .cab h2 { font-size: 36px; }
+    table { font-size: 13px; } th, td { padding: 10px 6px; }
+    .fuentes { columns: 1; }
   }
 </style>
 </head>
 <body>
 <main class="lamina">
-  <header>
-    <div>
-      <p class="eyebrow">Estudio 83 para Cartocor · Octubre 2026</p>
-      <h1>Papel Misionero.<br>Raíz y renovación.</h1>
-    </div>
-    <p>Propuesta de renovación de identidad visual. Presentamos tres caminos creativos que proyectan a Papel Misionero hacia su próxima etapa sin resignar el capital simbólico construido en cinco décadas.</p>
-  </header>
 
-  <div class="contexto">
-    <img src="referencia/logo-actual.png" alt="Identidad vigente de Papel Misionero: araucaria e iniciales PM">
-    <div>
-      <p><b>Una marca con raíces.</b> Papel Misionero es la única productora nacional de papel kraft elaborado íntegramente con fibra virgen de pino. Medio siglo en Misiones, un modelo integrado que va del vivero a la bolsa industrial, certificación PEFC y una reserva natural de 10.300 hectáreas compartida con la comunidad Mbya Guaraní.</p>
-      <p><b>El símbolo a preservar.</b> La araucaria de la identidad vigente es el activo más valioso de la marca: nativa de la selva misionera, habla de origen, de bosque y de permanencia. Nuestra propuesta la conserva como eje y la lleva a un dibujo más contundente, pensado para convivir con la impresión flexográfica sobre kraft, las bobinas, las bolsas y los soportes digitales.</p>
-      <small>Desafío: una identidad contemporánea, de alta legibilidad en cualquier escala, que exprese el liderazgo industrial y el compromiso con el territorio.</small>
+  <!-- PORTADA -->
+  <div class="portada">
+    <div class="top"><span>Estudio 83</span><span>Para Cartocor · Grupo Arcor</span><span>Octubre 2026</span></div>
+    <h1>Papel<br>Misionero.<br><span>Cincuenta años<br>de raíz.</span></h1>
+    <div class="pie">
+      <p><b>Propuesta de renovación de identidad visual.</b> Investigación, estrategia y cinco caminos creativos para proyectar a Papel Misionero hacia su próximo medio siglo.</p>
+      <p class="gris">Documento confidencial. Contenido: contexto, territorio, diagnóstico, insights, cinco propuestas con aplicaciones, evaluación comparativa y recomendación.</p>
     </div>
   </div>
 
+  <!-- 1. CONTEXTO -->
+  <section>
+    <div class="cab">
+      <div><p class="eyebrow">01 — Contexto</p><h2>Una industria que nació del orgullo misionero.</h2></div>
+      <p>Papel Misionero fue concebida a comienzos de los años 70 como un proyecto colectivo: más de 400 inversores, sumados al Estado provincial y nacional, dieron origen a la primera papelera integrada de la provincia. Cinco décadas después, es la única planta del país que produce papel kraft a partir de fibra virgen de pino, y una pieza estratégica de la división Packaging de Grupo Arcor.</p>
+    </div>
+    <div class="cifras">
+      <div class="cifra"><b>1975</b><span>Puesta en marcha en Puerto Mineral, Puerto Leoni</span></div>
+      <div class="cifra"><b>90.000 t</b><span>de papel kraft por año, al 100% de su capacidad</span></div>
+      <div class="cifra"><b>+80 M</b><span>de bolsas multipliego al año desde la nueva línea</span></div>
+      <div class="cifra"><b>+40</b><span>países de destino en América, Europa, África y Asia</span></div>
+      <div class="cifra"><b>22.000 ha</b><span>de patrimonio forestal integrado</span></div>
+      <div class="cifra"><b>10.300 ha</b><span>de selva paranaense protegida en la reserva propia</span></div>
+      <div class="cifra"><b>700.000</b><span>plantines por año desde el vivero propio</span></div>
+      <div class="cifra"><b>+350</b><span>familias empleadas, algunas por tres generaciones</span></div>
+    </div>
+    <div class="linea-tiempo">
+      <div class="hito"><b>1975</b><span>Inicia la producción de papeles kraft y bolseros, con tecnología alemana.</span></div>
+      <div class="hito"><b>1978</b><span>Adquiere las tierras que luego serán la reserva natural.</span></div>
+      <div class="hito"><b>1994</b><span>Se crea la Reserva Natural y Cultural Papel Misionero.</span></div>
+      <div class="hito"><b>1998</b><span>Privatización: el consorcio BISA–Zucamor toma la compañía.</span></div>
+      <div class="hito"><b>2017</b><span>Se integra a Grupo Arcor junto a Zucamor.</span></div>
+      <div class="hito"><b>2022</b><span>Nueva planta de bolsas multipliego, US$ 20 M de inversión.</span></div>
+      <div class="hito"><b>2025</b><span>Cumple 50 años. Certificación carbono positivo y PEFC.</span></div>
+    </div>
+  </section>
+
+  <!-- 2. TERRITORIO -->
+  <section>
+    <div class="cab">
+      <div><p class="eyebrow">02 — Territorio</p><h2>Selva, tierra colorada y fibra larga.</h2></div>
+      <p>La marca tiene algo que pocas compañías del sector pueden reclamar: un origen preciso y valioso. Misiones es selva paranaense, suelo rojo, agua, comunidades originarias y una cultura del trabajo forestal. La provincia misma eligió la tierra colorada y el agua como signos de su marca territorial bajo la idea de que «en Misiones lo bueno crece».</p>
+    </div>
+    <div class="tres">
+      <div class="ficha verde"><span class="tag">El árbol</span><h3>Araucaria</h3><p>La <i>Araucaria angustifolia</i>, o pino Paraná, es nativa de la región y Monumento Natural Provincial por ley. Protegida y no comercial, es el emblema perfecto de una empresa que produce con pino cultivado y conserva la selva nativa.</p></div>
+      <div class="ficha"><span class="tag">El suelo</span><h3>Tierra colorada</h3><p>El rojo de la tierra misionera es el color más reconocible del territorio. Aporta calidez, identidad y un contrapunto natural al verde de la selva y al marrón del kraft.</p></div>
+      <div class="ficha"><span class="tag">La gente</span><h3>Comunidad Mbya Guaraní</h3><p>La reserva de Papel Misionero alberga comunidades Mbya Guaraní con las que la empresa desarrolla proyectos productivos y educativos. Un vínculo que la identidad debe honrar con respeto, sin apropiarse de su iconografía.</p></div>
+    </div>
+  </section>
+
+  <!-- 3. MERCADO Y ARQUITECTURA -->
+  <section>
+    <div class="cab">
+      <div><p class="eyebrow">03 — Mercado y arquitectura</p><h2>Una marca que viaja a 40 países.</h2></div>
+      <p>Los grandes productores globales de papel y packaging comunican desde la escala, la tecnología y una sustentabilidad genérica. Pocos hablan de un lugar. Para un papel que compite en el mundo, el origen es un diferencial: fibra virgen, bosque cultivado, energía de biomasa y una reserva de selva nativa. La nueva identidad debe funcionar en una bolsa de cemento de 50 kg, en una etiqueta de bobina de exportación y en un perfil digital, y convivir con las demás marcas del grupo.</p>
+    </div>
+    <div class="dos">
+      <div class="ficha"><span class="tag">Escenario competitivo</span><h3>Escala vs. origen</h3><p>Actores globales como Smurfit Westrock, Mondi, Klabin o Billerud construyen marcas corporativas de alcance mundial. Papel Misionero puede ocupar un espacio propio: el del papel con procedencia, trazable desde el vivero hasta la bolsa.</p></div>
+      <div class="ficha"><span class="tag">Soportes críticos</span><h3>Pensada para la flexografía</h3><p>La marca se imprimirá mayormente a una tinta sobre kraft. Esto exige formas sólidas, trazos generosos, buen rendimiento en tamaños chicos y versiones monocromáticas impecables.</p></div>
+    </div>
+    <p class="eyebrow" style="margin-top:40px">Familia de marcas — División Packaging, Grupo Arcor</p>
+    <div class="familia">
+      <div>Cartocor</div><div>Converflex</div><div>Zucamor</div><div>Puntapel</div><div class="yo">Papel Misionero</div>
+    </div>
+  </section>
+
+  <!-- 4. DIAGNÓSTICO -->
+  <section>
+    <div class="cab">
+      <div><p class="eyebrow">04 — Diagnóstico</p><h2>Un símbolo con historia, listo para evolucionar.</h2></div>
+      <p>La identidad vigente reúne una araucaria de trazo fino y las iniciales PM. Es un activo con memoria: la sigla PM está instalada en la región y el árbol conecta de manera directa con el territorio. El desafío es preservarlos y llevarlos a un lenguaje contemporáneo.</p>
+    </div>
+    <div class="diag">
+      <img src="referencia/logo-actual.png" alt="Identidad vigente de Papel Misionero">
+      <ul>
+        <li><b>Preservar</b><span>La araucaria como símbolo de origen y la sigla PM como nombre corto de uso cotidiano.</span></li>
+        <li><b>Fortalecer</b><span>El grosor del trazo, para garantizar lectura en tamaños pequeños y en impresión flexográfica sobre kraft.</span></li>
+        <li><b>Incorporar</b><span>Un sistema de color propio, versiones horizontal, vertical y de símbolo aislado, y una tipografía institucional.</span></li>
+        <li><b>Proyectar</b><span>Una marca que hable de integración, sustentabilidad y procedencia ante clientes nacionales e internacionales.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5. INSIGHTS -->
+  <section>
+    <div class="cab">
+      <div><p class="eyebrow">05 — Insights</p><h2>Cinco verdades, cinco caminos.</h2></div>
+      <p>Cada propuesta creativa nace de una verdad concreta de la compañía. Juntas cubren el espectro que va de la continuidad a la ruptura, para que la decisión sea estratégica y no solo estética.</p>
+    </div>
+    <div class="insights">
+      <div class="insight"><h3>Somos de acá</h3><p>La araucaria es el árbol que todo misionero reconoce y el símbolo que la empresa ya tiene.</p><span class="va">→ 01 Araucaria</span></div>
+      <div class="insight"><h3>Del bosque al papel</h3><p>El producto y su origen son inseparables: cada pliego contiene un bosque gestionado.</p><span class="va">→ 02 Pliego</span></div>
+      <div class="insight"><h3>El nombre es la marca</h3><p>«Misionero» es gentilicio, pertenencia y orgullo. El nombre puede ser el símbolo.</p><span class="va">→ 03 Misionero</span></div>
+      <div class="insight"><h3>Todo empieza en un anillo</h3><p>Los anillos de crecimiento del árbol y la bobina de papel comparten la misma forma.</p><span class="va">→ 04 Anillos</span></div>
+      <div class="insight"><h3>Medio siglo de procedencia</h3><p>Para exportar a 40 países, el origen certificado es un argumento comercial.</p><span class="va">→ 05 Sello</span></div>
+    </div>
+  </section>
+
+  <!-- PROPUESTA 01 -->
   <section class="prop">
-    <div class="prop-head">
-      <span class="num">A</span>
-      <h2>Araucaria</h2>
-      <p>La evolución natural de la marca. La araucaria se sintetiza en un trazo único y constante: un tronco firme y tres niveles de ramas en candelabro. Un logotipo en mayúsculas espaciadas aporta solidez institucional. Continuidad y modernización en equilibrio.</p>
+    <div class="cab">
+      <div><span class="num">PROPUESTA 01</span><h2>Araucaria</h2></div>
+      <div>
+        <p>La evolución natural de la marca. La araucaria se sintetiza en un trazo único y constante: un tronco firme y tres niveles de ramas en candelabro, fieles a la silueta del pino Paraná adulto. El logotipo en mayúsculas espaciadas aporta solidez institucional. Continuidad y modernización en equilibrio.</p>
+        <div class="claves"><span>Continuidad</span><span>Territorio</span><span>Institucional</span></div>
+      </div>
     </div>
     <div class="grilla">
-      <div class="panel blanco"><img src="svg/A-araucaria-color.svg" alt="Propuesta A en color"></div>
-      <div class="panel blanco"><img src="svg/A-araucaria-vertical.svg" alt="Propuesta A vertical"></div>
+      <div class="panel blanco"><img src="svg/01-araucaria-respaldo.svg" alt="Propuesta 01 con línea de respaldo"></div>
+      <div class="panel blanco"><img src="svg/01-araucaria-vertical.svg" alt="Propuesta 01 vertical"></div>
     </div>
     <div class="fila">
-      <div class="panel verde"><img src="svg/A-araucaria-negativo.svg" alt="Propuesta A en negativo"></div>
-      <div class="panel blanco"><img src="svg/A-simbolo.svg" alt="Símbolo A" style="width:110px"></div>
-      <div class="panel blanco"><div class="bolsa"><img src="svg/A-araucaria-monocromo.svg" alt="Propuesta A sobre bolsa kraft"></div></div>
+      <div class="panel verde"><img src="svg/01-araucaria-negativo.svg" alt="Propuesta 01 en negativo"></div>
+      <div class="panel crudo"><div class="bolsa"><img src="svg/01-araucaria-monocromo.svg" alt="Propuesta 01 sobre bolsa"></div><span class="rot">Bolsa multipliego</span></div>
+      <div class="panel blanco"><div class="avatar"><img src="svg/01-simbolo-claro.svg" alt="Símbolo 01 como avatar"></div><span class="rot">Perfil digital</span></div>
     </div>
   </section>
 
+  <!-- PROPUESTA 02 -->
   <section class="prop">
-    <div class="prop-head">
-      <span class="num">B</span>
-      <h2>Pliego</h2>
-      <p>Del bosque al papel en un solo gesto. La araucaria habita un pliego kraft con la esquina plegada: origen y producto se funden en un signo compacto, versátil como sello de calidad, etiqueta de bobina o ícono digital.</p>
+    <div class="cab">
+      <div><span class="num">PROPUESTA 02</span><h2>Pliego</h2></div>
+      <div>
+        <p>Del bosque al papel en un solo gesto. La araucaria habita un pliego kraft con la esquina plegada: origen y producto se funden en un signo compacto y amigable. Su forma cerrada lo vuelve ideal como sello de calidad en bolsas, etiqueta de bobina o ícono digital.</p>
+        <div class="claves"><span>Producto</span><span>Cercanía</span><span>Versatilidad</span></div>
+      </div>
     </div>
     <div class="grilla">
-      <div class="panel blanco"><img src="svg/B-pliego-color.svg" alt="Propuesta B en color"></div>
-      <div class="panel blanco"><img src="svg/B-simbolo.svg" alt="Símbolo B" style="width:150px"></div>
+      <div class="panel blanco"><img src="svg/02-pliego-color.svg" alt="Propuesta 02 en color"></div>
+      <div class="panel blanco"><img src="svg/02-simbolo.svg" alt="Símbolo 02" style="width:150px"></div>
     </div>
     <div class="fila">
-      <div class="panel verde"><img src="svg/B-pliego-negativo.svg" alt="Propuesta B en negativo"></div>
-      <div class="panel blanco"><img src="svg/B-pliego-monocromo.svg" alt="Propuesta B monocromo"></div>
-      <div class="panel blanco"><div class="bolsa"><img src="svg/B-pliego-monocromo.svg" alt="Propuesta B sobre bolsa kraft"></div></div>
+      <div class="panel verde"><img src="svg/02-pliego-negativo.svg" alt="Propuesta 02 en negativo"></div>
+      <div class="panel crudo"><div class="bolsa"><img src="svg/02-pliego-monocromo.svg" alt="Propuesta 02 sobre bolsa"></div><span class="rot">Bolsa multipliego</span></div>
+      <div class="panel blanco"><div class="bobina"><div class="etiqueta"><img src="svg/02-pliego-color.svg" alt="Propuesta 02 en etiqueta de bobina"></div></div><span class="rot">Etiqueta de bobina</span></div>
     </div>
   </section>
 
+  <!-- PROPUESTA 03 -->
   <section class="prop">
-    <div class="prop-head">
-      <span class="num">C</span>
-      <h2>Misionero</h2>
-      <p>El nombre como emblema. La primera «i» de misionero se transforma en araucaria y su punto florece en copa. Una tipografía de carácter editorial y el rojo de la tierra colorada anclan la marca en su territorio con una voz propia y memorable.</p>
+    <div class="cab">
+      <div><span class="num">PROPUESTA 03</span><h2>Misionero</h2></div>
+      <div>
+        <p>El nombre como emblema. La primera «i» de misionero se transforma en araucaria: el fuste es el tronco y el punto florece en copa. Una tipografía de carácter editorial y el rojo de la tierra colorada le dan a la marca una voz propia, cálida y memorable. Un logotipo que no necesita símbolo aparte.</p>
+        <div class="claves"><span>Orgullo</span><span>Carácter</span><span>Memorabilidad</span></div>
+      </div>
     </div>
     <div class="grilla">
-      <div class="panel blanco"><img src="svg/C-misionero-color.svg" alt="Propuesta C en color"></div>
-      <div class="panel verde"><img src="svg/C-misionero-negativo.svg" alt="Propuesta C en negativo"></div>
+      <div class="panel blanco"><img src="svg/03-misionero-color.svg" alt="Propuesta 03 en color"></div>
+      <div class="panel verde"><img src="svg/03-misionero-claro.svg" alt="Propuesta 03 en negativo"></div>
     </div>
     <div class="fila">
-      <div class="panel kraft"><img src="svg/C-misionero-monocromo.svg" alt="Propuesta C sobre kraft"></div>
-      <div class="panel blanco"><img src="svg/C-misionero-monocromo.svg" alt="Propuesta C monocromo"></div>
-      <div class="panel blanco"><div class="bolsa"><img src="svg/C-misionero-monocromo.svg" alt="Propuesta C sobre bolsa kraft"></div></div>
+      <div class="panel kraft"><img src="svg/03-misionero-monocromo.svg" alt="Propuesta 03 sobre kraft"></div>
+      <div class="panel crudo"><div class="bolsa"><img src="svg/03-misionero-monocromo.svg" alt="Propuesta 03 sobre bolsa"></div><span class="rot">Bolsa multipliego</span></div>
+      <div class="panel blanco"><div class="bobina"><div class="etiqueta"><img src="svg/03-misionero-color.svg" alt="Propuesta 03 en etiqueta de bobina"></div></div><span class="rot">Etiqueta de bobina</span></div>
     </div>
   </section>
 
-  <div class="prop-head" style="padding-top:64px;margin-bottom:0">
-    <span class="num">—</span>
-    <h2>Paleta</h2>
-    <p>Una paleta nacida del paisaje misionero: el verde profundo de la selva, el kraft del producto, el rojo de la tierra colorada y el tono crudo del papel. Común a los tres caminos.</p>
-  </div>
-  <div class="paleta" style="padding-top:32px">
-    <div class="color" style="background:var(--verde);color:var(--crudo)"><b>Verde selva</b>#1F3A2B</div>
-    <div class="color" style="background:var(--kraft);color:var(--tinta)"><b>Kraft</b>#B98A57</div>
-    <div class="color" style="background:var(--kraft-osc);color:var(--crudo)"><b>Kraft oscuro</b>#8E6538</div>
-    <div class="color" style="background:var(--tierra);color:var(--crudo)"><b>Tierra colorada</b>#B0452B</div>
-    <div class="color" style="background:var(--crudo);color:var(--tinta);border:1px solid #d8cdb9"><b>Papel crudo</b>#F2EADB</div>
-  </div>
-
-  <section class="prop" style="border-bottom:0;padding-bottom:0">
-    <div class="prop-head">
-      <span class="num">→</span>
-      <h2>Próximos pasos</h2>
-      <p>1. Selección de un camino creativo junto al equipo de Cartocor.<br>2. Refinamiento del símbolo y ajuste óptico del logotipo.<br>3. Pruebas de impresión flexográfica sobre papel kraft.<br>4. Manual de identidad y aplicaciones: bolsas, bobinas, señalética, papelería y digital.</p>
+  <!-- PROPUESTA 04 -->
+  <section class="prop">
+    <div class="cab">
+      <div><span class="num">PROPUESTA 04</span><h2>Anillos</h2></div>
+      <div>
+        <p>Todo empieza en un anillo. Los anillos de crecimiento de un tronco y el corte de una bobina de papel comparten la misma forma: círculos concéntricos que guardan tiempo y trabajo. El anillo exterior se desenrolla como un pliego y forma la P de Papel. Un monograma único que cuenta, en un solo signo, la integración completa del árbol al producto.</p>
+        <div class="claves"><span>Integración</span><span>Distintividad</span><span>Proyección global</span></div>
+      </div>
+    </div>
+    <div class="grilla">
+      <div class="panel blanco"><img src="svg/04-anillos-color.svg" alt="Propuesta 04 en color"></div>
+      <div class="panel blanco"><img src="svg/04-simbolo.svg" alt="Símbolo 04" style="width:130px"></div>
+    </div>
+    <div class="fila">
+      <div class="panel verde"><img src="svg/04-anillos-negativo.svg" alt="Propuesta 04 en negativo"></div>
+      <div class="panel crudo"><div class="bolsa"><img src="svg/04-anillos-monocromo.svg" alt="Propuesta 04 sobre bolsa"></div><span class="rot">Bolsa multipliego</span></div>
+      <div class="panel blanco"><div class="avatar"><img src="svg/04-simbolo-claro.svg" alt="Símbolo 04 como avatar" style="width:52%"></div><span class="rot">Perfil digital</span></div>
     </div>
   </section>
 
-  <footer>Estudio 83 · Propuesta confidencial preparada para Cartocor — Grupo Arcor. Tipografías: Fraunces e Instrument Sans.</footer>
+  <!-- PROPUESTA 05 -->
+  <section class="prop">
+    <div class="cab">
+      <div><span class="num">PROPUESTA 05</span><h2>Sello de origen</h2></div>
+      <div>
+        <p>La marca como certificado de procedencia. Un sello circular reúne la araucaria, el nombre, el lugar y el año de fundación: Misiones, Argentina, 1975. Remite a los sellos de calidad que se estampan sobre bobinas y bolsas, y convierte cada impresión en una garantía de origen, trayectoria y responsabilidad forestal.</p>
+        <div class="claves"><span>Trayectoria</span><span>Confianza</span><span>Exportación</span></div>
+      </div>
+    </div>
+    <div class="grilla">
+      <div class="panel blanco"><img src="svg/05-sello-horizontal.svg" alt="Propuesta 05 horizontal"></div>
+      <div class="panel blanco"><img src="svg/05-sello-color.svg" alt="Sello 05" style="width:200px"></div>
+    </div>
+    <div class="fila">
+      <div class="panel verde"><img src="svg/05-sello-claro.svg" alt="Propuesta 05 en negativo" style="width:200px"></div>
+      <div class="panel crudo"><div class="bolsa"><img src="svg/05-sello-monocromo.svg" alt="Propuesta 05 sobre bolsa" style="width:62%"></div><span class="rot">Bolsa multipliego</span></div>
+      <div class="panel blanco"><div class="bobina"><div class="etiqueta" style="width:96px;top:16px"><img src="svg/05-sello-color.svg" alt="Propuesta 05 en etiqueta de bobina" style="max-height:72px"></div></div><span class="rot">Etiqueta de bobina</span></div>
+    </div>
+  </section>
+
+  <!-- COMPARATIVA -->
+  <section>
+    <div class="cab">
+      <div><p class="eyebrow">06 — Evaluación</p><h2>Cinco caminos, una misma vara.</h2></div>
+      <p>Evaluamos cada propuesta con los criterios que surgen del diagnóstico. La valoración es orientativa y busca ordenar la conversación con el equipo de Cartocor.</p>
+    </div>
+    <div class="tabla"><table>
+      <thead><tr><th>Propuesta</th><th>Continuidad</th><th>Distintividad</th><th>Lectura en flexo</th><th>Versatilidad</th><th>Proyección global</th></tr></thead>
+      <tbody>
+        <tr><td>01 Araucaria</td><td class="pts">●●●●●</td><td class="pts">●●●<i>●●</i></td><td class="pts">●●●●<i>●</i></td><td class="pts">●●●●<i>●</i></td><td class="pts">●●●<i>●●</i></td></tr>
+        <tr><td>02 Pliego</td><td class="pts">●●●●<i>●</i></td><td class="pts">●●●<i>●●</i></td><td class="pts">●●●●<i>●</i></td><td class="pts">●●●●●</td><td class="pts">●●●<i>●●</i></td></tr>
+        <tr><td>03 Misionero</td><td class="pts">●●<i>●●●</i></td><td class="pts">●●●●<i>●</i></td><td class="pts">●●●<i>●●</i></td><td class="pts">●●●<i>●●</i></td><td class="pts">●●●<i>●●</i></td></tr>
+        <tr class="destacada"><td>04 Anillos</td><td class="pts">●●<i>●●●</i></td><td class="pts">●●●●●</td><td class="pts">●●●●●</td><td class="pts">●●●●●</td><td class="pts">●●●●●</td></tr>
+        <tr><td>05 Sello</td><td class="pts">●●●●<i>●</i></td><td class="pts">●●●<i>●●</i></td><td class="pts">●●●<i>●●</i></td><td class="pts">●●●<i>●●</i></td><td class="pts">●●●●<i>●</i></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- SISTEMA -->
+  <section>
+    <div class="cab">
+      <div><p class="eyebrow">07 — Sistema</p><h2>Paleta y tipografía.</h2></div>
+      <p>Una paleta nacida del paisaje misionero, común a los cinco caminos: el verde profundo de la selva, el kraft del producto, el rojo de la tierra colorada y el tono crudo del papel sin blanquear. Dos familias tipográficas de licencia libre aseguran uso irrestricto en todos los soportes.</p>
+    </div>
+    <div class="paleta">
+      <div class="color" style="background:var(--verde);color:var(--crudo)"><b>Verde selva</b>#1F3A2B</div>
+      <div class="color" style="background:var(--kraft)"><b>Kraft</b>#B98A57</div>
+      <div class="color" style="background:var(--kraft-osc);color:var(--crudo)"><b>Kraft oscuro</b>#8E6538</div>
+      <div class="color" style="background:var(--tierra);color:var(--crudo)"><b>Tierra colorada</b>#B0452B</div>
+      <div class="color" style="background:#fff;border:1px solid var(--linea)"><b>Papel crudo</b>#F2EADB</div>
+    </div>
+    <div class="tipos">
+      <div class="tipo"><span class="eyebrow">Institucional</span><div class="muestra" style="font-family:'Instrument Sans';font-weight:600">Aa Kraft</div><p class="gris">Instrument Sans. Una grotesca contemporánea, clara y robusta, para logotipos, señalética, packaging y comunicación técnica.</p></div>
+      <div class="tipo"><span class="eyebrow">Expresiva</span><div class="muestra" style="font-family:'Fraunces';font-weight:600">Aa Selva</div><p class="gris">Fraunces. Una serif con carácter, para títulos, campañas y la voz más cálida de la marca.</p></div>
+    </div>
+  </section>
+
+  <!-- RECOMENDACIÓN -->
+  <section>
+    <div class="reco">
+      <div>
+        <p class="eyebrow">08 — Recomendación del estudio</p>
+        <h2 style="font-size:48px;line-height:1.02;margin-bottom:20px">Recomendamos avanzar con Anillos.</h2>
+        <p>Es la propuesta con mayor capacidad de diferenciación y la que mejor cuenta lo que hace única a Papel Misionero: la integración completa, del árbol a la bobina. Funciona a una tinta, resiste la reducción y se proyecta con naturalidad en mercados internacionales.</p>
+        <p class="gris">Si la prioridad es la continuidad con la identidad vigente, la propuesta 01 Araucaria es la alternativa natural. Ambos caminos pueden convivir: la araucaria puede integrarse como sello de origen dentro del sistema de Anillos.</p>
+      </div>
+      <div class="reco-logo"><img src="svg/04-anillos-color.svg" alt="Propuesta recomendada: Anillos"></div>
+    </div>
+    <div style="margin-top:72px" class="dos">
+      <div><p class="eyebrow">Próximos pasos</p>
+        <ol class="pasos">
+          <li>Presentación y selección de un camino creativo junto al equipo de Cartocor.</li>
+          <li>Refinamiento del símbolo, ajuste óptico del logotipo y versiones reducidas.</li>
+          <li>Pruebas de impresión flexográfica sobre sack kraft y kraftliner.</li>
+          <li>Validación con la Fundación Selva Misionera y diálogo con las comunidades de la reserva.</li>
+          <li>Manual de identidad y aplicaciones: bolsas, bobinas, flota, señalética, indumentaria y digital.</li>
+        </ol>
+      </div>
+      <div><p class="eyebrow">Fuentes de la investigación</p>
+        <div class="fuentes">
+          <p><a href="https://www.arcor.com/en/industrial-plants/papel-misionero-misiones">Arcor — Planta Papel Misionero</a></p>
+          <p><a href="https://mercado.com.ar/gestion-sustentable/papel-misionero-cumple-50-anos-y-consolida-su-modelo-integrado-en-la-industria-forestal-de-misiones">Revista Mercado — 50 años</a></p>
+          <p><a href="https://www.argentinaforestal.com/2025/12/22/video-papel-misionero-cumplio-50-anos/">Argentina Forestal — 50 años</a></p>
+          <p><a href="https://planbmisiones.com/2025/12/26/nota/produce-al-maximo-vende-a-medio-mundo-y-es-competitiva-por-que-pm-encontro-en-arcor-al-marido-ideal/">Plan B Misiones — PM y Arcor</a></p>
+          <p><a href="https://misionesonline.net/2015/12/22/papel-misionero-40-anos-que-marcan-el-liderazgo-en-la-produccion-de-papeles-marrones-en-la-argentina/">MisionesOnline — 40 años</a></p>
+          <p><a href="https://misionesonline.net/2017/04/18/grupo-arcor-compro-papel-misionero/">MisionesOnline — Compra de Arcor</a></p>
+          <p><a href="https://en.wikipedia.org/wiki/Papel_Misionero_Natural_Cultural_Reserve">Reserva Natural Cultural Papel Misionero</a></p>
+          <p><a href="https://misionesonline.net/2022/10/06/misiones-presento-su-nueva-marca/">Marca Misiones 2022</a></p>
+          <p><a href="https://www.arcor.com.br/wp-content/uploads/2024/06/Arcor-brochure_Institucional_2023_POR_baja.pdf">Arcor — Brochure institucional 2023</a></p>
+          <p><a href="https://cartocor.com/">Cartocor</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer><span>Estudio 83 · Propuesta confidencial preparada para Cartocor — Grupo Arcor</span><span>Octubre 2026</span></footer>
 </main>
 </body>
 </html>
