@@ -35,10 +35,20 @@ OPCIONES = [
     ("Jerarquía", [("PAPEL", BOLD, .5, .42, 62), ("misionero", BOLD, 1.25, -.035, 76)]),
 ]
 
+# Variantes con distintos niveles de jerarquía (la opción 6 y la 5, desarrolladas).
+NIVELES = [
+    ("PAPEL bold chico / misionero", [("PAPEL", BOLD, .5, .42, 62), ("misionero", BOLD, 1.25, -.035, 76)]),
+    ("PAPEL regular chico / misionero", [("PAPEL", REG, .5, .42, 62), ("misionero", BOLD, 1.25, -.035, 76)]),
+    ("misionero / PAPEL debajo", [("misionero", BOLD, 1.25, -.035, 92), ("PAPEL", REG, .5, .42, 40)]),
+    ("PAPEL chico / Misionero", [("PAPEL", BOLD, .5, .42, 62), ("Misionero", BOLD, 1.2, -.035, 76)]),
+    ("papel regular / misionero bold", [("papel", REG, 1.1, -.02, 80), ("misionero", BOLD, 1.1, -.03, 58)]),
+    ("Tres niveles", [("PAPEL", BOLD, .5, .42, 54), ("misionero", BOLD, 1.25, -.035, 74), ("MISIONES · ARGENTINA", REG, .34, .3, 36)]),
+]
+
 
 def logo(simbolo, spec):
-    d, w, _ = lineas(spec)
-    return svg(150 + w + 24, 182, simbolo + f'<path d="{d}" fill="{VERDE}"/>')
+    d, w, y = lineas(spec)
+    return svg(150 + w + 24, max(182, y + 24), simbolo + f'<path d="{d}" fill="{VERDE}"/>')
 
 
 if __name__ == "__main__":
@@ -46,3 +56,6 @@ if __name__ == "__main__":
         guardar(f"H{n}-araucaria.svg", logo(araucaria_copa(VERDE, 20, 12), spec))
         guardar(f"H{n}-anillos.svg", logo(bobina_fibra(TIERRA, 18, 8), spec))
         print(n, nombre)
+    for n, (nombre, spec) in enumerate(NIVELES, 1):
+        guardar(f"N{n}-araucaria.svg", logo(araucaria_copa(VERDE, 20, 12), spec))
+        guardar(f"N{n}-anillos.svg", logo(bobina_fibra(TIERRA, 18, 8), spec))
