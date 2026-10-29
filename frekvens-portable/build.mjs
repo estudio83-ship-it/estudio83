@@ -418,6 +418,37 @@ const LIVE = readFileSync(join(HERE, "live.js"), "utf8").replace("__DATA__", JSO
 const page = k.pageHtml({ title: "IKEA FREKVENS Portable · despiece", theme: THEME, body: `<style>${CSS}</style>${body}`, script: LIVE, width: 1000 }).replace('<html lang="en">', '<html lang="es">');
 const name = THEME === "light" ? "frekvens-portable-light.html" : "frekvens-portable.html";
 writeFileSync(join(HERE, name), page);
+
+// Versión para publicar como Artifact: sin esqueleto propio y con el tema del visor.
+// Claro por defecto; los valores oscuros del kit y de fk.css se copian bajo prefers-color-scheme y data-theme.
+if (THEME === "light") {
+  const blockOf = (css, selector) => {
+    const at = css.indexOf(`${selector}{`) >= 0 ? css.indexOf(`${selector}{`) : css.indexOf(`${selector} {`);
+    return css.slice(css.indexOf("{", at) + 1, css.indexOf("}", at));
+  };
+  const darkKit = blockOf(k.ISO_CSS, "\n.iso");
+  const darkFk = blockOf(CSS, ".fk");
+  const dark = `.iso[data-theme="light"]{${darkKit}}.iso[data-theme="light"] .fk{${darkFk}}`;
+  const scoped = (prefix) => dark.replace(/\.iso\[data-theme="light"\]/g, `${prefix} .iso[data-theme="light"]`);
+  const shell = `
+:root{--fk-page:#f2f2ef}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--fk-page:#0b0b0b;color-scheme:dark}${scoped(':root:not([data-theme="light"])')}}
+:root[data-theme="dark"]{--fk-page:#0b0b0b;color-scheme:dark}
+${scoped(':root[data-theme="dark"]')}
+body{background:var(--fk-page)}
+.fk-page{box-sizing:border-box;max-width:1032px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));background:var(--anatomy-page);color:var(--anatomy-text);font:14px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.fk-page *{box-sizing:border-box}
+`;
+  const artifact = `<title>FREKVENS Portable</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>${k.ISO_CSS}${shell}</style>
+<style>${CSS}</style>
+<main class="iso fk-page" data-theme="light">${body}</main>
+<script type="module">${LIVE.replace(/<\/(script)/gi, "<\\/$1")}</script>
+`;
+  writeFileSync(join(HERE, "frekvens-portable-artifact.html"), artifact);
+  console.log("wrote frekvens-portable-artifact.html");
+}
 console.log("wrote", name, `${(page.length / 1024).toFixed(0)} KB`, `${R.items.length} items`, `${R.solids.length} solids`);
 
 // Pares anidados que sólo existen montados, ocultos por las carcasas cerradas:
