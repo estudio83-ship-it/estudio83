@@ -19,9 +19,9 @@ MARCAS = (
 
 def lockup(clave, f, simbolo, letras):
     t, c = f()
-    d, w, _ = lineas(NIVELES[1][1], x=168)
+    d, w, _ = lineas(NIVELES[1][1], x=180)  # aire suficiente para las copas más anchas
     iso = f'<g transform="translate(4 20) scale(1.3)">{icono(f"i{clave}{simbolo[1:]}", t, c, simbolo)}</g>'
-    return svg(168 + w + 24, 196, iso + f'<path d="{d}" fill="{letras}" transform="translate(0 6)"/>')
+    return svg(180 + w + 24, 196, iso + f'<path d="{d}" fill="{letras}" transform="translate(0 6)"/>')
 
 
 if __name__ == "__main__":
@@ -32,3 +32,24 @@ if __name__ == "__main__":
         guardar(f"ID-{clave}-iso-claro.svg", svg(120, 120, icono(f"c{clave}", t, c, KRAFT)))
         guardar(f"ID-{clave}-iso.svg", svg(120, 120, icono(f"v{clave}", t, c, VERDE)))
         print(clave, fam, nombre)
+
+
+# Pruebas de color sobre una marca (fondo, símbolo, texto, rótulo)
+COMBINACIONES = [
+    ("1F3A2B", KRAFT, CRUDO, "Verde selva · kraft y crudo"),
+    ("B98A57", VERDE, VERDE, "Kraft · verde selva"),
+    ("F2EADB", VERDE, VERDE, "Papel crudo · verde selva"),
+    ("B0452B", CRUDO, CRUDO, "Tierra colorada · crudo"),
+    ("8E6538", CRUDO, CRUDO, "Kraft oscuro · crudo"),
+    ("F2EADB", "#B0452B", VERDE, "Papel crudo · tierra y verde"),
+]
+
+
+def pruebas_color(clave):
+    f = next(fn for c, _, _, fn in MARCAS if c == clave)
+    for i, (_, sim, txt, _) in enumerate(COMBINACIONES, 1):
+        guardar(f"COLOR-{clave}-{i}.svg", lockup(f"{clave}c{i}", f, sim, txt))
+
+
+if __name__ == "__main__":
+    pruebas_color("A2")

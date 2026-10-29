@@ -186,6 +186,59 @@ async function png(nombre) {
     }
   }
 
+  // Sistema: paleta, tipografía, reglas y pruebas de color
+  pres.addSection({ title: "Sistema" });
+  s = pres.addSlide({ masterName: "SECCION", sectionTitle: "Sistema" });
+  s.addText("COMÚN A TODAS LAS MARCAS", { placeholder: "num" });
+  s.addText("Sistema de identidad", { placeholder: "title" });
+  s.addText("Una paleta nacida del paisaje misionero, una tipografía en dos niveles y reglas pensadas para imprimir a una tinta sobre kraft.", { placeholder: "body" });
+
+  s = pres.addSlide({ masterName: "PROPUESTA", sectionTitle: "Sistema" });
+  s.addText("Paleta, tipografía y reglas", { placeholder: "title" });
+  s.addText("SISTEMA · COMÚN A TODAS LAS MARCAS FINALISTAS", { placeholder: "body" });
+  const COLORES = [
+    ["Verde selva", "#1F3A2B · tinta principal", C.text1, C.background2],
+    ["Kraft", "#B98A57 · soporte y acento", C.accent1, C.text1],
+    ["Kraft oscuro", "#8E6538", C.accent3, C.background2],
+    ["Tierra colorada", "#B0452B · acento", C.accent2, C.background2],
+    ["Papel crudo", "#F2EADB · fondo", C.background2, C.text1],
+  ];
+  COLORES.forEach(([nombre, dato, fondo, tinta], i) => {
+    const x = 0.5 + i * 2.5;
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y: 1.75, w: 2.3, h: 2.3, fill: { color: fondo }, line: { color: i === 4 ? C.accent5 : fondo }, rectRadius: 0.12, objectName: `Color ${nombre}` });
+    s.addText([{ text: nombre, options: { fontSize: 16, bold: true, breakLine: true } }, { text: dato, options: { fontSize: 12 } }],
+      { x: x + 0.2, y: 3.15, w: 1.95, h: 0.75, color: tinta, valign: "bottom", margin: 0, isTextBox: true, objectName: `Dato ${nombre}` });
+  });
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 0.5, y: 4.3, w: 7.0, h: 2.45, fill: { color: C.background1 }, line: { color: C.background1 }, rectRadius: 0.12, objectName: "Tipografía" });
+  s.addText([
+    { text: "PAPEL", options: { fontSize: 16, charSpacing: 10, breakLine: true } },
+    { text: "misionero", options: { fontSize: 66, bold: true, charSpacing: -2, breakLine: true } },
+    { text: "Helvetica Regular espaciada + Helvetica Bold apretada. Dos niveles: el origen manda.", options: { fontSize: 12, color: C.accent6 } },
+  ], { x: 0.85, y: 4.45, w: 6.4, h: 2.15, color: C.text1, valign: "middle", margin: 0, isTextBox: true, objectName: "Muestra tipográfica" });
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 7.7, y: 4.3, w: 5.13, h: 2.45, fill: { color: C.background1 }, line: { color: C.background1 }, rectRadius: 0.12, objectName: "Reglas" });
+  s.addText([
+    { text: "Reglas", options: { fontSize: 16, bold: true, breakLine: true } },
+    ...["Una sola tinta: verde selva, o kraft y crudo en negativo.", "Calado mínimo de 5 unidades para flexografía.", "Isotipo a 1,3 veces la altura del bloque de texto.", "Margen de respeto: la altura de «PAPEL» alrededor.", "Tamaño mínimo del isotipo: 16 px / 6 mm."]
+      .map((t, i, a) => ({ text: t, options: { fontSize: 14, bullet: true, breakLine: i < a.length - 1 } })),
+  ], { x: 8.0, y: 4.5, w: 4.6, h: 2.1, color: C.text1, valign: "top", margin: 0, paraSpaceAfter: 4, isTextBox: true, objectName: "Lista de reglas" });
+
+  s = pres.addSlide({ masterName: "PROPUESTA", sectionTitle: "Sistema" });
+  s.addText("Pruebas de color", { placeholder: "title" });
+  s.addText("SISTEMA · ARAUCARIA DE RAMAS (A2)", { placeholder: "body" });
+  s.addText("La misma marca en las combinaciones de la paleta: todas funcionan a una o dos tintas y conservan el contraste.", { placeholder: "concepto" });
+  const PRUEBAS = [
+    [C.text1, "Verde selva · kraft y crudo", C.accent5], [C.accent1, "Kraft · verde selva", C.text2], [C.background2, "Papel crudo · verde selva", C.accent6],
+    [C.accent2, "Tierra colorada · crudo", C.background2], [C.accent3, "Kraft oscuro · crudo", C.background2], [C.background2, "Papel crudo · tierra y verde", C.accent6],
+  ];
+  for (const [i, [fondo, rotulo, rot]] of PRUEBAS.entries()) {
+    const x = 0.5 + (i % 3) * 4.15, y = 2.3 + Math.floor(i / 3) * 2.3;
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y, w: 3.95, h: 2.1, fill: { color: fondo }, line: { color: i === 2 || i === 5 ? C.accent5 : fondo }, rectRadius: 0.12, objectName: `Prueba ${rotulo}` });
+    const im = await png(`COLOR-A2-${i + 1}`);
+    const w = 2.9, h = w * im.ratio;
+    s.addImage({ data: im.data, x: x + (3.95 - w) / 2, y: y + (2.1 - h) / 2 - 0.12, w, h, altText: `Araucaria de ramas · ${rotulo}`, objectName: `Logo ${rotulo}` });
+    s.addText(rotulo.toUpperCase(), { x: x + 0.2, y: y + 1.72, w: 3.6, h: 0.25, fontSize: 10, charSpacing: 2, color: rot, margin: 0, isTextBox: true, objectName: "Rótulo" });
+  }
+
   await pres.writeFile({ fileName: SALIDA });
   await applyTheme(SALIDA, THEME);
   console.log(`${SALIDA} · ${n} propuestas`);
