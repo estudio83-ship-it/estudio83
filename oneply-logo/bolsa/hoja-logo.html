@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>OnePly — Logo en la bolsa</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@800&display=block" rel="stylesheet">
+<style>
+  @font-face { font-family: "Geist Mono"; src: url("../serie-5/fonts/GeistMono-Regular.ttf"); }
+  @font-face { font-family: "Instrument Sans"; src: url("../serie-5/fonts/InstrumentSans-Regular.ttf"); font-weight: 400; }
+  @font-face { font-family: "Instrument Sans"; src: url("../serie-5/fonts/InstrumentSans-Bold.ttf"); font-weight: 700; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #F3F1EA; font-family: "Instrument Sans", sans-serif; color: #1B1A17; }
+  .page { width: 1680px; height: 1188px; overflow: hidden; padding: 52px 56px 38px; display: grid; grid-template-rows: auto 1fr auto; row-gap: 24px; }
+  header { display: grid; grid-template-columns: 1fr auto; align-items: end; padding-bottom: 16px; border-bottom: 1px solid #D5D2C7; }
+  .brand { display: flex; align-items: baseline; gap: 20px; }
+  .brand b { font-family: "Figtree"; font-weight: 800; font-size: 28px; letter-spacing: -.02em; color: #1B1A17; }
+  .brand span { font-size: 15px; color: #7A786F; }
+  .meta, footer { font-family: "Geist Mono"; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #7A786F; }
+  .meta { display: flex; gap: 26px; }
+  footer { display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid #D5D2C7; }
+  main { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; min-height: 0; }
+  .pair { display: grid; grid-template-rows: 1fr 66px; gap: 10px; min-height: 0; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; min-height: 0; }
+  .v { display: grid; grid-template-rows: 1fr 210px auto; gap: 8px; min-height: 0; }
+  .bag { background: #fff; border-radius: 3px; display: grid; place-items: center; min-height: 0; overflow: hidden; padding: 10px; }
+  .bag img { max-height: 100%; max-width: 100%; display: block; }
+  .det { border-radius: 3px; overflow: hidden; }
+  .det img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ink { display: flex; align-items: center; gap: 8px; font-family: "Geist Mono"; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: #4E4C45; }
+  .ink i { width: 14px; height: 14px; border-radius: 50%; display: block; }
+  .cap { display: grid; grid-template-columns: 26px 1fr; row-gap: 3px; border-top: 1px solid #D5D2C7; padding-top: 10px; }
+  .cap .n { font-family: "Geist Mono"; font-size: 12px; color: #7A786F; padding-top: 3px; }
+  .cap .t { font-weight: 700; font-size: 15.5px; }
+  .cap .d { grid-column: 2; font-size: 12.3px; line-height: 1.38; color: #4E4C45; }
+</style>
+</head>
+<body>
+<section class="page">
+  <header>
+    <div class="brand"><b>OnePly</b><span>El logo en la parte superior de la bolsa, en negro o gris</span></div>
+    <div class="meta"><span>Montaje de presentación</span><span>Octubre 2026</span></div>
+  </header>
+  <main id="m"></main>
+  <footer><span>Foto de base: bolsa Loma Negra · uso interno, solo para visualizar la aplicación</span><span>El gris es el mismo que ya imprime la bolsa: no suma tinta</span><span>Estudio83</span></footer>
+</section>
+<script>
+const L = [
+  ['C', 'Bobina', 'La bobina que desenrolla un pliego y dibuja la P. Es la más reconocible como industria papelera.'],
+  ['A', 'Uno plegado', 'Una tira que se dobla una vez y forma el 1. Es la más técnica y la que mejor dice «un pliego».'],
+  ['E', 'Hoja 1', 'Una hoja con el 1 calado. Une con el concepto «Una sola hoja» y con el sello.'],
+];
+document.getElementById('m').innerHTML = L.map(([k, t, d], i) => `
+  <div class="pair">
+    <div class="cols">
+      ${[['negro', '#24201F', 'Negro'], ['gris', '#6A6A6C', 'Gris']].map(([v, c, lbl]) => `
+        <div class="v"><div class="bag"><img src="logo-${k}-${v}.png"></div>
+          <div class="det"><img src="logo-${k}-${v}-detalle.png"></div>
+          <div class="ink"><i style="background:${c}"></i>${lbl}</div></div>`).join('')}
+    </div>
+    <div class="cap"><span class="n">0${i + 1}</span><span class="t">${t}</span><span class="d">${d}</span></div>
+  </div>`).join('');
+Promise.all([document.fonts.ready, ...[...document.images].map(i => i.decode())]).then(() => document.body.dataset.ready = '1');
+</script>
+</body>
+</html>
