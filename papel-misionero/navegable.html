@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Papel Misionero — Identidad</title>
+<title>Identidad Papel Misionero</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <style>
   @font-face { font-family: "Instrument Sans"; font-weight: 500; src: url(fuentes/InstrumentSans-500.woff) format("woff"); }
   @font-face { font-family: "Instrument Sans"; font-weight: 600; src: url(fuentes/InstrumentSans-600.woff) format("woff"); }
@@ -11,6 +12,7 @@
   :root {
     --verde: #1F3A2B; --kraft: #B98A57; --kraft-osc: #8E6538; --tierra: #B0452B; --crudo: #F2EADB;
     --tinta: #1B1F1C; --gris: #64625A; --linea: #D8CDB9; --blanco: #FFFFFF;
+    color-scheme: light;  /* identidad pensada sobre papel crudo: un solo tema, a propósito */
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -23,8 +25,9 @@
   .num { font-weight: 600; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--tierra); display: block; margin-bottom: 12px; }
 
   /* Barra de navegación por logo */
-  header { position: sticky; top: 0; z-index: 10; background: rgba(242,234,219,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--linea); }
-  .barra { max-width: 1240px; margin: 0 auto; padding: 10px 32px; display: flex; align-items: center; gap: 24px; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 11; background: var(--crudo); }
+  header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: rgba(242,234,219,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--linea); }
+  .barra { max-width: 1240px; margin: 0 auto; padding-block: 10px; padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); display: flex; align-items: center; gap: 24px; }
   .marca { font: 600 17px/1.1 "Fraunces", serif; color: var(--verde); white-space: nowrap; }
   .marca small { display: block; font: 500 11px/1.4 "Instrument Sans"; letter-spacing: .12em; text-transform: uppercase; color: var(--gris); }
   nav { display: flex; gap: 6px; margin-left: auto; overflow-x: auto; scrollbar-width: none; }
@@ -64,7 +67,7 @@
   nav label { cursor: pointer; user-select: none; }
   nav label:hover { border-color: var(--linea); }
 
-  main { max-width: 1240px; margin: 0 auto; padding: 0 32px 80px; }
+  main { max-width: 1240px; margin: 0 auto; padding-block: 0 80px; padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); }
   .vista { display: none; animation: entrar .45s ease both; }
   @keyframes entrar { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
@@ -161,13 +164,13 @@
   .vigente { display: grid; grid-template-columns: 180px 1fr; gap: 24px; align-items: center; }
   .vigente img { width: 100%; border-radius: 8px; }
 
-  .pie { display: flex; justify-content: space-between; gap: 20px; max-width: 1240px; margin: 0 auto; padding: 28px 32px 40px; border-top: 1px solid var(--linea); font-size: 13px; color: var(--gris); }
+  .pie { display: flex; justify-content: space-between; gap: 20px; max-width: 1240px; margin: 0 auto; padding-block: 28px 40px; padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); border-top: 1px solid var(--linea); font-size: 13px; color: var(--gris); }
   .teclas kbd { font: 600 11px/1 "Instrument Sans"; border: 1px solid var(--linea); border-radius: 4px; padding: 3px 6px; background: #fff; }
 
   @media (max-width: 900px) {
-    .barra { padding: 8px 16px; flex-wrap: wrap; gap: 8px; }
+    .barra { padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); flex-wrap: wrap; gap: 8px; }
     nav { margin-left: 0; width: 100%; }
-    main { padding: 0 16px 64px; }
+    main { padding-block: 0 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
     .hero, .dos-col, .escala-bloque, .antes-despues, .razones, .comp, .vigente { grid-template-columns: 1fr; }
     .hero { padding-top: 32px; }
     .hero-logo { min-height: 240px; padding: 28px; }
@@ -175,7 +178,7 @@
     .ronda1 { grid-template-columns: 1fr 1fr; }
     .flecha { transform: rotate(90deg); justify-self: center; }
     .ad img { height: 130px; }
-    .pie { flex-direction: column; padding: 24px 16px; }
+    .pie { flex-direction: column; padding-block: 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   }
   @media (max-width: 520px) { .versiones, .apps, .ronda1 { grid-template-columns: 1fr; } }
   @media (prefers-reduced-motion: reduce) { .vista { animation: none; } html { scroll-behavior: auto; } }
@@ -357,14 +360,16 @@
     if (t) { t.checked = true; window.scrollTo({ top: 0 }); }
   };
   if (location.hash) elegir(location.hash.slice(1));
-  pestanas.forEach(t => t.addEventListener("change", () => window.scrollTo({ top: 0 })));
+  const marcar = t => { try { history.replaceState(null, "", "#" + t.id.slice(2)); } catch (e) {} };
+  pestanas.forEach(t => t.addEventListener("change", () => { window.scrollTo({ top: 0 }); marcar(t); }));
+  window.addEventListener("hashchange", () => elegir(location.hash.slice(1)));
   document.addEventListener("keydown", e => {
     if (e.target.closest("input[type=range], textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
     if (e.target.matches('input[type=radio]')) e.preventDefault();
     const k = pestanas.findIndex(t => t.checked);
     const sig = pestanas[(k + (e.key === "ArrowRight" ? 1 : -1) + pestanas.length) % pestanas.length];
-    sig.checked = true; window.scrollTo({ top: 0 });
+    sig.checked = true; window.scrollTo({ top: 0 }); marcar(sig);
   });
 
   // Control de escala: debajo del umbral usa la versión reducida
