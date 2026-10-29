@@ -211,6 +211,88 @@ def p5_horizontal(tinta, acento, letras, fondo=None):
     return svg(238 + max(w1, w2, wb) + 28, 224, cuerpo, fondo)
 
 
+# === Ronda 2: refinamiento de Araucaria y Anillos ===============================
+def araucaria_copa(color, x=0, y=0, s=1.0, reducida=False):
+    """Pino Paraná en silueta: tronco largo y copa plana en capas de follaje (caja 120x160).
+    La versión reducida usa tres capas para tamaños menores a 24 px."""
+    capas = ([(8, 116, 9, 10), (34, 88, 8, 9.5), (58, 58, 6, 9)] if reducida
+             else [(8, 116, 8, 9), (31, 94, 7, 8.5), (52, 70, 6, 8), (70, 44, 5, 7)])
+    wt, wb, bot, top = 2.4, 5.4, 152, 24
+    d = f'<path d="M{60 - wt} {top} L{60 - wb} {bot} Q60 {bot + 2.5} {60 + wb} {bot} L{60 + wt} {top} Z"/>'
+    for yy, w, sag, th in capas:
+        l, r = 60 - w / 2, 60 + w / 2
+        d += f'<path d="M{l} {yy} Q60 {yy + sag * 2} {r} {yy} Q60 {yy + sag * 2 + th * 2} {l} {yy} Z"/>'
+    # El contorno redondea las puntas de cada capa, más noble en flexografía.
+    return (f'<g transform="translate({x:.2f} {y:.2f}) scale({s})" fill="{color}" stroke="{color}" '
+            f'stroke-width="2.6" stroke-linejoin="round">{d}</g>')
+
+
+def _espiral(off, cx=64, cy=56, r0=6, R=36, vueltas=1, n=500):
+    """Espiral que termina en el extremo izquierdo, bajando: de ahí nace el fuste de la P."""
+    tend = math.pi + 2 * math.pi * vueltas
+    b = (R - r0) / tend
+    pts = []
+    for i in range(n):
+        t = tend * i / (n - 1)
+        r = r0 + b * t + off
+        pts.append((cx + r * math.cos(-t), cy + r * math.sin(-t)))
+    return pts
+
+
+def bobina_fibra(color, x=0, y=0, s=1.0, reducida=False):
+    """La P como bobina: tres hebras de fibra se enrollan y se desenrollan en el fuste,
+    con los extremos desparejos como el borde de un papel rasgado (caja 120x170).
+    La versión reducida usa una sola hebra gruesa para tamaños menores a 32 px."""
+    hebras = [(6.4, 162)] if reducida else [(0, 160), (6.4, 150), (12.8, 165)]
+    d = ""
+    for off, fin in hebras:
+        pts = _espiral(off)
+        ex = pts[-1][0]
+        d += '<path d="M' + " L".join(f"{px:.2f} {py:.2f}" for px, py in pts) + f' L{ex:.2f} {fin}"/>'
+    return (f'<g transform="translate({x:.2f} {y:.2f}) scale({s})" fill="none" stroke="{color}" '
+            f'stroke-width="{13 if reducida else 4.2}" stroke-linecap="round" stroke-linejoin="round">{d}</g>')
+
+
+def r2_araucaria(simbolo, letras, fondo=None, respaldo=False):
+    l1, w1, _ = texto(SANS, "PAPEL", 46, 150, 92, tracking=9)
+    l2, w2, _ = texto(SANS, "MISIONERO", 46, 150, 146, tracking=9)
+    cuerpo = araucaria_copa(simbolo, 20, 12, 1.0) + f'<path d="{l1} {l2}" fill="{letras}"/>'
+    h = 180
+    if respaldo:
+        b, _ = bajada(simbolo, 152, 192)
+        cuerpo += b
+        h = 206
+    return svg(150 + max(w1, w2) + 24, h, cuerpo, fondo)
+
+
+def r2_araucaria_vertical(simbolo, letras, fondo=None):
+    w = 360
+    _, w1, _ = texto(SANS, "PAPEL MISIONERO", 30, 0, 0, tracking=5)
+    l1, _, _ = texto(SANS, "PAPEL MISIONERO", 30, (w - w1) / 2, 262, tracking=5)
+    cuerpo = araucaria_copa(simbolo, (w - 168) / 2, 18, 1.4) + f'<path d="{l1}" fill="{letras}"/>'
+    return svg(w, 290, cuerpo, fondo)
+
+
+def r2_bobina(simbolo, letras, fondo=None, respaldo=False):
+    l1, w1, _ = texto(SANS, "Papel", 54, 150, 92, tracking=-0.8)
+    l2, w2, _ = texto(SANS, "Misionero", 54, 150, 150, tracking=-0.8)
+    cuerpo = bobina_fibra(simbolo, 18, 8) + f'<path d="{l1} {l2}" fill="{letras}"/>'
+    h = 186
+    if respaldo:
+        b, _ = bajada(simbolo, 152, 196)
+        cuerpo += b
+        h = 210
+    return svg(150 + max(w1, w2) + 24, h, cuerpo, fondo)
+
+
+def r2_bobina_vertical(simbolo, letras, fondo=None):
+    w = 360
+    _, w1, _ = texto(SANS, "Papel Misionero", 36, 0, 0, tracking=-0.4)
+    l1, _, _ = texto(SANS, "Papel Misionero", 36, (w - w1) / 2, 286, tracking=-0.4)
+    cuerpo = bobina_fibra(simbolo, (w - 168) / 2 - 6, 14, 1.4) + f'<path d="{l1}" fill="{letras}"/>'
+    return svg(w, 312, cuerpo, fondo)
+
+
 if __name__ == "__main__":
     for f in SALIDA.glob("*.svg"):
         f.unlink()
@@ -246,4 +328,23 @@ if __name__ == "__main__":
     guardar("03-misionero-claro.svg", p3(CRUDO, KRAFT))
     guardar("04-simbolo-claro.svg", svg(150, 176, anillos(KRAFT, CRUDO, 14, 12)))
     guardar("05-sello-claro.svg", p5(CRUDO, KRAFT))
+
+    # Ronda 2
+    guardar("R2-araucaria-color.svg", r2_araucaria(VERDE, VERDE))
+    guardar("R2-araucaria-respaldo.svg", r2_araucaria(VERDE, VERDE, respaldo=True))
+    guardar("R2-araucaria-negativo.svg", r2_araucaria(KRAFT, CRUDO, VERDE))
+    guardar("R2-araucaria-kraft.svg", r2_araucaria(VERDE, VERDE, KRAFT))
+    guardar("R2-araucaria-vertical.svg", r2_araucaria_vertical(VERDE, VERDE))
+    guardar("R2-araucaria-simbolo.svg", svg(150, 176, araucaria_copa(VERDE, 15, 8)))
+    guardar("R2-araucaria-simbolo-reducido.svg", svg(150, 176, araucaria_copa(VERDE, 15, 8, reducida=True)))
+    guardar("R2-araucaria-simbolo-claro.svg", svg(150, 176, araucaria_copa(KRAFT, 15, 8)))
+    guardar("R2-bobina-color.svg", r2_bobina(TIERRA, VERDE))
+    guardar("R2-bobina-respaldo.svg", r2_bobina(TIERRA, VERDE, respaldo=True))
+    guardar("R2-bobina-negativo.svg", r2_bobina(KRAFT, CRUDO, VERDE))
+    guardar("R2-bobina-kraft.svg", r2_bobina(VERDE, VERDE, KRAFT))
+    guardar("R2-bobina-vertical.svg", r2_bobina_vertical(TIERRA, VERDE))
+    guardar("R2-bobina-simbolo.svg", svg(150, 190, bobina_fibra(TIERRA, 12, 10)))
+    guardar("R2-bobina-simbolo-reducido.svg", svg(150, 190, bobina_fibra(TIERRA, 12, 10, reducida=True)))
+    guardar("R2-bobina-simbolo-claro.svg", svg(150, 190, bobina_fibra(KRAFT, 12, 10)))
+    guardar("R2-bobina-monocromo.svg", r2_bobina(VERDE, VERDE))
     print("\n".join(sorted(p.name for p in SALIDA.iterdir())))

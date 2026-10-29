@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Papel Misionero — Refinamiento</title>
+<style>
+  @font-face { font-family: "Instrument Sans"; font-weight: 500; src: url(fuentes/InstrumentSans-500.woff) format("woff"); }
+  @font-face { font-family: "Instrument Sans"; font-weight: 600; src: url(fuentes/InstrumentSans-600.woff) format("woff"); }
+  @font-face { font-family: "Fraunces"; font-weight: 600; src: url(fuentes/Fraunces-600.woff) format("woff"); }
+  :root {
+    --verde: #1F3A2B; --kraft: #B98A57; --kraft-osc: #8E6538; --tierra: #B0452B; --crudo: #F2EADB;
+    --tinta: #1B1F1C; --gris: #64625A; --linea: #D8CDB9;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--crudo); color: var(--tinta); font: 500 16px/1.55 "Instrument Sans", sans-serif; }
+  .lamina { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+  h1, h2, h3 { font-family: "Fraunces", serif; font-weight: 600; color: var(--verde); margin: 0; letter-spacing: -0.015em; }
+  .eyebrow { font-weight: 600; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--tierra); margin: 0 0 18px; }
+  p { margin: 0 0 12px; }
+  .gris { color: var(--gris); }
+
+  .portada { min-height: 88vh; display: grid; grid-template-rows: auto 1fr auto; padding: 56px 0 48px; border-bottom: 1.5px solid var(--verde); }
+  .portada .top { display: flex; justify-content: space-between; font-size: 13px; color: var(--gris); gap: 16px; }
+  .portada h1 { font-size: clamp(52px, 8.5vw, 112px); line-height: .96; align-self: center; }
+  .portada h1 span { color: var(--kraft); }
+  .portada .pie { display: grid; grid-template-columns: 1.3fr 1fr; gap: 48px; align-items: end; }
+  .portada .pie p { max-width: 54ch; margin: 0; }
+
+  section { padding: 96px 0; border-bottom: 1px solid var(--linea); }
+  .cab { display: grid; grid-template-columns: 1fr 1.25fr; gap: 56px; margin-bottom: 48px; align-items: end; }
+  .cab h2 { font-size: 48px; line-height: 1.02; }
+  .cab p { margin: 0; color: var(--gris); max-width: 62ch; }
+  .prop .cab h2 { font-size: 72px; }
+  .num { font: 600 15px/1 "Instrument Sans", sans-serif; letter-spacing: .2em; color: var(--tierra); display: block; margin-bottom: 14px; }
+
+  .seleccion { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .seleccion div { background: #fff; border-radius: 12px; padding: 22px 16px 16px; display: grid; gap: 14px; justify-items: center; font-size: 13px; color: var(--gris); text-align: center; }
+  .seleccion img { height: 64px; width: auto; }
+  .seleccion .off { opacity: .35; }
+  .seleccion .on { outline: 2px solid var(--verde); color: var(--verde); font-weight: 600; }
+
+  .antes-despues { display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; align-items: center; margin-bottom: 48px; }
+  .ad { background: #fff; border-radius: 14px; padding: 40px; display: grid; justify-items: center; gap: 18px; }
+  .ad img { height: 200px; width: auto; }
+  .ad span { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--gris); }
+  .ad.nuevo { outline: 2px solid var(--verde); }
+  .flecha { font: 600 40px/1 "Fraunces", serif; color: var(--kraft); }
+
+  .razones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 64px; }
+  .razon { border-top: 1.5px solid var(--verde); padding-top: 18px; }
+  .razon b { display: block; font: 600 22px/1.2 "Fraunces", serif; color: var(--verde); margin-bottom: 10px; }
+  .razon p { font-size: 15px; color: var(--gris); margin: 0; }
+
+  .grilla { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .panel { border-radius: 12px; display: grid; place-items: center; padding: 44px; min-height: 260px; overflow: hidden; position: relative; }
+  .panel img { max-width: 100%; height: auto; display: block; }
+  .panel .rot { position: absolute; left: 16px; bottom: 12px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .55; }
+  .blanco { background: #fff; } .verde { background: var(--verde); color: var(--crudo); } .kraft { background: var(--kraft); } .crudo { background: #EAE0CD; }
+  .fila { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+  .fila .panel { min-height: 300px; padding: 28px; }
+
+  .escala { display: flex; align-items: flex-end; gap: 28px; flex-wrap: wrap; }
+  .escala figure { margin: 0; display: grid; justify-items: center; gap: 8px; font-size: 11px; color: var(--gris); }
+
+  .bolsa { width: 200px; height: 270px; position: relative; display: grid; place-items: center; border-radius: 3px;
+    background: linear-gradient(90deg, #9F7446, var(--kraft) 14%, #C79B69 50%, var(--kraft) 86%, #9F7446);
+    box-shadow: 0 18px 30px -18px rgba(0,0,0,.55); }
+  .bolsa::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 18px; background: repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0 5px, transparent 5px 10px); }
+  .bolsa::after { content: "50 KG"; position: absolute; bottom: 16px; font: 600 11px/1 "Instrument Sans"; letter-spacing: .2em; color: var(--verde); opacity: .75; }
+  .bolsa img { width: 76%; margin-top: -18px; }
+  .bobina { width: 230px; height: 230px; border-radius: 50%; display: grid; place-items: center; position: relative;
+    background: repeating-radial-gradient(circle, #B58654 0 2px, #A97B4A 2px 4px); box-shadow: 0 18px 30px -18px rgba(0,0,0,.55); }
+  .bobina::after { content: ""; position: absolute; width: 46px; height: 46px; border-radius: 50%; background: #6B4A2A; box-shadow: inset 0 0 0 7px #8E6538; }
+  .bobina .etiqueta { position: absolute; top: 20px; background: #fff; border-radius: 6px; padding: 10px 14px; width: 150px; display: grid; place-items: center; box-shadow: 0 4px 10px -6px rgba(0,0,0,.4); }
+  .bobina .etiqueta img { max-height: 56px; }
+  .avatar { width: 150px; height: 150px; border-radius: 34px; background: var(--verde); display: grid; place-items: center; box-shadow: 0 18px 30px -20px rgba(0,0,0,.6); }
+  .avatar img { height: 66%; width: auto; }
+  .cartel { width: 100%; max-width: 340px; position: relative; padding-bottom: 70px; }
+  .cartel .placa { background: var(--verde); border-radius: 4px; padding: 26px 30px; display: grid; place-items: center; position: relative; z-index: 1; box-shadow: 0 16px 24px -16px rgba(0,0,0,.5); }
+  .cartel .placa img { width: 100%; }
+  .cartel::before, .cartel::after { content: ""; position: absolute; bottom: 0; width: 8px; height: 90px; background: #6E6A60; }
+  .cartel::before { left: 22%; } .cartel::after { right: 22%; }
+  .final { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .final .panel { min-height: 320px; }
+  .pasos { counter-reset: p; list-style: none; padding: 0; margin: 0; }
+  .pasos li { counter-increment: p; display: grid; grid-template-columns: 48px 1fr; padding: 16px 0; border-top: 1px solid var(--linea); }
+  .pasos li::before { content: counter(p, decimal-leading-zero); font: 600 18px/1.4 "Fraunces", serif; color: var(--tierra); }
+  footer { padding: 48px 0 64px; font-size: 13px; color: var(--gris); display: flex; justify-content: space-between; gap: 24px; }
+
+  @media (max-width: 860px) {
+    .lamina { padding: 0 16px; }
+    .cab, .portada .pie, .grilla, .fila, .razones, .final, .antes-despues { grid-template-columns: 1fr; }
+    .seleccion { grid-template-columns: repeat(2, 1fr); }
+    .prop .cab h2 { font-size: 48px; }
+    .cab h2 { font-size: 36px; }
+    .flecha { transform: rotate(90deg); justify-self: center; }
+    .ad img { height: 150px; }
+  }
+</style>
+</head>
+<body>
+<main class="lamina">
+
+  <div class="portada">
+    <div class="top"><span>Estudio 83</span><span>Para Cartocor · Grupo Arcor</span><span>Segunda instancia</span></div>
+    <h1>Papel Misionero.<br><span>Del árbol<br>a la fibra.</span></h1>
+    <div class="pie">
+      <p><b>Refinamiento de identidad visual.</b> A partir de la devolución del equipo de Cartocor, profundizamos los dos caminos seleccionados: Araucaria y Anillos. Esta instancia presenta su evolución formal, su fundamento y su sistema de aplicación.</p>
+      <p class="gris">Documento confidencial. Contenido: selección, refinamiento de cada camino, comportamiento en escala, aplicaciones y próximos pasos.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="cab">
+      <div><p class="eyebrow">01 — Selección</p><h2>De cinco caminos a dos.</h2></div>
+      <p>De la primera presentación avanzan los dos caminos con mayor potencial: Araucaria, por su continuidad con la identidad vigente y su arraigo territorial, y Anillos, por su capacidad de diferenciación. Sobre ambos trabajamos las observaciones recibidas.</p>
+    </div>
+    <div class="seleccion">
+      <div class="on"><img src="svg/01-simbolo.svg" alt="">01 Araucaria</div>
+      <div class="off"><img src="svg/02-simbolo.svg" alt="">02 Pliego</div>
+      <div class="off"><img src="svg/03-misionero-monocromo.svg" alt="" style="height:40px">03 Misionero</div>
+      <div class="on"><img src="svg/04-simbolo.svg" alt="">04 Anillos</div>
+      <div class="off"><img src="svg/05-sello-monocromo.svg" alt="">05 Sello</div>
+    </div>
+  </section>
+
+  <!-- ARAUCARIA -->
+  <section class="prop">
+    <div class="cab">
+      <div><span class="num">CAMINO 01 · REFINAMIENTO</span><h2>Araucaria</h2></div>
+      <div>
+        <p>En la primera versión, las ramas curvadas hacia arriba generaban una lectura ambigua: el símbolo podía interpretarse como una figura distinta a un árbol. Volvimos a la morfología real del pino Paraná adulto, cuya silueta es única en el paisaje misionero: un fuste recto y muy alto, sin ramas en su tramo inferior, coronado por una copa plana en forma de cáliz, construida por pisos de ramas que sostienen el follaje en sus extremos.</p>
+      </div>
+    </div>
+    <div class="antes-despues">
+      <div class="ad"><img src="svg/01-simbolo.svg" alt="Versión anterior"><span>Primera instancia</span></div>
+      <div class="flecha">→</div>
+      <div class="ad nuevo"><img src="svg/R2-araucaria-simbolo.svg" alt="Versión refinada"><span>Refinamiento</span></div>
+    </div>
+    <div class="razones">
+      <div class="razon"><b>Copa plana</b><p>El follaje se dibuja como capas llenas y ligeramente cóncavas, que en conjunto forman el cáliz característico de la especie. La silueta se lee como árbol aun a distancia.</p></div>
+      <div class="razon"><b>Fuste largo</b><p>El tronco ocupa más de la mitad de la altura y se afina hacia arriba, como en el árbol adulto. La proporción elimina cualquier lectura ambigua y aporta verticalidad y solidez.</p></div>
+      <div class="razon"><b>Pisos que son pliegos</b><p>Las capas apiladas de la copa evocan, a la vez, los pliegos de papel y las capas de una bolsa multipliego. El árbol y el producto conviven en un mismo trazo.</p></div>
+    </div>
+    <div class="grilla">
+      <div class="panel blanco"><img src="svg/R2-araucaria-respaldo.svg" alt="Araucaria horizontal con línea de respaldo"></div>
+      <div class="panel blanco"><img src="svg/R2-araucaria-vertical.svg" alt="Araucaria vertical"></div>
+    </div>
+    <div class="fila">
+      <div class="panel verde"><img src="svg/R2-araucaria-negativo.svg" alt="Araucaria en negativo"></div>
+      <div class="panel kraft"><img src="svg/R2-araucaria-kraft.svg" alt="Araucaria a una tinta sobre kraft"><span class="rot">Una tinta sobre kraft</span></div>
+      <div class="panel blanco">
+        <div class="escala">
+          <figure><img src="svg/R2-araucaria-simbolo.svg" alt="" style="height:96px">96 px</figure>
+          <figure><img src="svg/R2-araucaria-simbolo.svg" alt="" style="height:48px">48 px</figure>
+          <figure><img src="svg/R2-araucaria-simbolo-reducido.svg" alt="" style="height:24px">24 px</figure>
+          <figure><img src="svg/R2-araucaria-simbolo-reducido.svg" alt="" style="height:16px">16 px</figure>
+        </div>
+        <span class="rot">Escala · versión reducida debajo de 24 px</span>
+      </div>
+    </div>
+    <div class="fila">
+      <div class="panel crudo"><div class="bolsa"><img src="svg/R2-araucaria-color.svg" alt="Araucaria en bolsa multipliego"></div><span class="rot">Bolsa multipliego</span></div>
+      <div class="panel blanco"><div class="bobina"><div class="etiqueta"><img src="svg/R2-araucaria-color.svg" alt="Araucaria en etiqueta de bobina"></div></div><span class="rot">Etiqueta de bobina</span></div>
+      <div class="panel blanco"><div class="avatar"><img src="svg/R2-araucaria-simbolo-claro.svg" alt="Araucaria como perfil digital"></div><span class="rot">Perfil digital</span></div>
+    </div>
+  </section>
+
+  <!-- ANILLOS -->
+  <section class="prop">
+    <div class="cab">
+      <div><span class="num">CAMINO 04 · REFINAMIENTO</span><h2>Anillos</h2></div>
+      <div>
+        <p>El concepto de los anillos de crecimiento convertidos en bobina fue bien recibido, pero la primera versión resultaba geométrica y distante: hablaba de círculos más que de papel. En esta instancia el símbolo se construye con la materia misma del producto. La P ya no está formada por anillos cerrados: es una espiral, la forma real que adopta un pliego al enrollarse en una bobina.</p>
+      </div>
+    </div>
+    <div class="antes-despues">
+      <div class="ad"><img src="svg/04-simbolo.svg" alt="Versión anterior"><span>Primera instancia</span></div>
+      <div class="flecha">→</div>
+      <div class="ad nuevo"><img src="svg/R2-bobina-simbolo.svg" alt="Versión refinada"><span>Refinamiento</span></div>
+    </div>
+    <div class="razones">
+      <div class="razon"><b>Una espiral, no círculos</b><p>El pliego se enrolla sobre sí mismo y se desenrolla para formar el fuste de la P. Es el gesto de la bobina al entrar en la máquina: el papel en movimiento.</p></div>
+      <div class="razon"><b>Tres hebras de fibra</b><p>El trazo se divide en tres hebras paralelas: la fibra larga de pino que da resistencia al kraft, y los pliegos que componen cada bolsa multipliego.</p></div>
+      <div class="razon"><b>Borde de fibra</b><p>Las hebras terminan a distinta altura, como el borde de un papel rasgado donde asoman sus fibras. Un detalle que vuelve tangible la materia.</p></div>
+    </div>
+    <div class="grilla">
+      <div class="panel blanco"><img src="svg/R2-bobina-respaldo.svg" alt="Anillos horizontal con línea de respaldo"></div>
+      <div class="panel blanco"><img src="svg/R2-bobina-vertical.svg" alt="Anillos vertical"></div>
+    </div>
+    <div class="fila">
+      <div class="panel verde"><img src="svg/R2-bobina-negativo.svg" alt="Anillos en negativo"></div>
+      <div class="panel kraft"><img src="svg/R2-bobina-kraft.svg" alt="Anillos a una tinta sobre kraft"><span class="rot">Una tinta sobre kraft</span></div>
+      <div class="panel blanco">
+        <div class="escala">
+          <figure><img src="svg/R2-bobina-simbolo.svg" alt="" style="height:96px">96 px</figure>
+          <figure><img src="svg/R2-bobina-simbolo.svg" alt="" style="height:48px">48 px</figure>
+          <figure><img src="svg/R2-bobina-simbolo-reducido.svg" alt="" style="height:28px">28 px</figure>
+          <figure><img src="svg/R2-bobina-simbolo-reducido.svg" alt="" style="height:16px">16 px</figure>
+        </div>
+        <span class="rot">Escala · versión reducida debajo de 32 px</span>
+      </div>
+    </div>
+    <div class="fila">
+      <div class="panel crudo"><div class="bolsa"><img src="svg/R2-bobina-monocromo.svg" alt="Anillos en bolsa multipliego"></div><span class="rot">Bolsa multipliego</span></div>
+      <div class="panel blanco"><div class="bobina"><div class="etiqueta"><img src="svg/R2-bobina-color.svg" alt="Anillos en etiqueta de bobina"></div></div><span class="rot">Etiqueta de bobina</span></div>
+      <div class="panel blanco"><div class="avatar"><img src="svg/R2-bobina-simbolo-claro.svg" alt="Anillos como perfil digital"></div><span class="rot">Perfil digital</span></div>
+    </div>
+  </section>
+
+  <!-- CIERRE -->
+  <section>
+    <div class="cab">
+      <div><p class="eyebrow">02 — Lado a lado</p><h2>Dos caminos sólidos para decidir.</h2></div>
+      <p>Araucaria preserva la memoria de la marca y la proyecta con una silueta inconfundible del territorio. Anillos construye un signo nuevo y propio, nacido del producto y su materia. Ambos comparten paleta, tipografía y lógica de sistema, y ambos están listos para pasar a la etapa de pruebas.</p>
+    </div>
+    <div class="final">
+      <div class="panel blanco"><img src="svg/R2-araucaria-color.svg" alt="Araucaria refinada"><span class="rot">Camino 01 · Araucaria</span></div>
+      <div class="panel blanco"><img src="svg/R2-bobina-color.svg" alt="Anillos refinado"><span class="rot">Camino 04 · Anillos</span></div>
+      <div class="panel crudo"><div class="cartel"><div class="placa"><img src="svg/R2-araucaria-negativo.svg" alt="Araucaria en cartel de acceso a planta"></div></div><span class="rot">Acceso a planta</span></div>
+      <div class="panel crudo"><div class="cartel"><div class="placa"><img src="svg/R2-bobina-negativo.svg" alt="Anillos en cartel de acceso a planta"></div></div><span class="rot">Acceso a planta</span></div>
+    </div>
+    <div style="margin-top:72px; max-width:760px">
+      <p class="eyebrow">Próximos pasos</p>
+      <ol class="pasos">
+        <li>Elección del camino definitivo junto al equipo de Cartocor.</li>
+        <li>Pruebas de impresión flexográfica a una tinta sobre sack kraft y kraftliner.</li>
+        <li>Ajuste óptico final del símbolo y del logotipo, y archivos de producción.</li>
+        <li>Validación con la Fundación Selva Misionera y diálogo con las comunidades de la reserva.</li>
+        <li>Manual de identidad y aplicaciones: bolsas, bobinas, flota, señalética, indumentaria y digital.</li>
+      </ol>
+    </div>
+  </section>
+
+  <footer><span>Estudio 83 · Propuesta confidencial preparada para Cartocor — Grupo Arcor</span><span>Segunda instancia</span></footer>
+</main>
+</body>
+</html>
