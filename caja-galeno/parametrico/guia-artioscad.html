@@ -47,6 +47,9 @@ form{gap:14px}
 .grupo{display:grid;gap:9px;background:var(--soft-bg);border:1px solid var(--rule);border-radius:22px;padding:16px 18px 14px}
 h3.group{font:700 20px/1.15 var(--display);letter-spacing:-.02em;color:var(--ink);margin:0}
 .grupo .presets{margin-top:2px}
+.grupo .presets .tag{flex-basis:100%}
+.var.off{opacity:.38}
+.var.off input{cursor:not-allowed}
 button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--flash);font-weight:600}
 button{font:500 14px var(--body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:980px;padding:8px 16px;cursor:pointer}
 button:hover{border-color:var(--accent)}
@@ -189,7 +192,6 @@ svg.plan{display:block;width:100%;height:100%}
   <div class="desk">
     <section class="sheet side" aria-label="Variables">
       <form id="form" autocomplete="off"></form>
-      <div class="presets onda" id="atajos" role="group"></div>
       <button type="button" class="reset" id="reset">Reset</button>
     </section>
     <div class="right">
@@ -404,6 +406,7 @@ const DEFAULTS = {
   H: 274, // alto del frente entre hendidos (largo del tubo)
   t: 28, // puente de los tabiques
   e: 3, // espesor del cartón: onda B (el 6463 está compensado para B)
+  sep: 0, // separador: 0 tabiques con agujeros (el del 6463), 1 acordeón
 };
 const lengthFor = (Lb, e) => Lb + 3 * e + BOTTLE_GAP;
 // El ancho sale de las botellas: n pasos más las paredes y el juego lateral del 6463 (274 = 3 × 86 + 2 × 3 + 10),
@@ -431,6 +434,8 @@ const PARAMS = [
   { key: "A", group: "Caja", label: "Alto", min: 60, max: 200, step: 1 },
   { key: "H", group: "Caja", label: "Ancho", min: 120, max: 600, step: 1 },
   { key: "t", group: "Caja", label: "Puente separador", min: 10, max: 50, step: 1 },
+  // Tipo de separador: se elige con los botones Tabiques / Acordeón, sin fila propia.
+  { key: "sep", group: "Caja", label: "Separador", min: 0, max: 1, step: 1, oculto: true },
   { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 7, step: 1 },
 ];
 const L_RANGE = [210, 700];
@@ -450,6 +455,8 @@ function derived(P) {
 // rompa: del borde del agujero (o de la boca de la ranura del cuello, si es más ancha) al costado del
 // separador, como en el 6463 (7,75), y del agujero a los hendidos del tabique, arriba y abajo (4).
 const EDGE_MIN = 7.5;
+// Separador acordeón: el lomo de cada tabique mide 3 espesores (las dos paredes y una luz de e).
+const LOMO = 3;
 const WALL_MIN = 4;
 
 // Rango válido de cada variable dado el resto, para que el troquel no tenga líneas cruzadas ni sueltas.
@@ -477,8 +484,12 @@ function limits(P) {
   const n = cl(Math.round(P.n), lim.n);
   lim.p = n > 1 ? [pMin, Math.max(pMin, Math.min(500, room / (n - 1)))] : [pMin, Math.max(pMin, 500)];
   const p = cl(P.p, lim.p);
+  lim.sep = [0, 1];
   lim.A = [Math.max(st.A[0], Dc + 2 * e + 2 * WALL_MIN), st.A[1]];
-  lim.H = [Math.max(st.H[0], (n - 1) * p + 2 * half + 2 * EDGE_MIN + 2 * e), st.H[1]];
+  // Con tabiques, el ancho deja el material mínimo alrededor de los agujeros; con acordeón, cada
+  // compartimento tiene que ser al menos 2 mm más ancho que la botella.
+  const hMin = Math.round(P.sep) === 1 ? n * (Dc + 2) + (n - 1) * LOMO * e + 2 * e : (n - 1) * p + 2 * half + 2 * EDGE_MIN + 2 * e;
+  lim.H = [Math.max(st.H[0], hMin), st.H[1]];
   // Todo en milímetros enteros: los rangos se redondean hacia adentro.
   for (const k in lim) { const a = Math.ceil(lim[k][0] - 1e-9), b = Math.floor(lim[k][1] + 1e-9); lim[k] = [a, Math.max(a, b)]; }
   return lim;
@@ -496,6 +507,7 @@ function clampParams(params) {
   if (!given("H") && (given("n") || given("p") || given("Dc"))) P.H = Math.max(120, Math.min(600, widthFor(Math.round(P.n), P.p, P.e)));
   const notes = [];
   const lim = limits(P);
+  P.sep = Number(P.sep) >= 0.5 ? 1 : 0;
   for (const key of ["e", "Lb", "t", "Dc", "Dn", "n", "p", "A", "H"]) {
     const [a, b] = limits(P)[key];
     let v = key === "n" ? Math.round(P[key]) : P[key];
@@ -515,6 +527,11 @@ function validate(P) {
   if (P.Dn >= P.Dc) w.push(`La ranura del cuello (${P.Dn}) tiene que ser menor que el agujero del cuerpo (${P.Dc}).`);
   if (FIX.flareW <= P.Dn) w.push(`La ranura del cuello (${P.Dn}) es más ancha que la boca de 40 mm de la ranura.`);
   if (R < FIX.tongueW / 2 + 1) w.push(`Con ⌀${P.Dc} la lengüeta de apoyo de 33 mm no cabe en el agujero.`);
+  if (P.sep === 1) {
+    const c = (d.Wi - (P.n - 1) * LOMO * P.e) / P.n;
+    if (c < P.Dc + 2) w.push(`Con acordeón, cada compartimento mide ${Math.round(c)} mm y la botella ⌀${P.Dc}: no entra.`);
+    return w;
+  }
   const span = (P.n - 1) * P.p + P.Dc;
   if (span > d.Wi - 6) w.push(`${P.n} botellas con paso ${P.p} ocupan ${Math.round(span)} mm y el interior mide ${Math.round(d.Wi)} (H − 2e).`);
   if (P.n > 1 && P.p < P.Dc + 2) w.push(`El paso (${P.p}) es menor que el agujero más 2 mm: los agujeros se tocan.`);
@@ -696,6 +713,28 @@ function arcPoints(e) {
 }
 
 // ---------- Todo ----------
+// Separador acordeón: una tira con hendidos paralelos al largo de la botella. A lo ancho de la caja
+// (el largo de la tira) alterna el piso de cada compartimento y un tabique doble: sube A − 2e, lomo de
+// 3e y baja A − 2e. El ancho de la tira es el largo del separador plegado (L − 3e).
+function acordeon(P, x0, y0, out) {
+  const d = derived(P), h = d.wall, g = LOMO * P.e, n = P.n;
+  const c = (d.Wi - (n - 1) * g) / n, ancho = d.folded;
+  const L = (k, u0, v0, u1, v1) => out.push({ t: "L", k, a: [x0 + u0, y0 + v0], b: [x0 + u1, y0 + v1] });
+  const cortes = [0], tramos = [];
+  let v = 0;
+  for (let i = 0; i < n; i++) {
+    v += c; tramos.push("compartimento"); cortes.push(v);
+    if (i < n - 1) { v += h; tramos.push("pliegue"); cortes.push(v); v += g; tramos.push("lomo"); cortes.push(v); v += h; tramos.push("pliegue"); cortes.push(v); }
+  }
+  const top = v;
+  for (const q of cortes.slice(1, -1)) L("h", 0, q, ancho, q);
+  L("c", 0, 0, ancho, 0); L("c", 0, top, ancho, top);
+  // Bordes laterales cortados en tramos, de hendido a hendido.
+  cortes.forEach((q, i) => { if (i) { L("c", 0, cortes[i - 1], 0, q); L("c", ancho, cortes[i - 1], ancho, q); } });
+  const centres = Array.from({ length: n }, (_, i) => ancho / 2);
+  return { tipo: "acordeon", rows: { top }, cortes, tramos, ancho, centres, x0, y0 };
+}
+
 function generate(params, plantilla) {
   const { P, notes } = clampParams(params);
   const entities = [], problems = [];
@@ -703,7 +742,7 @@ function generate(params, plantilla) {
   const right = map([989.1, 900])[0];
   const bottom = map([700, 525])[1];
   const nBox = entities.length;
-  const ins = insert(P, right + FIX.gap, bottom + 31, entities);
+  const ins = P.sep === 1 ? acordeon(P, right + FIX.gap, bottom + 31, entities) : insert(P, right + FIX.gap, bottom + 31, entities);
   const d = derived(P);
   // Cotas de la caja (en coordenadas del plano original, antes del giro).
   const X = (x) => map([x, 900])[0];
@@ -744,16 +783,29 @@ function generate(params, plantilla) {
     if (e.t === "L") { e.a = insT(e.a); e.b = insT(e.b); }
     else e.c = insT(e.c);
   }
-  const ix0 = ins.x0 + tx, ix1 = ix0 + d.Wi, iy0 = ins.y0 + ty;
-  H_(dims, ix0, ix1, iy0 - 40, "interior");
-  dims[dims.length - 1].src = "h";
-  [0, r.c1, r.c2, r.p1, r.p2, r.c3, r.c4, r.top].map((v) => iy0 + v).forEach((y, i, all) => {
-    if (!i) return;
-    V_(dims, all[i - 1], y, ix1 + 45, ["pared", "puente", "tabique", "panel", "tabique", "puente", "pared"][i - 1]);
+  if (ins.tipo === "acordeon") {
+    const ix0 = ins.x0 + tx, ix1 = ix0 + ins.ancho, iy0 = ins.y0 + ty;
+    H_(dims, ix0, ix1, iy0 - 40, "tira");
+    dims[dims.length - 1].src = "h";
+    ins.cortes.map((v) => iy0 + v).forEach((y, i, all) => {
+      if (!i) return;
+      V_(dims, all[i - 1], y, ix1 + 45, ins.tramos[i - 1]);
+      dims[dims.length - 1].src = "v";
+    });
+    V_(dims, iy0, iy0 + r.top, ix1 + 175, "acordeón");
     dims[dims.length - 1].src = "v";
-  });
-  V_(dims, iy0, iy0 + r.top, ix1 + 175, "interior");
-  dims[dims.length - 1].src = "v";
+  } else {
+    const ix0 = ins.x0 + tx, ix1 = ix0 + d.Wi, iy0 = ins.y0 + ty;
+    H_(dims, ix0, ix1, iy0 - 40, "interior");
+    dims[dims.length - 1].src = "h";
+    [0, r.c1, r.c2, r.p1, r.p2, r.c3, r.c4, r.top].map((v) => iy0 + v).forEach((y, i, all) => {
+      if (!i) return;
+      V_(dims, all[i - 1], y, ix1 + 45, ["pared", "puente", "tabique", "panel", "tabique", "puente", "pared"][i - 1]);
+      dims[dims.length - 1].src = "v";
+    });
+    V_(dims, iy0, iy0 + r.top, ix1 + 175, "interior");
+    dims[dims.length - 1].src = "v";
+  }
 
   const all = ptsOf(entities);
   const xMin = Math.min(...all.map((q) => q[0])), xMax = Math.max(...all.map((q) => q[0])), yMin = Math.min(...all.map((q) => q[1])), yMax = Math.max(...all.map((q) => q[1]));
@@ -768,7 +820,7 @@ function generate(params, plantilla) {
     externa: [P.L + 2 * P.e, P.A + 2 * P.e, P.H + (22 / 3) * P.e],
     plancha: `${Math.round(xMax - xMin)} × ${Math.round(yMax - yMin)}`,
     botella: `${Math.round(P.n)} × ${Math.round(P.Lb)} de largo · ⌀ ${Math.round(P.Dc)} cuerpo · ⌀ ${Math.round(P.Dn)} cuello`,
-    interior: `${Math.round(d.Wi)} × ${Math.round(d.insertLen)} (plegado ${Math.round(d.folded)} × ${Math.round(d.Wi)} × ${Math.round(d.wall)})`,
+    interior: ins.tipo === "acordeon" ? `acordeón ${Math.round(ins.ancho)} × ${Math.round(r.top)}` : `${Math.round(d.Wi)} × ${Math.round(d.insertLen)} (plegado ${Math.round(d.folded)} × ${Math.round(d.Wi)} × ${Math.round(d.wall)})`,
     bounds: { xMin, xMax, yMin, yMax },
   };
   ins.T = insT;
@@ -801,6 +853,7 @@ const DIM_FORMULAS = {
     pegado: ["A − e", (P) => P.A - P.e],
     interior: ["H − 2e", (P) => P.H - 2 * P.e],
     caja: ["3A + 2L", (P) => 3 * P.A + 2 * P.L],
+    tira: ["L − 3e", (P) => P.L - 3 * P.e],
   },
   v: {
     lengüeta: ["A − 4e/3", (P) => P.A - (4 / 3) * P.e],
@@ -813,6 +866,11 @@ const DIM_FORMULAS = {
     tabique: ["A − 2e", (P) => P.A - 2 * P.e],
     panel: ["L − 3e − 2t", (P) => P.L - 3 * P.e - 2 * P.t],
     interior: ["4A + L − 11e", (P) => 4 * P.A + P.L - 11 * P.e],
+    // Separador acordeón.
+    compartimento: ["(H − 2e − 3e(n − 1))/n", (P) => (P.H - 2 * P.e - 3 * P.e * (P.n - 1)) / P.n],
+    pliegue: ["A − 2e", (P) => P.A - 2 * P.e],
+    lomo: ["3e", (P) => 3 * P.e],
+    "acordeón": ["H − 2e + 2(n − 1)(A − 2e)", (P) => P.H - 2 * P.e + 2 * (P.n - 1) * (P.A - 2 * P.e)],
   },
 };
 
@@ -994,8 +1052,13 @@ function crearDiseno(PLANTILLA) {
     DEFAULTS,
     generate: (state) => generate(state, PLANTILLA),
     limits,
-    // Botones rápidos para el espesor.
-    atajos: { titulo: "Onda", key: "e", opciones: Object.entries(ONDAS) },
+    // Botones rápidos: la onda del cartón y el tipo de separador (uno u otro).
+    atajos: [
+      { titulo: "Onda", key: "e", opciones: Object.entries(ONDAS), unidad: "mm" },
+      { titulo: "Separador", key: "sep", opciones: [["Tabiques", 0], ["Acordeón", 1]] },
+    ],
+    // El puente es de los tabiques: con acordeón no se usa.
+    inactiva: (P, key) => key === "t" && P.sep === 1,
     // Las medidas de la caja acompañan a las botellas (después se pueden corregir a mano):
     // la cantidad mueve el ancho H; el diámetro mueve el alto A y el ancho H (el paso es Dc + 6).
     enlazar(s, key) {
@@ -1028,13 +1091,22 @@ function crearDiseno(PLANTILLA) {
 `,
     formulas: DIM_FORMULAS,
     // Vista simple: sólo las cotas de las variables que se cargan (con su letra) y los totales de la plancha.
-    simple: { "h:costado": "A", "h:contrafrente": "L", "v:frente": "H", "v:puente": "t", "h:plano total": "", "v:plano total": "" },
+    simple: { "h:costado": "A", "h:contrafrente": "L", "v:frente": "H", "v:puente": "t", "v:compartimento": "", "v:lomo": "", "h:plano total": "", "v:plano total": "" },
     // Letras del plano y qué letras mueve cada variable del panel.
     letras: "Dc|Dn|(?<![A-Za-zÀ-ÿ])[LAHte](?![A-Za-zÀ-ÿ])",
     toca: { Lb: ["L"], Dc: ["Dc", "A", "H"], Dn: ["Dn"], n: ["Dc", "Dn", "H"], A: ["A"], H: ["H"], t: ["t"], e: ["e"] },
     // Notas sueltas sobre el plano: [punto, texto, visible en la vista simple].
     llamadas(model) {
       const map = (p) => model.anchors.rot(model.anchors.map(p)), ins = model.anchors.insert, r = ins.rows;
+      const caja = [
+        [map([530, 1090]), "guardapolvo A + 26"],
+        [map([944, 1090]), "A + 29"],
+        [map([112, 1050]), "oreja × A/94"],
+        [map([326, 1068]), "contratapa A − 2e"],
+        [map([741.5, 1000]), "traba 87 × 10e/3"],
+        [map([741.5, 1228]), "diente 85 × 5"],
+      ];
+      if (ins.tipo === "acordeon") return caja;
       const out = [
         [map([530, 1090]), "guardapolvo A + 26"],
         [map([944, 1090]), "A + 29"],
@@ -1057,7 +1129,7 @@ function crearDiseno(PLANTILLA) {
         ["Botella", mm(P.Lb) + " × ⌀" + mm(P.Dc), P.n + (P.n > 1 ? " botellas" : " botella") + " · cuello ⌀" + mm(P.Dn)],
         ["Medidas internas", x3([P.L, P.A, P.H]), "L × A × H"],
         ["Medidas externas", x3(model.info.externa), "con paredes y cierres"],
-        ["Plancha total", x3([b.xMax - b.xMin, b.yMax - b.yMin]), "ancho × alto"],
+        ["Plancha total", x3([b.xMax - b.xMin, b.yMax - b.yMin]), "separador " + (P.sep === 1 ? "acordeón" : "de tabiques")],
       ];
     },
     archivo(model) {
@@ -1069,7 +1141,7 @@ function crearDiseno(PLANTILLA) {
     cf2: (model, name) => toCf2(model, { name }),
     describir: (model) => "Troquel galeno " + model.info.caja + " mm",
     // Combinaciones con las que se comprueba que cada fórmula dé lo que mide el plano.
-    casosFormulas: [{}, { L: 370 }, { L: 400, A: 110, H: 300, t: 32, n: 4, Dc: 70, Dn: 28, p: 72 }, { L: 250, A: 70, H: 200, n: 2, Dc: 56, Dn: 22, p: 64 }, { e: 2 }, { e: 4 }, { e: 4, L: 370, t: 40 }, { e: 2, A: 120, H: 300, t: 15 }],
+    casosFormulas: [{}, { L: 370 }, { L: 400, A: 110, H: 300, t: 32, n: 4, Dc: 70, Dn: 28, p: 72 }, { L: 250, A: 70, H: 200, n: 2, Dc: 56, Dn: 22, p: 64 }, { e: 2 }, { e: 4 }, { e: 4, L: 370, t: 40 }, { e: 2, A: 120, H: 300, t: 15 }, { sep: 1 }, { sep: 1, n: 5, Dc: 70, e: 4 }, { sep: 1, n: 1, A: 150 }],
   };
 }
 
@@ -1114,6 +1186,14 @@ for (const p of PARAMETROS) {
     fig.appendChild(campo);
     continue;
   }
+  // Variable sin fila propia (se elige con sus atajos): sólo los campos, ocultos.
+  if (p.oculto) {
+    const box = document.createElement("span");
+    box.hidden = true;
+    box.innerHTML = '<input id="v-' + p.key + '" type="number" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + INICIAL[p.key] + '"><input id="r-' + p.key + '" type="range" min="0" max="1000" step="1" value="500">';
+    caja.appendChild(box);
+    continue;
+  }
   const row = document.createElement("div");
   row.className = "var";
   row.dataset.key = p.key;
@@ -1121,14 +1201,18 @@ for (const p of PARAMETROS) {
   caja.appendChild(row);
 }
 // Botones rápidos de una variable (por ejemplo, la onda del cartón).
-const atajos = document.getElementById("atajos");
+// Botones rápidos de una o varias variables (la onda del cartón, el tipo de separador...). Cada grupo
+// de botones va en el recuadro del grupo de su variable; la unidad, si hay, se lee con el valor.
+const ATAJOS = [].concat(DESIGN.atajos || []);
 const paramDeInicio = (key) => PARAMETROS.find((q) => q.key === key);
-if (DESIGN.atajos) {
-  atajos.setAttribute("aria-label", DESIGN.atajos.titulo);
-  atajos.innerHTML = '<span class="tag">' + DESIGN.atajos.titulo + "</span>" + DESIGN.atajos.opciones.map(([n, v]) => '<button type="button" data-atajo="' + v + '" data-nombre="' + n + '" aria-label="' + DESIGN.atajos.titulo + " " + n + ", " + v + ' mm">' + n + "</button>").join("");
-  // Los atajos van en el recuadro del grupo de su variable.
-  form.querySelector('.grupo[data-group="' + paramDeInicio(DESIGN.atajos.key).group + '"]').appendChild(atajos);
-} else atajos.remove();
+for (const a of ATAJOS) {
+  const div = document.createElement("div");
+  div.className = "presets";
+  div.setAttribute("role", "group");
+  div.setAttribute("aria-label", a.titulo);
+  div.innerHTML = '<span class="tag">' + a.titulo + "</span>" + a.opciones.map(([n, v]) => '<button type="button" data-atajo="' + v + '" data-key="' + a.key + '" data-nombre="' + n + '" aria-label="' + a.titulo + " " + n + (a.unidad ? ", " + v + " " + a.unidad : "") + '">' + n + "</button>").join("");
+  form.querySelector('.grupo[data-group="' + paramDeInicio(a.key).group + '"]').appendChild(div);
+}
 const f1 = (v) => (Math.round(v * 10) / 10).toString();
 const mm = (v) => String(Math.round(v));
 function arrow(x0, y0, x1, y1) {
@@ -1253,7 +1337,14 @@ function render(source) {
   });
   // La leyenda muestra sólo los tipos de línea que tiene el troquel.
   applyActive();
-  if (DESIGN.atajos) document.querySelectorAll("[data-atajo]").forEach((b) => b.setAttribute("aria-pressed", String(Math.abs(Number(b.dataset.atajo) - model.P[DESIGN.atajos.key]) < 1e-9)));
+  document.querySelectorAll("[data-atajo]").forEach((b) => b.setAttribute("aria-pressed", String(Math.abs(Number(b.dataset.atajo) - model.P[b.dataset.key]) < 1e-9)));
+  // Variables que no aplican con los valores actuales (DESIGN.inactiva): la fila queda atenuada y
+  // sin uso, sin cambiar el tamaño del panel.
+  form.querySelectorAll(".var").forEach((row) => {
+    const off = !!(DESIGN.inactiva && DESIGN.inactiva(model.P, row.dataset.key));
+    row.classList.toggle("off", off);
+    row.querySelectorAll("input").forEach((i) => { i.disabled = off; });
+  });
   document.getElementById("facts").innerHTML = DESIGN.resumen(model).map(([k, v, hint]) => '<div class="row"><dt>' + k + "</dt><dd><strong>" + v + "</strong><span>" + hint + "</span></dd></div>").join("");
   clearTimeout(hotTimer);
   hotTimer = setTimeout(() => document.querySelectorAll(".hot").forEach((e) => e.classList.remove("hot")), 1400);
@@ -1333,8 +1424,9 @@ document.getElementById("formulas").addEventListener("click", (e) => {
 });
 form.addEventListener("change", () => render("commit"));
 document.querySelectorAll("[data-atajo]").forEach((b) => b.addEventListener("click", () => {
-  setValue(DESIGN.atajos.key, Number(b.dataset.atajo));
-  render("commit"); say(DESIGN.atajos.titulo + " " + b.dataset.nombre + ": " + b.dataset.atajo + " mm.");
+  const a = ATAJOS.find((q) => q.key === b.dataset.key);
+  setValue(a.key, Number(b.dataset.atajo));
+  render("commit"); say(a.titulo + ": " + b.dataset.nombre + (a.unidad ? ", " + b.dataset.atajo + " " + a.unidad : "") + ".");
 }));
 document.getElementById("reset").addEventListener("click", () => {
   for (const k in INICIAL) setValue(k, INICIAL[k]);

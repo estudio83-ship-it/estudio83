@@ -20,6 +20,7 @@ export const DEFAULTS = {
   H: 274, // alto del frente entre hendidos (largo del tubo)
   t: 28, // puente de los tabiques
   e: 3, // espesor del cartón: onda B (el 6463 está compensado para B)
+  sep: 0, // separador: 0 tabiques con agujeros (el del 6463), 1 acordeón
 };
 export const lengthFor = (Lb, e) => Lb + 3 * e + BOTTLE_GAP;
 // El ancho sale de las botellas: n pasos más las paredes y el juego lateral del 6463 (274 = 3 × 86 + 2 × 3 + 10),
@@ -47,6 +48,8 @@ export const PARAMS = [
   { key: "A", group: "Caja", label: "Alto", min: 60, max: 200, step: 1 },
   { key: "H", group: "Caja", label: "Ancho", min: 120, max: 600, step: 1 },
   { key: "t", group: "Caja", label: "Puente separador", min: 10, max: 50, step: 1 },
+  // Tipo de separador: se elige con los botones Tabiques / Acordeón, sin fila propia.
+  { key: "sep", group: "Caja", label: "Separador", min: 0, max: 1, step: 1, oculto: true },
   { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 7, step: 1 },
 ];
 const L_RANGE = [210, 700];
@@ -66,6 +69,8 @@ export function derived(P) {
 // rompa: del borde del agujero (o de la boca de la ranura del cuello, si es más ancha) al costado del
 // separador, como en el 6463 (7,75), y del agujero a los hendidos del tabique, arriba y abajo (4).
 export const EDGE_MIN = 7.5;
+// Separador acordeón: el lomo de cada tabique mide 3 espesores (las dos paredes y una luz de e).
+export const LOMO = 3;
 export const WALL_MIN = 4;
 
 // Rango válido de cada variable dado el resto, para que el troquel no tenga líneas cruzadas ni sueltas.
@@ -93,8 +98,12 @@ export function limits(P) {
   const n = cl(Math.round(P.n), lim.n);
   lim.p = n > 1 ? [pMin, Math.max(pMin, Math.min(500, room / (n - 1)))] : [pMin, Math.max(pMin, 500)];
   const p = cl(P.p, lim.p);
+  lim.sep = [0, 1];
   lim.A = [Math.max(st.A[0], Dc + 2 * e + 2 * WALL_MIN), st.A[1]];
-  lim.H = [Math.max(st.H[0], (n - 1) * p + 2 * half + 2 * EDGE_MIN + 2 * e), st.H[1]];
+  // Con tabiques, el ancho deja el material mínimo alrededor de los agujeros; con acordeón, cada
+  // compartimento tiene que ser al menos 2 mm más ancho que la botella.
+  const hMin = Math.round(P.sep) === 1 ? n * (Dc + 2) + (n - 1) * LOMO * e + 2 * e : (n - 1) * p + 2 * half + 2 * EDGE_MIN + 2 * e;
+  lim.H = [Math.max(st.H[0], hMin), st.H[1]];
   // Todo en milímetros enteros: los rangos se redondean hacia adentro.
   for (const k in lim) { const a = Math.ceil(lim[k][0] - 1e-9), b = Math.floor(lim[k][1] + 1e-9); lim[k] = [a, Math.max(a, b)]; }
   return lim;
@@ -112,6 +121,7 @@ export function clampParams(params) {
   if (!given("H") && (given("n") || given("p") || given("Dc"))) P.H = Math.max(120, Math.min(600, widthFor(Math.round(P.n), P.p, P.e)));
   const notes = [];
   const lim = limits(P);
+  P.sep = Number(P.sep) >= 0.5 ? 1 : 0;
   for (const key of ["e", "Lb", "t", "Dc", "Dn", "n", "p", "A", "H"]) {
     const [a, b] = limits(P)[key];
     let v = key === "n" ? Math.round(P[key]) : P[key];
@@ -131,6 +141,11 @@ export function validate(P) {
   if (P.Dn >= P.Dc) w.push(`La ranura del cuello (${P.Dn}) tiene que ser menor que el agujero del cuerpo (${P.Dc}).`);
   if (FIX.flareW <= P.Dn) w.push(`La ranura del cuello (${P.Dn}) es más ancha que la boca de 40 mm de la ranura.`);
   if (R < FIX.tongueW / 2 + 1) w.push(`Con ⌀${P.Dc} la lengüeta de apoyo de 33 mm no cabe en el agujero.`);
+  if (P.sep === 1) {
+    const c = (d.Wi - (P.n - 1) * LOMO * P.e) / P.n;
+    if (c < P.Dc + 2) w.push(`Con acordeón, cada compartimento mide ${Math.round(c)} mm y la botella ⌀${P.Dc}: no entra.`);
+    return w;
+  }
   const span = (P.n - 1) * P.p + P.Dc;
   if (span > d.Wi - 6) w.push(`${P.n} botellas con paso ${P.p} ocupan ${Math.round(span)} mm y el interior mide ${Math.round(d.Wi)} (H − 2e).`);
   if (P.n > 1 && P.p < P.Dc + 2) w.push(`El paso (${P.p}) es menor que el agujero más 2 mm: los agujeros se tocan.`);
@@ -312,6 +327,28 @@ function arcPoints(e) {
 }
 
 // ---------- Todo ----------
+// Separador acordeón: una tira con hendidos paralelos al largo de la botella. A lo ancho de la caja
+// (el largo de la tira) alterna el piso de cada compartimento y un tabique doble: sube A − 2e, lomo de
+// 3e y baja A − 2e. El ancho de la tira es el largo del separador plegado (L − 3e).
+function acordeon(P, x0, y0, out) {
+  const d = derived(P), h = d.wall, g = LOMO * P.e, n = P.n;
+  const c = (d.Wi - (n - 1) * g) / n, ancho = d.folded;
+  const L = (k, u0, v0, u1, v1) => out.push({ t: "L", k, a: [x0 + u0, y0 + v0], b: [x0 + u1, y0 + v1] });
+  const cortes = [0], tramos = [];
+  let v = 0;
+  for (let i = 0; i < n; i++) {
+    v += c; tramos.push("compartimento"); cortes.push(v);
+    if (i < n - 1) { v += h; tramos.push("pliegue"); cortes.push(v); v += g; tramos.push("lomo"); cortes.push(v); v += h; tramos.push("pliegue"); cortes.push(v); }
+  }
+  const top = v;
+  for (const q of cortes.slice(1, -1)) L("h", 0, q, ancho, q);
+  L("c", 0, 0, ancho, 0); L("c", 0, top, ancho, top);
+  // Bordes laterales cortados en tramos, de hendido a hendido.
+  cortes.forEach((q, i) => { if (i) { L("c", 0, cortes[i - 1], 0, q); L("c", ancho, cortes[i - 1], ancho, q); } });
+  const centres = Array.from({ length: n }, (_, i) => ancho / 2);
+  return { tipo: "acordeon", rows: { top }, cortes, tramos, ancho, centres, x0, y0 };
+}
+
 export function generate(params, plantilla) {
   const { P, notes } = clampParams(params);
   const entities = [], problems = [];
@@ -319,7 +356,7 @@ export function generate(params, plantilla) {
   const right = map([989.1, 900])[0];
   const bottom = map([700, 525])[1];
   const nBox = entities.length;
-  const ins = insert(P, right + FIX.gap, bottom + 31, entities);
+  const ins = P.sep === 1 ? acordeon(P, right + FIX.gap, bottom + 31, entities) : insert(P, right + FIX.gap, bottom + 31, entities);
   const d = derived(P);
   // Cotas de la caja (en coordenadas del plano original, antes del giro).
   const X = (x) => map([x, 900])[0];
@@ -360,16 +397,29 @@ export function generate(params, plantilla) {
     if (e.t === "L") { e.a = insT(e.a); e.b = insT(e.b); }
     else e.c = insT(e.c);
   }
-  const ix0 = ins.x0 + tx, ix1 = ix0 + d.Wi, iy0 = ins.y0 + ty;
-  H_(dims, ix0, ix1, iy0 - 40, "interior");
-  dims[dims.length - 1].src = "h";
-  [0, r.c1, r.c2, r.p1, r.p2, r.c3, r.c4, r.top].map((v) => iy0 + v).forEach((y, i, all) => {
-    if (!i) return;
-    V_(dims, all[i - 1], y, ix1 + 45, ["pared", "puente", "tabique", "panel", "tabique", "puente", "pared"][i - 1]);
+  if (ins.tipo === "acordeon") {
+    const ix0 = ins.x0 + tx, ix1 = ix0 + ins.ancho, iy0 = ins.y0 + ty;
+    H_(dims, ix0, ix1, iy0 - 40, "tira");
+    dims[dims.length - 1].src = "h";
+    ins.cortes.map((v) => iy0 + v).forEach((y, i, all) => {
+      if (!i) return;
+      V_(dims, all[i - 1], y, ix1 + 45, ins.tramos[i - 1]);
+      dims[dims.length - 1].src = "v";
+    });
+    V_(dims, iy0, iy0 + r.top, ix1 + 175, "acordeón");
     dims[dims.length - 1].src = "v";
-  });
-  V_(dims, iy0, iy0 + r.top, ix1 + 175, "interior");
-  dims[dims.length - 1].src = "v";
+  } else {
+    const ix0 = ins.x0 + tx, ix1 = ix0 + d.Wi, iy0 = ins.y0 + ty;
+    H_(dims, ix0, ix1, iy0 - 40, "interior");
+    dims[dims.length - 1].src = "h";
+    [0, r.c1, r.c2, r.p1, r.p2, r.c3, r.c4, r.top].map((v) => iy0 + v).forEach((y, i, all) => {
+      if (!i) return;
+      V_(dims, all[i - 1], y, ix1 + 45, ["pared", "puente", "tabique", "panel", "tabique", "puente", "pared"][i - 1]);
+      dims[dims.length - 1].src = "v";
+    });
+    V_(dims, iy0, iy0 + r.top, ix1 + 175, "interior");
+    dims[dims.length - 1].src = "v";
+  }
 
   const all = ptsOf(entities);
   const xMin = Math.min(...all.map((q) => q[0])), xMax = Math.max(...all.map((q) => q[0])), yMin = Math.min(...all.map((q) => q[1])), yMax = Math.max(...all.map((q) => q[1]));
@@ -384,7 +434,7 @@ export function generate(params, plantilla) {
     externa: [P.L + 2 * P.e, P.A + 2 * P.e, P.H + (22 / 3) * P.e],
     plancha: `${Math.round(xMax - xMin)} × ${Math.round(yMax - yMin)}`,
     botella: `${Math.round(P.n)} × ${Math.round(P.Lb)} de largo · ⌀ ${Math.round(P.Dc)} cuerpo · ⌀ ${Math.round(P.Dn)} cuello`,
-    interior: `${Math.round(d.Wi)} × ${Math.round(d.insertLen)} (plegado ${Math.round(d.folded)} × ${Math.round(d.Wi)} × ${Math.round(d.wall)})`,
+    interior: ins.tipo === "acordeon" ? `acordeón ${Math.round(ins.ancho)} × ${Math.round(r.top)}` : `${Math.round(d.Wi)} × ${Math.round(d.insertLen)} (plegado ${Math.round(d.folded)} × ${Math.round(d.Wi)} × ${Math.round(d.wall)})`,
     bounds: { xMin, xMax, yMin, yMax },
   };
   ins.T = insT;

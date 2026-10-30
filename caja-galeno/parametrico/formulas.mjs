@@ -9,6 +9,7 @@ export const DIM_FORMULAS = {
     pegado: ["A − e", (P) => P.A - P.e],
     interior: ["H − 2e", (P) => P.H - 2 * P.e],
     caja: ["3A + 2L", (P) => 3 * P.A + 2 * P.L],
+    tira: ["L − 3e", (P) => P.L - 3 * P.e],
   },
   v: {
     lengüeta: ["A − 4e/3", (P) => P.A - (4 / 3) * P.e],
@@ -21,6 +22,11 @@ export const DIM_FORMULAS = {
     tabique: ["A − 2e", (P) => P.A - 2 * P.e],
     panel: ["L − 3e − 2t", (P) => P.L - 3 * P.e - 2 * P.t],
     interior: ["4A + L − 11e", (P) => 4 * P.A + P.L - 11 * P.e],
+    // Separador acordeón.
+    compartimento: ["(H − 2e − 3e(n − 1))/n", (P) => (P.H - 2 * P.e - 3 * P.e * (P.n - 1)) / P.n],
+    pliegue: ["A − 2e", (P) => P.A - 2 * P.e],
+    lomo: ["3e", (P) => 3 * P.e],
+    "acordeón": ["H − 2e + 2(n − 1)(A − 2e)", (P) => P.H - 2 * P.e + 2 * (P.n - 1) * (P.A - 2 * P.e)],
   },
 };
 

@@ -40,12 +40,13 @@ La página sale encriptada (AES-GCM 256, clave derivada con PBKDF2-SHA256 de 600
 | Campo | Qué es |
 |---|---|
 | `titulo`, `bajada` | Título grande y la línea de arriba. |
-| `PARAMS` | `[{ key, group, label, min, max, step }]`, en el orden del panel; `group` arma los títulos. |
+| `PARAMS` | `[{ key, group, label, min, max, step, oculto }]`, en el orden del panel; `group` arma los recuadros. `oculto: true` para una variable que sólo se elige con atajos (sin fila). |
 | `DEFAULTS` | Valor inicial de cada variable (el del troquel original). |
 | `generate(state)` | Devuelve el modelo: `{ P, entities, dims, info: { bounds } }` (ver abajo). |
 | `limits(P)` | Opcional. Rangos que dependen de otras medidas: `{ key: [min, max] }`. |
 | `enlazar(state, key)` | Opcional. Variables que siguen a otra: devuelve `{ H: ... }` cuando cambia `key`. |
-| `atajos` | Opcional. `{ titulo, key, opciones: [[nombre, valor], ...] }`; los botones muestran sólo el nombre. |
+| `atajos` | Opcional. `{ titulo, key, opciones: [[nombre, valor], ...], unidad }`, o una lista de esos; los botones muestran sólo el nombre y van en el recuadro del grupo de su variable. |
+| `inactiva(P, key)` | Opcional. `true` si la variable no se usa con estos valores: su fila queda atenuada y bloqueada (sin cambiar el tamaño del panel). |
 | `figuras` | Opcional. `{ grupo: (P) => svg }`: un dibujo debajo del título del grupo, redibujado con cada cambio. Las cotas del dibujo llevan `class="cota" data-var="clave"` para marcarse en naranja con su variable. El alto del SVG tiene que ser fijo. |
 | `campos` | Opcional. `{ grupo: (P) => ({ clave: [x, y] }) }`: esas variables se escriben sobre su cota en el dibujo del grupo (en unidades del viewBox), sin fila ni deslizador. |
 | `estilos` | Opcional. CSS propio del diseño (los colores de sus dibujos). |

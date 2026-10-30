@@ -66,6 +66,20 @@ Derivadas: el separador plegado ocupa `L − 3e` de largo (si crece `t`, se achi
 
 Todas las variables y medidas se manejan en milímetros enteros; las cotas del plano y del DXF se redondean al milímetro.
 
+## Separador acordeón (opción)
+
+En la página, en Caja → Separador, se elige entre los **tabiques** con agujeros (el del 6463) y un **acordeón**: una sola tira con hendidos paralelos al largo de la botella, que apoya en el piso y se pliega en zigzag formando un tabique doble entre botella y botella.
+
+| Tramo de la tira | Medida |
+|---|---|
+| Ancho de la tira | `L − 3e` (el largo del separador plegado) |
+| Piso de cada compartimento | `(H − 2e − 3e(n − 1)) / n` |
+| Cada lado del tabique | `A − 2e` (alto interior de la caja) |
+| Lomo del tabique | `3e` (las dos paredes y una luz de e) |
+| Largo total de la tira | `H − 2e + 2(n − 1)(A − 2e)` |
+
+Con acordeón el puente `t` no se usa, y el ancho de la caja no baja de lo necesario para que cada compartimento sea 2 mm más ancho que la botella. En `generar.mjs`: `--sep 1`.
+
 ## Fórmulas para rearmarlo como paramétrico nativo
 
 Si querés el diseño paramétrico dentro de ArtiosCAD (que el operador cambie L, A, H desde el catálogo de estándares), dibujalo en un diseño con variables `L`, `A`, `H` y acotá cada línea con estas fórmulas. Las compensaciones de espesor son las del 6463 (onda B, `e` = 3) escaladas por `e/3`: con onda E o C se recalculan solas.
