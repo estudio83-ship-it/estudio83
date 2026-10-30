@@ -95,6 +95,9 @@ svg.plan{display:block;width:100%;min-width:680px;height:auto}
 .dim text{font:500 17px var(--mono);text-anchor:middle}
 .dim text.side{text-anchor:start;font-size:15px}
 .dim text.side-l,.dim text.down{text-anchor:end;font-size:15px}
+.plan.simple .dim text{font-size:22px}
+.plan.simple .call{font-size:18px;fill:var(--accent);font-weight:600}
+.head h2{margin-right:auto}
 .dim .fx{fill:var(--accent);font-weight:600}.dim .val{fill:var(--soft)}
 .dim.hot .val{fill:var(--accent);font-weight:600}
 .call{font:500 14px var(--mono);fill:var(--soft);text-anchor:middle}
@@ -145,12 +148,12 @@ li b{font-weight:500}
       <p class="status" id="status" role="status"></p>
     </section>
     <section class="sheet plan-sheet" aria-labelledby="t-plano">
-      <div class="head"><h2 id="t-plano">Plano con fórmulas</h2><span class="tag" id="caption"></span></div>
+      <div class="head"><h2 id="t-plano">Plano</h2><button type="button" id="formulas" aria-pressed="false">Ver fórmulas</button><span class="tag" id="caption"></span></div>
       <div class="legend" aria-hidden="true">
         <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--ink)" stroke-width="1.4"/></svg>Corte</span>
         <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--crease)" stroke-width="1.2" stroke-dasharray="6 4"/></svg>Hendido</span>
         <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--crease)" stroke-width="1.2" stroke-dasharray="2 3"/></svg>Intermitente 5×5</span>
-        <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--accent)" stroke-width="1.2"/></svg>Fórmula = valor</span>
+        <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--accent)" stroke-width="1.2"/></svg><span id="legend-dim">Cota de variable</span></span>
       </div>
       <div class="scroll" id="plan"></div>
     </section>
@@ -188,6 +191,9 @@ function arrow(x0, y0, x1, y1) {
   const h = (x, y, dx, dy) => "M" + f1(x) + " " + f1(y) + "L" + f1(x + dx * s - dy * w) + " " + f1(y + dy * s + dx * w) + "L" + f1(x + dx * s + dy * w) + " " + f1(y + dy * s - dx * w) + "Z";
   return h(x0, y0, ux, uy) + h(x1, y1, -ux, -uy);
 }
+// Vista simple: sólo las cotas de las variables que se cargan (con su letra) y los totales de la plancha.
+const SIMPLE = { "h:costado": "A", "h:contrafrente": "L", "v:frente": "H", "v:puente": "t", "h:plano total": "", "v:plano total": "" };
+let showFormulas = false;
 function planSvg(prevDims) {
   const b = model.info.bounds;
   const X0 = b.xMin - 270, X1 = b.xMax + 300, Y0 = b.yMin - 110, Y1 = b.yMax + 30;
@@ -207,10 +213,20 @@ function planSvg(prevDims) {
     const entry = DIM_FORMULAS[d.src][d.name], v = fmt(d.value).replace(".", ",");
     return entry && entry[0] !== v ? [entry[0] + " = " + v, '<tspan class="fx">' + entry[0] + '</tspan><tspan class="val"> = ' + v + "</tspan>"] : [v, '<tspan class="val">' + v + "</tspan>"];
   };
+  const simpleText = (d) => {
+    const letter = SIMPLE[d.src + ":" + d.name], v = fmt(d.value).replace(".", ",");
+    return letter ? [letter + " = " + v, '<tspan class="fx">' + letter + '</tspan><tspan class="val"> = ' + v + "</tspan>"] : [v, '<tspan class="val">' + v + "</tspan>"];
+  };
+  const seen = new Set();
   let dims = "";
   model.dims.forEach((d, i) => {
+    const key = d.src + ":" + d.name;
+    if (!showFormulas) {
+      if (!(key in SIMPLE) || seen.has(key)) return;
+      seen.add(key);
+    }
     const hot = prevDims && prevDims[i] !== undefined && Math.abs(prevDims[i] - d.value) > 0.005 ? " hot" : "";
-    const [plain, rich] = text(d);
+    const [plain, rich] = showFormulas ? text(d) : simpleText(d);
     const fits = plain.length * 10.4 < Math.abs(d.dir === "h" ? d.x1 - d.x0 : d.y1 - d.y0) - 12;
     if (d.dir === "h") {
       const y = Y(d.at), xm = (d.x0 + d.x1) / 2;
@@ -240,8 +256,9 @@ function planSvg(prevDims) {
   ];
   if (ins.centres.length > 1) calls.push([ins.T([ins.x0 + ins.centres[1], ins.y0 + (r.p2 + r.c3) / 2 + 9]), "Dn"]);
   calls.push([ins.T([ins.x0 + ins.centres[ins.centres.length > 1 ? 1 : 0], ins.y0 + r.c1 / 2]), "muesca 35 × 4"]);
-  const callSvg = calls.map(([p, t]) => '<text class="call" x="' + f1(p[0]) + '" y="' + f1(Y(p[1])) + '">' + t + "</text>").join("");
-  return '<svg class="plan" viewBox="' + f1(X0) + " 0 " + f1(X1 - X0) + " " + f1(Y1 - Y0) + '" role="img" aria-label="Troquel galeno ' + model.info.caja + ' mm con cada cota expresada en sus variables"><path class="c" d="' + paths.c + '"/><path class="h" d="' + paths.h + '"/><path class="p" d="' + paths.p + '"/>' + dims + callSvg + "</svg>";
+  const shown = showFormulas ? calls : calls.filter(([, t]) => t === "⌀Dc" || t === "Dn");
+  const callSvg = shown.map(([p, t]) => '<text class="call" x="' + f1(p[0]) + '" y="' + f1(Y(p[1])) + '">' + t + "</text>").join("");
+  return '<svg class="plan' + (showFormulas ? "" : " simple") + '" viewBox="' + f1(X0) + " 0 " + f1(X1 - X0) + " " + f1(Y1 - Y0) + '" role="img" aria-label="Troquel galeno ' + model.info.caja + ' mm' + (showFormulas ? " con cada cota expresada en sus variables" : " con las cotas de L, A, H y t") + '"><path class="c" d="' + paths.c + '"/><path class="h" d="' + paths.h + '"/><path class="p" d="' + paths.p + '"/>' + dims + callSvg + "</svg>";
 }
 const prevTables = {};
 function tableHtml(key) {
@@ -312,6 +329,13 @@ async function download(text, ext) {
 document.getElementById("dl-dxf").addEventListener("click", () => download(toDxf(model, { name: name() }), "dxf"));
 document.getElementById("dl-cf2").addEventListener("click", () => download(toCf2(model, { name: name() }), "cf2"));
 form.addEventListener("input", (e) => render(e.target));
+document.getElementById("formulas").addEventListener("click", (e) => {
+  showFormulas = !showFormulas;
+  e.currentTarget.setAttribute("aria-pressed", String(showFormulas));
+  e.currentTarget.textContent = showFormulas ? "Ocultar fórmulas" : "Ver fórmulas";
+  document.getElementById("legend-dim").textContent = showFormulas ? "Fórmula = valor" : "Cota de variable";
+  document.getElementById("plan").innerHTML = planSvg(null);
+});
 form.addEventListener("change", () => render("commit"));
 document.querySelectorAll("[data-onda]").forEach((b) => b.addEventListener("click", () => {
   const e = ONDAS[b.dataset.onda];
