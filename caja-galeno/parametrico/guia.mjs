@@ -148,7 +148,7 @@ li b{font-weight:500}
       <p class="status" id="status" role="status"></p>
     </section>
     <section class="sheet plan-sheet" aria-labelledby="t-plano">
-      <div class="head"><h2 id="t-plano">Plano</h2><button type="button" id="formulas" aria-pressed="false">Ver fórmulas</button><span class="tag" id="caption"></span></div>
+      <div class="head"><h2 id="t-plano">Plano</h2><button type="button" id="formulas" aria-pressed="false">Ver fórmulas</button></div>
       <div class="legend" aria-hidden="true">
         <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--ink)" stroke-width="1.4"/></svg>Corte</span>
         <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--crease)" stroke-width="1.2" stroke-dasharray="6 4"/></svg>Hendido</span>
@@ -286,8 +286,7 @@ function render(source) {
     if (source === "commit" || source === rng) num.value = Math.round(model.P[p.key] * 100) / 100;
   }
   document.getElementById("plan").innerHTML = planSvg(prevDims);
-  document.getElementById("caption").textContent = "L " + fmtMm(model.P.L) + " · A " + fmtMm(model.P.A) + " · H " + fmtMm(model.P.H) + " · t " + fmtMm(model.P.t) + " · e " + fmtMm(model.P.e) + " · plancha " + model.info.plancha;
-  document.querySelectorAll("[data-onda]").forEach((b) => b.setAttribute("aria-pressed", String(Math.abs(ONDAS[b.dataset.onda] - model.P.e) < 1e-9)));
+    document.querySelectorAll("[data-onda]").forEach((b) => b.setAttribute("aria-pressed", String(Math.abs(ONDAS[b.dataset.onda] - model.P.e) < 1e-9)));
   const onda = Object.keys(ONDAS).find((k) => Math.abs(ONDAS[k] - model.P.e) < 1e-9);
   const facts = [["Cartón", (onda ? "onda " + onda + " · " : "") + "e = " + fmtMm(model.P.e) + " mm"], ["Botella", model.info.botella], ["Largo de caja", "L = Lb + 3e + 5 = " + fmtMm(model.P.L)], ["Caja", model.info.caja + " mm"], ["Plancha", model.info.plancha + " mm"], ["Separador", model.info.interior]];
   document.getElementById("facts").innerHTML = facts.map(([k, v]) => "<dt>" + k + "</dt><dd>" + v + "</dd>").join("");
