@@ -1,5 +1,6 @@
 // Genera el troquel galeno con los parámetros dados, en DXF y CF2 para ArtiosCAD.
-// node generar.mjs --L 370 --A 94 --H 274 --n 3 --Dc 80 --Dn 31 --p 86.25 --t 28 [--nombre GALENO-370] [--sin-cotas]
+// node generar.mjs --L 370 --A 94 --H 274 --n 3 --Dc 80 --Dn 31 --p 86.25 --t 28 [--nombre GALENO-370]
+// El DXF lleva las líneas del troquel y las cotas H y L; [--sin-cotas] o [--todas-las-cotas] lo cambian.
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,6 +14,6 @@ for (const key of Object.keys(DEFAULTS)) if (opt(key) !== undefined) params[key]
 const model = generate(params, JSON.parse(readFileSync(join(HERE, "plantilla-caja.json"), "utf8")));
 const name = opt("nombre") ?? `GALENO-${model.P.L}x${model.P.A}x${model.P.H}`;
 if (model.warnings.length) console.warn("Avisos:\n  " + model.warnings.join("\n  "));
-writeFileSync(join(HERE, `${name}.dxf`), toDxf(model, { dims: !args.includes("--sin-cotas"), name }));
+writeFileSync(join(HERE, `${name}.dxf`), toDxf(model, { dims: args.includes("--sin-cotas") ? false : args.includes("--todas-las-cotas") ? true : "HL", name }));
 writeFileSync(join(HERE, `${name}.cf2`), toCf2(model, { name }));
 console.log(`wrote ${name}.dxf y ${name}.cf2 · caja ${model.info.caja} · plancha ${model.info.plancha} · ${model.info.frasco}`);

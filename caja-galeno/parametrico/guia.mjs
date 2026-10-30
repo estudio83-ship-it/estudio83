@@ -109,7 +109,7 @@ li b{font-weight:500}
   <header>
     <span class="tag">Troquel 6463 · caja tipo galeno · guía de diseño paramétrico</span>
     <h1>Galeno 6463 para ArtiosCAD</h1>
-    <p class="lede">Mové las variables y el troquel se rearma con cada cota escrita en su fórmula y su valor; lo que cambió se marca en azul. Descargá el DXF o el CF2 para ArtiosCAD.</p>
+    <p class="lede">Mové las variables y el troquel se rearma con cada cota escrita en su fórmula y su valor; lo que cambió se marca en azul. El DXF descargado lleva sólo las líneas del troquel y las cotas H y L.</p>
   </header>
 
   <div class="desk">
@@ -165,7 +165,7 @@ function arrow(x0, y0, x1, y1) {
 }
 function planSvg(prevDims) {
   const b = model.info.bounds;
-  const X0 = b.xMin - 270, X1 = b.xMax + 90, Y0 = b.yMin - 300, Y1 = b.yMax + 30;
+  const X0 = b.xMin - 270, X1 = b.xMax + 300, Y0 = b.yMin - 110, Y1 = b.yMax + 30;
   const cx = (b.xMin + b.xMax) / 2;
   const Y = (y) => Y1 - y;
   const paths = { c: "", h: "", p: "" };
@@ -211,10 +211,10 @@ function planSvg(prevDims) {
     [map([326, 1068]), "contratapa A − 6"],
     [map([741.5, 1000]), "traba 86,5 × 10"],
     [map([741.5, 1228]), "diente 85 × 5"],
-    [rot([ins.x0 + ins.centres[0], ins.y0 + (r.p2 + r.c3) / 2]), "⌀Dc"],
+    [ins.T([ins.x0 + ins.centres[0], ins.y0 + (r.p2 + r.c3) / 2]), "⌀Dc"],
   ];
-  if (ins.centres.length > 1) calls.push([rot([ins.x0 + ins.centres[1], ins.y0 + (r.p2 + r.c3) / 2 + 9]), "Dn"]);
-  calls.push([rot([ins.x0 + ins.centres[ins.centres.length > 1 ? 1 : 0], ins.y0 + r.c1 / 2]), "muesca 35 × 4"]);
+  if (ins.centres.length > 1) calls.push([ins.T([ins.x0 + ins.centres[1], ins.y0 + (r.p2 + r.c3) / 2 + 9]), "Dn"]);
+  calls.push([ins.T([ins.x0 + ins.centres[ins.centres.length > 1 ? 1 : 0], ins.y0 + r.c1 / 2]), "muesca 35 × 4"]);
   const callSvg = calls.map(([p, t]) => '<text class="call" x="' + f1(p[0]) + '" y="' + f1(Y(p[1])) + '">' + t + "</text>").join("");
   return '<svg class="plan" viewBox="' + f1(X0) + " 0 " + f1(X1 - X0) + " " + f1(Y1 - Y0) + '" role="img" aria-label="Troquel galeno ' + model.info.caja + ' mm con cada cota expresada en sus variables"><path class="c" d="' + paths.c + '"/><path class="h" d="' + paths.h + '"/><path class="p" d="' + paths.p + '"/>' + dims + callSvg + "</svg>";
 }
@@ -253,31 +253,24 @@ function render(source) {
 }
 const name = () => "GALENO-" + fmtMm(state.L) + "x" + fmtMm(state.A) + "x" + fmtMm(state.H);
 const say = (t) => (document.getElementById("status").textContent = t);
-${ARTIFACT ? `// En claude.ai el visor guarda archivos sólo con el permiso de descargas y no acepta .dxf ni .cf2:
-// se entregan dentro de un .zip, que adentro tiene el archivo con su extensión real.
-const CRC = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
-function zipOne(filename, text) {
-  const data = new TextEncoder().encode(text), nameBytes = new TextEncoder().encode(filename);
-  let crc = 0xffffffff; for (const b of data) crc = CRC[(crc ^ b) & 255] ^ (crc >>> 8); crc = (crc ^ 0xffffffff) >>> 0;
-  const local = new DataView(new ArrayBuffer(30)), central = new DataView(new ArrayBuffer(46)), end = new DataView(new ArrayBuffer(22));
-  const now = new Date(), time = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1), date = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
-  local.setUint32(0, 0x04034b50, true); local.setUint16(4, 20, true); local.setUint16(6, 0x0800, true); local.setUint16(10, time, true); local.setUint16(12, date, true);
-  local.setUint32(14, crc, true); local.setUint32(18, data.length, true); local.setUint32(22, data.length, true); local.setUint16(26, nameBytes.length, true);
-  central.setUint32(0, 0x02014b50, true); central.setUint16(4, 20, true); central.setUint16(6, 20, true); central.setUint16(8, 0x0800, true); central.setUint16(12, time, true); central.setUint16(14, date, true);
-  central.setUint32(16, crc, true); central.setUint32(20, data.length, true); central.setUint32(24, data.length, true); central.setUint16(28, nameBytes.length, true);
-  const offset = 30 + nameBytes.length + data.length;
-  end.setUint32(0, 0x06054b50, true); end.setUint16(8, 1, true); end.setUint16(10, 1, true); end.setUint32(12, 46 + nameBytes.length, true); end.setUint32(16, offset, true);
-  return new Blob([local, nameBytes, data, central, nameBytes, end]);
-}
+${ARTIFACT ? `// En claude.ai el visor guarda archivos sólo con el permiso de descargas. Se intenta el .dxf o .cf2
+// directo; si el visor no acepta esa extensión, se guarda con .txt al final para renombrar.
 let downloads = null;
 window.claude?.use?.("downloads").then((d) => { downloads = d; }).catch(() => {});
 async function download(text, ext) {
   if (!downloads) { say("Las descargas no están disponibles en esta vista. Usá Copiar y pegalo en un archivo ." + ext + "."); return; }
   const file = name() + "." + ext;
   try {
-    await downloads.save({ filename: name() + "-" + ext + ".zip", data: zipOne(file, text) });
-    say("Guardado " + name() + "-" + ext + ".zip: adentro está " + file + ".");
+    await downloads.save({ filename: file, data: text });
+    say("Guardado " + file + ".");
   } catch (e) {
+    if (e && e.code === "rejected_extension") {
+      try {
+        await downloads.save({ filename: file + ".txt", data: text });
+        say("claude.ai no deja guardar ." + ext + ": se guardó " + file + ".txt. Borrale el .txt del nombre y abrilo en ArtiosCAD.");
+      } catch (e2) { say(e2 && e2.code === "declined" ? "Descarga cancelada." : "No se pudo descargar. Usá Copiar."); }
+      return;
+    }
     say(e && e.code === "declined" ? "Descarga cancelada." : "No se pudo descargar (" + ((e && e.code) || "error") + "). Usá Copiar y pegalo en un archivo ." + ext + ".");
   }
 }` : `function download(text, ext) {

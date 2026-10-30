@@ -82,7 +82,7 @@ li b{font-weight:500}
   <header>
     <span class="tag">Troquel 6463 · caja tipo galeno · guía de diseño paramétrico</span>
     <h1>Galeno 6463 para ArtiosCAD</h1>
-    <p class="lede">Mové las variables y el troquel se rearma con cada cota escrita en su fórmula y su valor; lo que cambió se marca en azul. Descargá el DXF o el CF2 para ArtiosCAD.</p>
+    <p class="lede">Mové las variables y el troquel se rearma con cada cota escrita en su fórmula y su valor; lo que cambió se marca en azul. El DXF descargado lleva sólo las líneas del troquel y las cotas H y L.</p>
   </header>
 
   <div class="desk">
@@ -120,7 +120,7 @@ li b{font-weight:500}
 // Caja tipo galeno (troquel 6463) paramétrica.
 // generate(params, plantilla) → { entities, dims, info, warnings }
 // Unidades: mm. El troquel se arma en las coordenadas del plano original (x a la derecha, y hacia
-// arriba) y al final se gira 90° a la derecha: el tubo queda vertical y el interior abajo.
+// arriba); al final la caja se gira 90° a la derecha (tubo vertical) y el separador va a su derecha.
 //
 // La caja se arma desde la plantilla del troquel 6463 (sus mismas curvas y compensaciones) moviendo
 // zonas rectas con L, A y H; las orejas curvas escalan con A. El interior se dibuja desde cero con
@@ -352,54 +352,83 @@ function generate(params, plantilla) {
   const map = box(P, plantilla, entities, problems);
   const right = map([989.1, 900])[0];
   const bottom = map([700, 525])[1];
+  const nBox = entities.length;
   const ins = insert(P, right + FIX.gap, bottom + 31, entities);
   const d = derived(P);
-  // Cotas (en el plano generado).
+  // Cotas de la caja (en coordenadas del plano original, antes del giro).
   const X = (x) => map([x, 900])[0];
   const Yb = (y) => map([700, y])[1];
   const Yf = (y) => map([300, y])[1];
-  const dims = [];
-  const H_ = (x0, x1, at, name) => dims.push({ dir: "h", x0, x1, at, name, value: x1 - x0 });
-  const V_ = (y0, y1, at, name) => dims.push({ dir: "v", y0, y1, at, name, value: y1 - y0 });
+  const boxDims = [];
+  const H_ = (list, x0, x1, at, name) => list.push({ dir: "h", x0, x1, at, name, value: x1 - x0 });
+  const V_ = (list, y0, y1, at, name) => list.push({ dir: "v", y0, y1, at, name, value: y1 - y0 });
   const cols = [67.1, 161.1, 484.1, 578.1, 898.1, 989.1].map(X);
   const names = ["costado", "frente", "costado", "contrafrente", "pegado"];
-  const pts = entities.flatMap((e) => (e.t === "L" ? [e.a, e.b] : arcPoints(e)));
-  const yMin = Math.min(...pts.map((q) => q[1])), yMax = Math.max(...pts.map((q) => q[1])), xMin = Math.min(...pts.map((q) => q[0]));
-  const xMax = ins.x0 + d.Wi;
-  cols.slice(1).forEach((x, i) => H_(cols[i], x, yMin - 40, names[i]));
-  H_(ins.x0, xMax, yMin - 40, "interior");
-  H_(cols[0], cols[5], yMin - 160, "caja");
-  H_(xMin, xMax, yMin - 210, "plano total");
+  const ptsOf = (list) => list.flatMap((e) => (e.t === "L" ? [e.a, e.b] : arcPoints(e)));
+  const yMin0 = Math.min(...ptsOf(entities.slice(0, nBox)).map((q) => q[1]));
+  cols.slice(1).forEach((x, i) => H_(boxDims, cols[i], x, yMin0 - 40, names[i]));
+  H_(boxDims, cols[0], cols[5], yMin0 - 160, "caja");
   const lidX = (X(586.1) + X(698)) / 2;
-  [530, 620, 630, 724, 1020, 1114, 1124, 1214].map(Yb).forEach((y, i, all) => i && V_(all[i - 1], y, lidX, ["lengüeta", "pestaña", "tapa", "contrafrente", "tapa", "pestaña", "lengüeta"][i - 1]));
-  V_(Yf(735), Yf(1009), X(300), "frente");
-  const r = ins.rows;
-  [0, r.c1, r.c2, r.p1, r.p2, r.c3, r.c4, r.top].map((v) => ins.y0 + v).forEach((y, i, all) => i && V_(all[i - 1], y, xMax + 45, ["pared", "puente", "tabique", "panel", "tabique", "puente", "pared"][i - 1]));
-  V_(ins.y0, ins.y0 + r.top, xMax + 175, "interior");
-  V_(yMin, yMax, xMax + 230, "plano total");
-  // Giro de 90° a la derecha: (x, y) → (y, −x).
+  [530, 620, 630, 724, 1020, 1114, 1124, 1214].map(Yb).forEach((y, i, all) => i && V_(boxDims, all[i - 1], y, lidX, ["lengüeta", "pestaña", "tapa", "contrafrente", "tapa", "pestaña", "lengüeta"][i - 1]));
+  V_(boxDims, Yf(735), Yf(1009), X(300), "frente");
+
+  // La caja se gira 90° a la derecha: (x, y) → (y, −x). El tubo queda vertical.
   const rot = ([x, y]) => [y, -x];
-  for (const e of entities) {
+  for (const e of entities.slice(0, nBox)) {
     if (e.t === "L") { e.a = rot(e.a); e.b = rot(e.b); }
     else { e.c = rot(e.c); e.a0 -= 90; e.a1 -= 90; }
   }
-  const turned = dims.map((q) => (q.dir === "h"
+  const dims = boxDims.map((q) => (q.dir === "h"
     ? { dir: "v", src: "h", y0: -q.x1, y1: -q.x0, at: q.at, name: q.name, value: q.value }
     : { dir: "h", src: "v", x0: q.y0, x1: q.y1, at: -q.at, name: q.name, value: q.value }));
+  const boxPts = ptsOf(entities.slice(0, nBox));
+  const bx = { xMin: Math.min(...boxPts.map((q) => q[0])), xMax: Math.max(...boxPts.map((q) => q[0])), yMin: Math.min(...boxPts.map((q) => q[1])), yMax: Math.max(...boxPts.map((q) => q[1])) };
+
+  // El separador queda a la derecha de la caja, a 8 mm, alineado arriba, con su largo vertical
+  // (girado 90° respecto de como quedaba debajo de la caja).
+  const r = ins.rows;
+  const tx = bx.xMax + FIX.gap - ins.x0, ty = bx.yMax - (ins.y0 + r.top);
+  const insT = ([x, y]) => [x + tx, y + ty];
+  for (const e of entities.slice(nBox)) {
+    if (e.t === "L") { e.a = insT(e.a); e.b = insT(e.b); }
+    else e.c = insT(e.c);
+  }
+  const ix0 = ins.x0 + tx, ix1 = ix0 + d.Wi, iy0 = ins.y0 + ty;
+  H_(dims, ix0, ix1, iy0 - 40, "interior");
+  dims[dims.length - 1].src = "h";
+  [0, r.c1, r.c2, r.p1, r.p2, r.c3, r.c4, r.top].map((v) => iy0 + v).forEach((y, i, all) => {
+    if (!i) return;
+    V_(dims, all[i - 1], y, ix1 + 45, ["pared", "puente", "tabique", "panel", "tabique", "puente", "pared"][i - 1]);
+    dims[dims.length - 1].src = "v";
+  });
+  V_(dims, iy0, iy0 + r.top, ix1 + 175, "interior");
+  dims[dims.length - 1].src = "v";
+
+  const all = ptsOf(entities);
+  const xMin = Math.min(...all.map((q) => q[0])), xMax = Math.max(...all.map((q) => q[0])), yMin = Math.min(...all.map((q) => q[1])), yMax = Math.max(...all.map((q) => q[1]));
+  H_(dims, xMin, xMax, yMin - 70, "plano total");
+  dims[dims.length - 1].src = "h";
+  V_(dims, yMin, yMax, xMin - 210, "plano total");
+  dims[dims.length - 1].src = "v";
   const info = {
     caja: `${P.L} × ${P.A} × ${P.H}`,
-    plancha: `${(yMax - yMin).toFixed(1)} × ${(xMax - xMin).toFixed(1)}`,
+    plancha: `${(xMax - xMin).toFixed(1)} × ${(yMax - yMin).toFixed(1)}`,
     frasco: `largo máx. ≈ ${d.bottle} · ⌀ cuerpo < ${P.Dc} · ⌀ cuello ≤ ${P.Dn}`,
     interior: `${d.Wi} × ${d.insertLen} (plegado ${d.folded} × ${d.Wi} × ${d.wall})`,
-    bounds: { xMin: yMin, xMax: yMax, yMin: -xMax, yMax: -xMin },
+    bounds: { xMin, xMax, yMin, yMax },
   };
-  return { P, entities, dims: turned, info, anchors: { map, insert: ins, rot }, notes, warnings: [...validate(P), ...problems] };
+  ins.T = insT;
+  return { P, entities, dims, info, anchors: { map, insert: ins, rot }, notes, warnings: [...validate(P), ...problems] };
 }
 
 // ---------- Salidas ----------
 const LAYERS = { c: ["CORTE", 1], h: ["HENDIDO", 2], p: ["PERFORADO", 6] };
 
-function toDxf(model, { dims = true, name = "GALENO" } = {}) {
+// Cotas que van al DXF: por defecto sólo H (alto del frente) y L (ancho del contrafrente).
+const HL = (d) => (d.src === "v" && d.name === "frente") || (d.src === "h" && d.name === "contrafrente");
+const HL_LABEL = (d) => (d.name === "frente" ? "H=" : "L=");
+
+function toDxf(model, { dims = "HL", name = "GALENO" } = {}) {
   const out = [];
   const put = (c, v) => out.push(String(c).padStart(3), String(v));
   const f = (v) => (Math.round(v * 1e4) / 1e4).toString();
@@ -416,14 +445,11 @@ function toDxf(model, { dims = true, name = "GALENO" } = {}) {
   if (dims) {
     const line = (a, b) => { put(0, "LINE"); put(8, "COTAS"); put(62, 5); put(10, f(a[0])); put(20, f(a[1])); put(30, 0); put(11, f(b[0])); put(21, f(b[1])); put(31, 0); };
     const text = (at, s, rot) => { put(0, "TEXT"); put(8, "COTAS"); put(62, 5); put(10, f(at[0])); put(20, f(at[1])); put(30, 0); put(40, 10); put(1, s); if (rot) put(50, rot); put(72, 1); put(11, f(at[0])); put(21, f(at[1])); put(31, 0); };
-    for (const d of model.dims) {
-      const v = fmt(d.value);
+    for (const d of model.dims.filter(dims === "HL" ? HL : () => true)) {
+      const v = (dims === "HL" ? HL_LABEL(d) : "") + fmt(d.value);
       if (d.dir === "h") { line([d.x0, d.at], [d.x1, d.at]); line([d.x0, d.at - 7], [d.x0, d.at + 7]); line([d.x1, d.at - 7], [d.x1, d.at + 7]); text([(d.x0 + d.x1) / 2, d.at + 5], v); }
       else { line([d.at, d.y0], [d.at, d.y1]); line([d.at - 7, d.y0], [d.at + 7, d.y0]); line([d.at - 7, d.y1], [d.at + 7, d.y1]); text([d.at - 5, (d.y0 + d.y1) / 2], v, 90); }
     }
-    const b = model.info.bounds;
-    const notes = [`${name}  caja ${model.info.caja} mm`, `L=${model.P.L} A=${model.P.A} H=${model.P.H} n=${model.P.n} Dc=${model.P.Dc} Dn=${model.P.Dn} p=${model.P.p} t=${model.P.t}`, "CORTE rojo - HENDIDO amarillo - PERFORADO magenta (intermitente 5x5). Troquelar de dorso."];
-    notes.forEach((s, i) => { put(0, "TEXT"); put(8, "COTAS"); put(62, 5); put(10, f(b.xMin)); put(20, f(b.yMax + 60 - i * 18)); put(30, 0); put(40, i ? 9 : 14); put(1, s); });
   }
   put(0, "ENDSEC"); put(0, "EOF");
   return out.join("\r\n") + "\r\n";
@@ -540,7 +566,7 @@ function arrow(x0, y0, x1, y1) {
 }
 function planSvg(prevDims) {
   const b = model.info.bounds;
-  const X0 = b.xMin - 270, X1 = b.xMax + 90, Y0 = b.yMin - 300, Y1 = b.yMax + 30;
+  const X0 = b.xMin - 270, X1 = b.xMax + 300, Y0 = b.yMin - 110, Y1 = b.yMax + 30;
   const cx = (b.xMin + b.xMax) / 2;
   const Y = (y) => Y1 - y;
   const paths = { c: "", h: "", p: "" };
@@ -586,10 +612,10 @@ function planSvg(prevDims) {
     [map([326, 1068]), "contratapa A − 6"],
     [map([741.5, 1000]), "traba 86,5 × 10"],
     [map([741.5, 1228]), "diente 85 × 5"],
-    [rot([ins.x0 + ins.centres[0], ins.y0 + (r.p2 + r.c3) / 2]), "⌀Dc"],
+    [ins.T([ins.x0 + ins.centres[0], ins.y0 + (r.p2 + r.c3) / 2]), "⌀Dc"],
   ];
-  if (ins.centres.length > 1) calls.push([rot([ins.x0 + ins.centres[1], ins.y0 + (r.p2 + r.c3) / 2 + 9]), "Dn"]);
-  calls.push([rot([ins.x0 + ins.centres[ins.centres.length > 1 ? 1 : 0], ins.y0 + r.c1 / 2]), "muesca 35 × 4"]);
+  if (ins.centres.length > 1) calls.push([ins.T([ins.x0 + ins.centres[1], ins.y0 + (r.p2 + r.c3) / 2 + 9]), "Dn"]);
+  calls.push([ins.T([ins.x0 + ins.centres[ins.centres.length > 1 ? 1 : 0], ins.y0 + r.c1 / 2]), "muesca 35 × 4"]);
   const callSvg = calls.map(([p, t]) => '<text class="call" x="' + f1(p[0]) + '" y="' + f1(Y(p[1])) + '">' + t + "</text>").join("");
   return '<svg class="plan" viewBox="' + f1(X0) + " 0 " + f1(X1 - X0) + " " + f1(Y1 - Y0) + '" role="img" aria-label="Troquel galeno ' + model.info.caja + ' mm con cada cota expresada en sus variables"><path class="c" d="' + paths.c + '"/><path class="h" d="' + paths.h + '"/><path class="p" d="' + paths.p + '"/>' + dims + callSvg + "</svg>";
 }

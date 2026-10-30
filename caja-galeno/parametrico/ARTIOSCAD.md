@@ -37,7 +37,7 @@ Guardá esa tabla de conversión para reutilizarla con cada variante. Unidades: 
 
 ## Variables
 
-El troquel sale girado 90° a la derecha: el tubo vertical y el interior abajo.
+El troquel sale con la caja girada 90° a la derecha (tubo vertical) y el separador a su derecha, a 8 mm, con el largo vertical. El DXF lleva las líneas del troquel y sólo las cotas H y L (`--todas-las-cotas` para el resto).
 
 
 | Var | Qué es | Original |
