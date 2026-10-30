@@ -1,0 +1,286 @@
+// Caja tipo galeno (troquel 6463) paramétrica.
+// generate(params, plantilla) → { entities, dims, info, warnings }
+// Unidades: mm. Coordenadas como el plano original: x a la derecha, y hacia arriba.
+//
+// La caja se arma desde la plantilla del troquel 6463 (sus mismas curvas y compensaciones) moviendo
+// zonas rectas con L, A y H; las orejas curvas escalan con A. El interior se dibuja desde cero con
+// las medidas de los frascos.
+
+export const DEFAULTS = {
+  L: 320, // largo interior (contrafrente), sentido del frasco
+  A: 94, // profundidad (costados)
+  H: 274, // alto del frente entre hendidos (largo del tubo)
+  n: 3, // frascos
+  Dc: 80, // ⌀ agujero del cuerpo
+  Dn: 31, // ancho de la ranura del cuello
+  p: 86.25, // paso entre frascos
+  t: 28, // puente de los tabiques
+};
+
+export const PARAMS = [
+  { key: "L", label: "Largo interior (contrafrente)", min: 150, max: 700, step: 1 },
+  { key: "A", label: "Profundidad (costados)", min: 50, max: 200, step: 1 },
+  { key: "H", label: "Alto del frente (tubo)", min: 120, max: 600, step: 1 },
+  { key: "n", label: "Cantidad de frascos", min: 1, max: 8, step: 1 },
+  { key: "Dc", label: "⌀ agujero del cuerpo", min: 20, max: 190, step: 0.5 },
+  { key: "Dn", label: "Ancho ranura del cuello", min: 8, max: 120, step: 0.5 },
+  { key: "p", label: "Paso entre frascos", min: 20, max: 300, step: 0.25 },
+  { key: "t", label: "Puente de los tabiques", min: 10, max: 80, step: 1 },
+];
+
+// Medidas fijas del troquel original que no dependen de los parámetros.
+const FIX = { tongueW: 33, tongueFromCentre: 13, notchW: 25, flareW: 40, flareLen: 23.8, edgeNotchW: 35, edgeNotchD: 4, gap: 8 };
+
+export function derived(P) {
+  const wall = P.A - 6, main = P.L - 65, Wi = P.H - 6;
+  return { wall, main, Wi, bottle: P.L - 14, insertLen: 4 * wall + 2 * P.t + main, folded: main + 2 * P.t };
+}
+
+export function validate(P) {
+  const d = derived(P), w = [];
+  const R = P.Dc / 2;
+  if (P.Dc > d.wall - 4) w.push(`El agujero de ⌀${P.Dc} no entra en el tabique de ${d.wall} (A − 6): dejá al menos 2 mm por lado.`);
+  if (P.Dn >= P.Dc) w.push(`La ranura del cuello (${P.Dn}) tiene que ser menor que el agujero del cuerpo (${P.Dc}).`);
+  if (FIX.flareW <= P.Dn) w.push(`La ranura del cuello (${P.Dn}) es más ancha que la boca de 40 mm de la ranura.`);
+  if (R < FIX.tongueW / 2 + 1) w.push(`Con ⌀${P.Dc} la lengüeta de apoyo de 33 mm no cabe en el agujero.`);
+  const span = (P.n - 1) * P.p + P.Dc;
+  if (span > d.Wi - 6) w.push(`${P.n} frascos con paso ${P.p} ocupan ${span.toFixed(1)} mm y el interior mide ${d.Wi} (H − 6).`);
+  if (P.n > 1 && P.p < P.Dc + 2) w.push(`El paso (${P.p}) es menor que el agujero más 2 mm: los agujeros se tocan.`);
+  if (d.main < 40) w.push(`El panel entre tabiques queda en ${d.main} mm (L − 65).`);
+  return w;
+}
+
+// ---------- Caja: mapa por zonas sobre la plantilla ----------
+function boxMap(P) {
+  const dL = P.L - 320, dA = P.A - 94, dH = P.H - 274;
+  const sA = P.A / 94;
+  const base = ([x, y]) => {
+    let sx = 0;
+    if (x < 531) sx -= dA; // costado
+    if (x < 330) sx -= dL; // frente
+    if (x < 114) sx -= dA; // costado exterior
+    if (x > 640) sx += dL / 2; // contrafrente (dos franjas: la traba queda centrada)
+    if (x > 840) sx += dL / 2;
+    if (x > 943) sx += dA; // solapa de pegado
+    let sy = y > 872 ? dH : 0;
+    if (x >= 165 && x <= 484.1) {
+      if (y > 1040) sy += dA; // contratapa
+      if (y < 704) sy -= dA;
+    } else if (x > 484.1) {
+      if (y > 1067) sy += dA; // tapa y guardapolvos
+      if (y > 1169) sy += dA; // lengüeta
+      if (y < 677) sy -= dA;
+      if (y < 575) sy -= dA;
+    }
+    return [x + sx, y + sy];
+  };
+  const ear = ([x, y]) => (x < 165 && (y > 1012 || y < 732) ? (y > 872 ? [161.1, 1017] : [161.1, 727]) : null);
+  const map = (p) => {
+    const a = ear(p);
+    if (!a) return base(p);
+    const A2 = base(a);
+    return [A2[0] + (p[0] - a[0]) * sA, A2[1] + (p[1] - a[1]) * sA];
+  };
+  return { map, ear, sA };
+}
+
+function box(P, plantilla, out, problems) {
+  const { map, ear, sA } = boxMap(P);
+  for (const e of plantilla) {
+    if (e[0] === "L") {
+      out.push({ t: "L", k: e[1], a: map([e[2], e[3]]), b: map([e[4], e[5]]) });
+    } else {
+      const [, k, cx, cy, r, a0, a1] = e;
+      let mid = a0 + (((a1 - a0) % 360) + 360) % 360 / 2;
+      const m = [cx + r * Math.cos((mid * Math.PI) / 180), cy + r * Math.sin((mid * Math.PI) / 180)];
+      const anchor = ear(m);
+      let c, R;
+      if (anchor) {
+        const A2 = map(anchor);
+        c = [A2[0] + (cx - anchor[0]) * sA, A2[1] + (cy - anchor[1]) * sA];
+        R = r * sA;
+      } else {
+        const d = [map(m)[0] - m[0], map(m)[1] - m[1]];
+        c = [cx + d[0], cy + d[1]];
+        R = r;
+      }
+      // Los extremos del arco tienen que caer donde caen las líneas vecinas.
+      for (const ang of [a0, a1]) {
+        const p0 = [cx + r * Math.cos((ang * Math.PI) / 180), cy + r * Math.sin((ang * Math.PI) / 180)];
+        const want = map(p0), got = [c[0] + R * Math.cos((ang * Math.PI) / 180), c[1] + R * Math.sin((ang * Math.PI) / 180)];
+        const err = Math.hypot(want[0] - got[0], want[1] - got[1]);
+        if (err > 0.05) problems.push(`arco en (${cx}, ${cy}) desplazado ${err.toFixed(2)} mm`);
+      }
+      out.push({ t: "A", k, c, r: R, a0, a1 });
+    }
+  }
+  return map;
+}
+
+// ---------- Interior ----------
+function insert(P, x0, y0, out) {
+  const d = derived(P);
+  const { wall, main, Wi } = d;
+  const t = P.t;
+  const c1 = wall, c2 = wall + t, p1 = 2 * wall + t, p2 = p1 + main, c3 = p2 + wall, c4 = c3 + t, top = c4 + wall;
+  const R = P.Dc / 2, hn = P.Dn / 2, hf = FIX.flareW / 2;
+  const L = (k, u0, v0, u1, v1) => out.push({ t: "L", k, a: [x0 + u0, y0 + v0], b: [x0 + u1, y0 + v1] });
+  const Arc = (k, u, v, r, a0, a1) => out.push({ t: "A", k, c: [x0 + u, y0 + v], r, a0, a1 });
+  const deg = (v) => (Math.acos(v) * 180) / Math.PI;
+  const centres = Array.from({ length: P.n }, (_, i) => Wi / 2 + (i - (P.n - 1) / 2) * P.p);
+  const gaps = { c1: [], c2: [], p1: [], p2: [], c3: [], c4: [], bottom: [], top: [] };
+
+  // Lado A: tabique entre p2 (intermitente) y c3 (hendido); lado B: entre c2 (hendido) y p1 (intermitente).
+  const sides = {
+    A: { vp: p2, vc: c3, far: c4, s: 1, rowP: "p2", rowC: "c3", rowFar: "c4", edge: "top" },
+    B: { vp: p1, vc: c2, far: c1, s: -1, rowP: "p1", rowC: "c2", rowFar: "c1", edge: "bottom" },
+  };
+  centres.forEach((u, i) => {
+    const baseSide = i % 2 === 0 ? "A" : "B";
+    const neckSide = baseSide === "A" ? "B" : "A";
+    // Agujero del cuerpo con lengüeta de apoyo y muesca al hendido.
+    {
+      const S = sides[baseSide], vm = (S.vp + S.vc) / 2, ht = FIX.tongueW / 2, hn2 = FIX.notchW / 2;
+      const aT = deg(ht / R), aN = deg(hn2 / R);
+      if (S.s > 0) { Arc("c", u, vm, R, 360 - aT, aN); Arc("c", u, vm, R, 180 - aN, 180 + aT); }
+      else { Arc("c", u, vm, R, 180 - aT, 180 + aN); Arc("c", u, vm, R, 360 - aN, aT); }
+      const vt = vm - S.s * FIX.tongueFromCentre;
+      L("c", u - ht, S.vp, u - ht, vt); L("c", u + ht, S.vp, u + ht, vt); L("c", u - ht, vt, u + ht, vt);
+      gaps[S.rowP].push([u - ht, u + ht]);
+      const vn = vm + S.s * Math.sqrt(R * R - hn2 * hn2);
+      L("c", u - hn2, vn, u - hn2, S.vc); L("c", u + hn2, vn, u + hn2, S.vc); L("c", u - hn2, S.vc, u + hn2, S.vc);
+      gaps[S.rowC].push([u - hn2, u + hn2]);
+      // Muesca en el borde exterior, del lado de la base.
+      const hw = FIX.edgeNotchW / 2, dd = FIX.edgeNotchD;
+      const ve = S.edge === "top" ? top : 0, vi = S.edge === "top" ? top - dd : dd;
+      L("c", u - hw, ve, u - hw, vi); L("c", u - hw, vi, u + hw, vi); L("c", u + hw, vi, u + hw, ve);
+      gaps[S.edge].push([u - hw, u + hw]);
+    }
+    // Ranura del cuello, abierta hacia el puente.
+    {
+      const S = sides[neckSide], vm = (S.vp + S.vc) / 2, vf = S.vc - S.s * FIX.flareLen;
+      if (S.s > 0) Arc("c", u, vm, hn, 180, 360); else Arc("c", u, vm, hn, 0, 180);
+      L("c", u - hn, vm, u - hn, vf); L("c", u + hn, vm, u + hn, vf);
+      L("c", u - hn, vf, u - hf, S.vc); L("c", u + hn, vf, u + hf, S.vc);
+      L("c", u - hf, S.vc, u - hf, S.far); L("c", u + hf, S.vc, u + hf, S.far); L("c", u - hf, S.far, u + hf, S.far);
+      gaps[S.rowC].push([u - hf, u + hf]);
+      gaps[S.rowFar].push([u - hf, u + hf]);
+    }
+  });
+  const row = (k, v, list) => {
+    const g = [...list].sort((a, b) => a[0] - b[0]);
+    let at = 0;
+    for (const [a, b] of g) { if (a > at + 0.01) L(k, at, v, a, v); at = Math.max(at, b); }
+    if (at < Wi - 0.01) L(k, at, v, Wi, v);
+  };
+  row("h", c1, gaps.c1); row("h", c2, gaps.c2); row("p", p1, gaps.p1); row("p", p2, gaps.p2); row("h", c3, gaps.c3); row("h", c4, gaps.c4);
+  row("c", 0, gaps.bottom); row("c", top, gaps.top);
+  L("c", 0, 0, 0, top); L("c", Wi, 0, Wi, top);
+  return { rows: { c1, c2, p1, p2, c3, c4, top }, centres, x0, y0 };
+}
+
+// Puntos de un arco (extremos y cuadrantes que recorre), para medir la plancha.
+function arcPoints(e) {
+  let a1 = e.a1;
+  while (a1 <= e.a0) a1 += 360;
+  const out = [];
+  for (let a = e.a0; a < a1; a += 1) out.push([e.c[0] + e.r * Math.cos((a * Math.PI) / 180), e.c[1] + e.r * Math.sin((a * Math.PI) / 180)]);
+  out.push([e.c[0] + e.r * Math.cos((a1 * Math.PI) / 180), e.c[1] + e.r * Math.sin((a1 * Math.PI) / 180)]);
+  return out;
+}
+
+// ---------- Todo ----------
+export function generate(params, plantilla) {
+  const P = { ...DEFAULTS, ...params };
+  const entities = [], problems = [];
+  const map = box(P, plantilla, entities, problems);
+  const right = map([989.1, 900])[0];
+  const bottom = map([700, 525])[1];
+  const ins = insert(P, right + FIX.gap, bottom + 31, entities);
+  const d = derived(P);
+  // Cotas (en el plano generado).
+  const X = (x) => map([x, 900])[0];
+  const Yb = (y) => map([700, y])[1];
+  const Yf = (y) => map([300, y])[1];
+  const dims = [];
+  const H_ = (x0, x1, at, name) => dims.push({ dir: "h", x0, x1, at, name, value: x1 - x0 });
+  const V_ = (y0, y1, at, name) => dims.push({ dir: "v", y0, y1, at, name, value: y1 - y0 });
+  const cols = [67.1, 161.1, 484.1, 578.1, 898.1, 989.1].map(X);
+  const names = ["costado", "frente", "costado", "contrafrente", "pegado"];
+  const pts = entities.flatMap((e) => (e.t === "L" ? [e.a, e.b] : arcPoints(e)));
+  const yMin = Math.min(...pts.map((q) => q[1])), yMax = Math.max(...pts.map((q) => q[1])), xMin = Math.min(...pts.map((q) => q[0]));
+  const xMax = ins.x0 + d.Wi;
+  cols.slice(1).forEach((x, i) => H_(cols[i], x, yMin - 40, names[i]));
+  H_(ins.x0, xMax, yMin - 40, "interior");
+  H_(cols[0], cols[5], yMin - 90, "caja");
+  H_(xMin, xMax, yMin - 140, "plano total");
+  const lidX = (X(586.1) + X(698)) / 2;
+  [530, 620, 630, 724, 1020, 1114, 1124, 1214].map(Yb).forEach((y, i, all) => i && V_(all[i - 1], y, lidX, ["lengüeta", "pestaña", "tapa", "contrafrente", "tapa", "pestaña", "lengüeta"][i - 1]));
+  V_(Yf(735), Yf(1009), X(300), "frente");
+  const r = ins.rows;
+  [0, r.c1, r.c2, r.p1, r.p2, r.c3, r.c4, r.top].map((v) => ins.y0 + v).forEach((y, i, all) => i && V_(all[i - 1], y, xMax + 45, ["pared", "puente", "tabique", "panel", "tabique", "puente", "pared"][i - 1]));
+  V_(ins.y0, ins.y0 + r.top, xMax + 110, "interior");
+  V_(yMin, yMax, xMax + 175, "plano total");
+  const info = {
+    caja: `${P.L} × ${P.A} × ${P.H}`,
+    plancha: `${(xMax - xMin).toFixed(1)} × ${(yMax - yMin).toFixed(1)}`,
+    frasco: `largo máx. ≈ ${d.bottle} · ⌀ cuerpo < ${P.Dc} · ⌀ cuello ≤ ${P.Dn}`,
+    interior: `${d.Wi} × ${d.insertLen} (plegado ${d.folded} × ${d.Wi} × ${d.wall})`,
+    bounds: { xMin, xMax, yMin, yMax },
+  };
+  return { P, entities, dims, info, warnings: [...validate(P), ...problems] };
+}
+
+// ---------- Salidas ----------
+const LAYERS = { c: ["CORTE", 1], h: ["HENDIDO", 2], p: ["PERFORADO", 6] };
+
+export function toDxf(model, { dims = true, name = "GALENO" } = {}) {
+  const out = [];
+  const put = (c, v) => out.push(String(c).padStart(3), String(v));
+  const f = (v) => (Math.round(v * 1e4) / 1e4).toString();
+  put(0, "SECTION"); put(2, "HEADER"); put(9, "$ACADVER"); put(1, "AC1009"); put(9, "$INSUNITS"); put(70, 4); put(9, "$MEASUREMENT"); put(70, 1); put(0, "ENDSEC");
+  put(0, "SECTION"); put(2, "TABLES"); put(0, "TABLE"); put(2, "LAYER"); put(70, 4);
+  for (const [n, c] of [...Object.values(LAYERS), ["COTAS", 5]]) { put(0, "LAYER"); put(2, n); put(70, 0); put(62, c); put(6, "CONTINUOUS"); }
+  put(0, "ENDTAB"); put(0, "ENDSEC");
+  put(0, "SECTION"); put(2, "ENTITIES");
+  for (const e of model.entities) {
+    const [layer, color] = LAYERS[e.k];
+    if (e.t === "L") { put(0, "LINE"); put(8, layer); put(62, color); put(10, f(e.a[0])); put(20, f(e.a[1])); put(30, 0); put(11, f(e.b[0])); put(21, f(e.b[1])); put(31, 0); }
+    else { put(0, "ARC"); put(8, layer); put(62, color); put(10, f(e.c[0])); put(20, f(e.c[1])); put(30, 0); put(40, f(e.r)); put(50, f(((e.a0 % 360) + 360) % 360)); put(51, f(((e.a1 % 360) + 360) % 360)); }
+  }
+  if (dims) {
+    const line = (a, b) => { put(0, "LINE"); put(8, "COTAS"); put(62, 5); put(10, f(a[0])); put(20, f(a[1])); put(30, 0); put(11, f(b[0])); put(21, f(b[1])); put(31, 0); };
+    const text = (at, s, rot) => { put(0, "TEXT"); put(8, "COTAS"); put(62, 5); put(10, f(at[0])); put(20, f(at[1])); put(30, 0); put(40, 10); put(1, s); if (rot) put(50, rot); put(72, 1); put(11, f(at[0])); put(21, f(at[1])); put(31, 0); };
+    for (const d of model.dims) {
+      const v = fmt(d.value);
+      if (d.dir === "h") { line([d.x0, d.at], [d.x1, d.at]); line([d.x0, d.at - 7], [d.x0, d.at + 7]); line([d.x1, d.at - 7], [d.x1, d.at + 7]); text([(d.x0 + d.x1) / 2, d.at + 5], v); }
+      else { line([d.at, d.y0], [d.at, d.y1]); line([d.at - 7, d.y0], [d.at + 7, d.y0]); line([d.at - 7, d.y1], [d.at + 7, d.y1]); text([d.at - 5, (d.y0 + d.y1) / 2], v, 90); }
+    }
+    const b = model.info.bounds;
+    const notes = [`${name}  caja ${model.info.caja} mm`, `L=${model.P.L} A=${model.P.A} H=${model.P.H} n=${model.P.n} Dc=${model.P.Dc} Dn=${model.P.Dn} p=${model.P.p} t=${model.P.t}`, "CORTE rojo - HENDIDO amarillo - PERFORADO magenta (intermitente 5x5). Troquelar de dorso."];
+    notes.forEach((s, i) => { put(0, "TEXT"); put(8, "COTAS"); put(62, 5); put(10, f(b.xMin)); put(20, f(b.yMax + 60 - i * 18)); put(30, 0); put(40, i ? 9 : 14); put(1, s); });
+  }
+  put(0, "ENDSEC"); put(0, "EOF");
+  return out.join("\r\n") + "\r\n";
+}
+
+// CF2 (Common Format 2): formato de intercambio de troquelería que ArtiosCAD importa.
+// Tipo de línea: 1 corte, 2 hendido, 3 perforado. Pointage 2 pt. Arcos: dirección 1 antihorario.
+export function toCf2(model, { name = "GALENO" } = {}) {
+  const b = model.info.bounds;
+  const f = (v) => (Math.round(v * 1e3) / 1e3).toFixed(3);
+  const type = { c: 1, h: 2, p: 3 };
+  const lines = ["$BOF", "V2", "ORDER", `MAIN,${name}`, "END", `MAIN,${name}`, "UM", `LL,${f(b.xMin)},${f(b.yMin)}`, `UR,${f(b.xMax)},${f(b.yMax)}`, "SCALE,1,1"];
+  for (const e of model.entities) {
+    if (e.t === "L") lines.push(`L,2,${type[e.k]},0,${f(e.a[0])},${f(e.a[1])},${f(e.b[0])},${f(e.b[1])},0,0`);
+    else {
+      const p = (a) => [e.c[0] + e.r * Math.cos((a * Math.PI) / 180), e.c[1] + e.r * Math.sin((a * Math.PI) / 180)];
+      const [s, t] = [p(e.a0), p(e.a1)];
+      lines.push(`A,2,${type[e.k]},0,${f(s[0])},${f(s[1])},${f(t[0])},${f(t[1])},${f(e.c[0])},${f(e.c[1])},1,0,0`);
+    }
+  }
+  lines.push("END", "$EOF");
+  return lines.join("\r\n") + "\r\n";
+}
+
+export const fmt = (v) => (Math.abs(v - Math.round(v)) < 0.05 ? String(Math.round(v)) : v.toFixed(1));
