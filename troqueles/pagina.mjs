@@ -116,7 +116,6 @@ svg.plan{display:block;width:100%;height:100%}
 .plan.simple .dim text{font-size:22px}
 .plan.simple .call{font-size:18px;fill:var(--accent);font-weight:600}
 .head h2{margin-right:auto}
-.head h2 .unit{font:500 13px var(--mono);color:var(--soft);letter-spacing:.08em;text-transform:uppercase;margin-left:6px}
 .var,.var b,.var label,.var input[type=number],.var input[type=range]{transition:background-color 1.5s ease,color 1.5s ease,border-color 1.5s ease,box-shadow 1.5s ease,accent-color 1.5s ease}
 .var.active,.var.active b,.var.active label,.var.active input{transition:none}
 .var{border-radius:16px;margin:0 -8px;padding:4px 8px}
@@ -139,11 +138,12 @@ svg.plan{display:block;width:100%;height:100%}
 .call{font:500 14px var(--mono);fill:var(--soft);text-anchor:middle}
 .figura{margin:2px 0 4px;position:relative}
 .campo{position:absolute;transform:translate(-50%,-50%);display:block}
-.campo .paso{display:inline-flex;align-items:center;gap:2px;background:var(--field);border:1px solid var(--rule);border-radius:980px;padding:2px 4px 2px 10px;box-shadow:0 1px 3px rgba(11,26,46,.08);transition:border-color 1.5s ease,box-shadow 1.5s ease}
-.campo input[type=number]{width:38px;font:600 13px var(--mono);color:var(--ink);background:none;border:0;padding:3px 0;text-align:right;font-variant-numeric:tabular-nums;-moz-appearance:textfield;appearance:textfield;transition:color 1.5s ease}
+.campo .paso{position:relative;display:block;background:var(--field);border:1px solid var(--rule);border-radius:980px;padding:2px 22px;box-shadow:0 1px 3px rgba(11,26,46,.08);transition:border-color 1.5s ease,box-shadow 1.5s ease}
+.campo input[type=number]{display:block;width:40px;font:600 13px var(--mono);color:var(--ink);background:none;border:0;padding:3px 0;text-align:center;font-variant-numeric:tabular-nums;-moz-appearance:textfield;appearance:textfield;transition:color 1.5s ease}
 .campo input[type=number]:focus-visible{outline:none}
 .campo input::-webkit-outer-spin-button,.campo input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-.campo .flechas{display:grid}
+/* Flechas al borde derecho; el número queda centrado en el campo (mismo margen a los dos lados). */
+.campo .flechas{position:absolute;right:4px;top:50%;transform:translateY(-50%);display:grid}
 .campo .flechas button{display:grid;place-items:center;width:18px;height:11px;padding:0;border:0;border-radius:4px;background:none;color:var(--accent);cursor:pointer}
 .campo .flechas button:hover{background:var(--flash)}
 .campo .flechas svg{width:9px;height:6px;fill:currentColor}
@@ -177,7 +177,7 @@ ${design.estilos || ""}
     </section>
     <div class="right">
     <section class="sheet plan-sheet" aria-labelledby="t-plano">
-      <div class="head"><h2 id="t-plano">Plano <span class="unit">mm</span></h2><button type="button" id="formulas" aria-pressed="false">Ver fórmulas</button></div>
+      <div class="head"><h2 id="t-plano">Plano</h2><button type="button" id="formulas" aria-pressed="false">Ver fórmulas</button></div>
       <div id="plan"></div>
       <div class="descargas">
         <p class="status" id="status" role="status"></p>
@@ -186,7 +186,7 @@ ${design.estilos || ""}
       </div>
     </section>
     <section class="sheet summary" aria-labelledby="t-res">
-      <div class="head"><h2 id="t-res">Resumen</h2><span class="tag">mm</span></div>
+      <div class="head"><h2 id="t-res">Resumen</h2></div>
       <dl class="facts" id="facts"></dl>
     </section>
     </div>

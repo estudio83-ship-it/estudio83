@@ -47,10 +47,12 @@ El troquel sale con la caja girada 90° a la derecha (tubo vertical) y el separa
 | Botella | `Dc` | Diámetro botella | Agujero del tabique (hasta 100, y hasta A − 2e − 4 y H − 2e − 6) | 80 |
 | Botella | `Dn` | Diámetro cuello | Ranura del tabique | 31 |
 | Botella | `n` | Cantidad | Botellas (hasta 6) | 3 |
-| Caja | `A` | Alto | Ancho de los costados; sale del diámetro, se puede corregir | 94 |
-| Caja | `H` | Ancho | Alto del frente entre hendidos (largo del tubo); sale de las botellas, se puede corregir | 274 |
+| Caja | `A` | Alto | Ancho de los costados; sale del diámetro, se puede agrandar pero no bajar de `Dc + 2e + 8` | 94 |
+| Caja | `H` | Ancho | Alto del frente entre hendidos (largo del tubo), hasta 660; sale de las botellas, se puede agrandar pero no achicar por debajo de lo que necesitan | 274 |
 | Caja | `t` | Puente separador | Puente de los tabiques | 28 |
 | Cartón | `e` | Espesor del cartón | Onda E 2 · B 3 · C 4 (el 6463 es onda B) | 3 |
+
+Mandan las botellas: el ancho y el alto de la caja nunca cambian la cantidad ni el diámetro. Alrededor de cada agujero del separador queda siempre material mínimo: 7,5 mm del agujero (o de la boca de la ranura del cuello) al costado, como en el 6463, y 4 mm del agujero a cada hendido del tabique.
 
 El paso entre ejes de botellas ya no es una variable: sale del diámetro, `p = Dc + 6` (86 con ⌀80; el 6463 tiene 86,25). `generar.mjs` todavía acepta `--p` para forzarlo.
 

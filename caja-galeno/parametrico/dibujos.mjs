@@ -21,14 +21,14 @@ const cota = (key, d, ar, tx) => '<g class="cota" data-var="' + key + '"><path d
 // La forma queda fija (la botella del 6463: 306 × ⌀80, cuello ⌀31); sólo cambian los valores de las cotas.
 // Las medidas se escriben en campos sobre las cotas (botellaCampos da dónde va cada uno).
 const FORMA = { Lb: 306, Dc: 80, Dn: 31 };
-const BOT = { W: 326, H: 230, cx: 160, base: 178, alto: 160 };
+const BOT = { W: 326, H: 250, cx: 163, base: 176, alto: 160 };
 export function botellaCampos() {
   const s = Math.min(BOT.alto / FORMA.Lb, 84 / FORMA.Dc), len = FORMA.Lb * s, R = (FORMA.Dc / 2) * s, rn = (FORMA.Dn / 2) * s;
   return {
-    Lb: [BOT.cx - R - 50, BOT.base - len / 2],
-    Dc: [BOT.cx, BOT.base + 16],
-    Dn: [BOT.cx + rn + 54, BOT.base - 0.78 * len],
-    n: [BOT.cx + R + 62, BOT.base - 0.3 * len],
+    Lb: [BOT.cx - R - 72, BOT.base - len / 2],
+    Dc: [BOT.cx, BOT.base + 32],
+    Dn: [BOT.cx + rn + 80, BOT.base - 0.78 * len],
+    n: [BOT.cx + R + 82, BOT.base - 0.3 * len],
   };
 }
 export function botellaSvg(P) {
@@ -47,14 +47,14 @@ export function botellaSvg(P) {
     "L" + r1(cx - R) + " " + r1(base - heel) + "Q" + r1(cx - R) + " " + r1(base) + " " + r1(cx - R + heel) + " " + r1(base) + "Z";
   // Bordes de la cápsula y del anillo del pico, de lado a lado del cuello.
   const lineas = "M" + r1(cx - rn) + " " + r1(yc) + "H" + r1(cx + rn) + "M" + r1(cx - rn) + " " + r1(yr) + "H" + r1(cx + rn);
-  const q = botellaCampos(), xL = q.Lb[0], yD = q.Dc[1], xN = cx + rn + 16;
+  const q = botellaCampos(), xL = q.Lb[0], yD = q.Dc[1], xN = q.Dn[0] - 36;
   const cAlto = cota("Lb", "M" + r1(cx - R - 3) + " " + r1(base) + "H" + r1(xL - 5) + "M" + r1(cx - rr - 3) + " " + r1(top) + "H" + r1(xL - 5) + "M" + r1(xL) + " " + r1(top) + "V" + r1(base), flechas(xL, top, xL, base), "");
   const cDiam = cota("Dc", "M" + r1(cx - R) + " " + r1(base + 3) + "V" + r1(yD + 5) + "M" + r1(cx + R) + " " + r1(base + 3) + "V" + r1(yD + 5) + "M" + r1(cx - R) + " " + r1(yD) + "H" + r1(cx + R), flechas(cx - R, yD, cx + R, yD), "");
   // El cuello es chico: flechas por fuera, apuntando hacia adentro; la línea llega hasta su campo.
   const cCue = cota("Dn", "M" + r1(cx - rn - 12) + " " + r1(yN) + "H" + r1(cx - rn) + "M" + r1(cx + rn) + " " + r1(yN) + "H" + r1(xN), punta(cx - rn, yN, -1, 0) + punta(cx + rn, yN, 1, 0), "");
-  // Rótulos chicos de cada campo.
-  const rot = (key, x, y, t, anchor = "middle") => '<text class="rotulo" data-var="' + key + '" x="' + r1(x) + '" y="' + r1(y) + '" text-anchor="' + anchor + '">' + t + "</text>";
-  const rotulos = rot("Lb", xL - 44, q.Lb[1] + 4, "Alto", "end") + rot("Dc", q.Dc[0], q.Dc[1] + 28, "⌀ botella") + rot("Dn", q.Dn[0], q.Dn[1] - 20, "⌀ cuello") + rot("n", q.n[0], q.n[1] - 20, "Cantidad");
+  // Rótulos chicos debajo de cada campo.
+  const rot = (key, t) => '<text class="rotulo" data-var="' + key + '" x="' + r1(q[key][0]) + '" y="' + r1(q[key][1] + 27) + '" text-anchor="middle">' + t + "</text>";
+  const rotulos = rot("Lb", "Alto") + rot("Dc", "⌀ botella") + rot("Dn", "⌀ cuello") + rot("n", "Cantidad");
   return '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Botella de vino de ' + Math.round(P.Lb) + " mm de alto, ⌀" + Math.round(P.Dc) + " de cuerpo y ⌀" + Math.round(P.Dn) + " de cuello, " + Math.round(P.n) + ' en la caja">' +
     '<path class="pieza" d="' + silueta + '"/><path class="filete" d="' + lineas + '"/>' + cAlto + cDiam + cCue + rotulos + "</svg>";
 }

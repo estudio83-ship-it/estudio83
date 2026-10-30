@@ -17,7 +17,7 @@ export function crearDiseno(PLANTILLA) {
     // Las medidas de la caja acompañan a las botellas (después se pueden corregir a mano):
     // la cantidad mueve el ancho H; el diámetro mueve el alto A y el ancho H (el paso es Dc + 6).
     enlazar(s, key) {
-      const ancho = Math.max(120, Math.min(600, widthFor(Math.min(6, s.n), pitchFor(s.Dc), s.e)));
+      const ancho = Math.max(120, Math.min(660, widthFor(Math.min(6, s.n), pitchFor(s.Dc), s.e)));
       if (key === "n") return { H: ancho };
       if (key === "Dc") return { A: Math.max(60, Math.min(200, depthFor(s.Dc, s.e))), H: ancho };
       return null;
@@ -33,7 +33,7 @@ export function crearDiseno(PLANTILLA) {
 .figura .filete{fill:none;stroke:var(--ink);stroke-width:.8}
 .figura .cota .fx{fill:var(--accent);font-weight:600}
 .figura .cota .val{fill:var(--soft);font-weight:500}
-.figura .rotulo{font:500 10.5px var(--mono);fill:var(--soft);transition:fill 1.5s ease}
+.figura .rotulo{font:500 10.5px var(--mono);fill:var(--soft);paint-order:stroke;stroke:var(--soft-bg);stroke-width:5px;stroke-linejoin:round;transition:fill 1.5s ease}
 .figura .rotulo.active{fill:var(--orange-deep);font-weight:700;transition:none}
 .figura .cota.active .fx,.figura .cota.active .val{fill:var(--orange-deep);font-weight:700}
 .figura .carton .sup{fill:var(--sheet)}

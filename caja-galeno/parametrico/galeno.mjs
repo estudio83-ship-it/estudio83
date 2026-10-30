@@ -45,7 +45,7 @@ export const PARAMS = [
   { key: "Dn", group: "Botella", label: "Diámetro cuello", min: 8, max: 38, step: 1 },
   { key: "n", group: "Botella", label: "Cantidad", min: 1, max: 6, step: 1 },
   { key: "A", group: "Caja", label: "Alto", min: 60, max: 200, step: 1 },
-  { key: "H", group: "Caja", label: "Ancho", min: 120, max: 600, step: 1 },
+  { key: "H", group: "Caja", label: "Ancho", min: 120, max: 660, step: 1 },
   { key: "t", group: "Caja", label: "Puente separador", min: 10, max: 80, step: 1 },
   { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 6, step: 1 },
 ];
@@ -62,26 +62,39 @@ export function derived(P) {
   return { wall, main, Wi, folded, bottle: folded - BOTTLE_GAP, insertLen: 4 * wall + 2 * P.t + main };
 }
 
+// Material mínimo alrededor de cada agujero del separador, para que no quede una tira finita que se
+// rompa: del borde del agujero (o de la boca de la ranura del cuello, si es más ancha) al costado del
+// separador, como en el 6463 (7,75), y del agujero a los hendidos del tabique, arriba y abajo (4).
+export const EDGE_MIN = 7.5;
+export const WALL_MIN = 4;
+
 // Rango válido de cada variable dado el resto, para que el troquel no tenga líneas cruzadas ni sueltas.
-// El orden importa: Dc depende de A y H; Dn de Dc; n y p de Dc y H.
+// Mandan las botellas: la cantidad sólo depende del diámetro (y del ancho máximo de la caja); el ancho
+// y el alto de la caja no bajan de lo que necesitan las botellas con su material mínimo alrededor.
 export function limits(P) {
   const st = Object.fromEntries(PARAMS.map((q) => [q.key, [q.min, q.max]]));
-  const lim = { e: st.e, A: st.A, H: st.H };
+  const lim = { e: st.e };
   const cl = (v, [a, b]) => Math.min(b, Math.max(a, v));
-  const e = cl(P.e, lim.e), A = cl(P.A, lim.A), H = cl(P.H, lim.H);
+  const e = cl(P.e, lim.e);
   // La caja que sale de la botella tiene que quedar entre 210 y 700 de largo.
   lim.Lb = [Math.max(st.Lb[0], L_RANGE[0] - 3 * e - BOTTLE_GAP), Math.min(st.Lb[1], L_RANGE[1] - 3 * e - BOTTLE_GAP)];
   const L = lengthFor(cl(P.Lb, lim.Lb), e);
   // El panel central del separador (L − 3e − 2t) no baja de 40.
   lim.t = [st.t[0], Math.max(st.t[0], Math.min(st.t[1], (L - 3 * e - 40) / 2))];
-  lim.Dc = [st.Dc[0], Math.min(st.Dc[1], A - 2 * e - 4, H - 2 * e - 6)];
+  lim.Dc = [st.Dc[0], Math.min(st.Dc[1], st.A[1] - 2 * e - 2 * WALL_MIN)];
   const Dc = cl(P.Dc, lim.Dc);
   lim.Dn = [st.Dn[0], Math.min(st.Dn[1], Dc - 6)];
-  const room = H - 2 * e - 6 - 2 * Math.max(Dc / 2, FIX.flareW / 2); // de centro a centro de las botellas extremas
+  const half = Math.max(Dc / 2, FIX.flareW / 2);
   const pMin = Math.max(Dc + 2, Dc / 2 + FIX.flareW / 2 + 3);
-  lim.n = [1, Math.max(1, Math.min(st.n[1], 1 + Math.floor(room / pMin + 1e-9)))];
+  // Lugar de centro a centro de las botellas extremas con la caja en su ancho máximo.
+  const room = st.H[1] - 2 * e - 2 * EDGE_MIN - 2 * half;
+  const p1 = cl(P.p, [pMin, 500]);
+  lim.n = [1, Math.max(1, Math.min(st.n[1], 1 + Math.floor(room / p1 + 1e-9)))];
   const n = cl(Math.round(P.n), lim.n);
   lim.p = n > 1 ? [pMin, Math.max(pMin, Math.min(500, room / (n - 1)))] : [pMin, Math.max(pMin, 500)];
+  const p = cl(P.p, lim.p);
+  lim.A = [Math.max(st.A[0], Dc + 2 * e + 2 * WALL_MIN), st.A[1]];
+  lim.H = [Math.max(st.H[0], (n - 1) * p + 2 * half + 2 * EDGE_MIN + 2 * e), st.H[1]];
   // Todo en milímetros enteros: los rangos se redondean hacia adentro.
   for (const k in lim) { const a = Math.ceil(lim[k][0] - 1e-9), b = Math.floor(lim[k][1] + 1e-9); lim[k] = [a, Math.max(a, b)]; }
   return lim;
@@ -96,10 +109,10 @@ export function clampParams(params) {
   const given = (k) => params && params[k] !== undefined;
   if (!given("p")) P.p = pitchFor(P.Dc);
   if (!given("A") && given("Dc")) P.A = Math.max(60, Math.min(200, depthFor(P.Dc, P.e)));
-  if (!given("H") && (given("n") || given("p") || given("Dc"))) P.H = Math.max(120, Math.min(600, widthFor(Math.round(P.n), P.p, P.e)));
+  if (!given("H") && (given("n") || given("p") || given("Dc"))) P.H = Math.max(120, Math.min(660, widthFor(Math.round(P.n), P.p, P.e)));
   const notes = [];
   const lim = limits(P);
-  for (const key of ["e", "Lb", "A", "H", "t", "Dc", "Dn", "n", "p"]) {
+  for (const key of ["e", "Lb", "t", "Dc", "Dn", "n", "p", "A", "H"]) {
     const [a, b] = limits(P)[key];
     let v = key === "n" ? Math.round(P[key]) : P[key];
     if (!Number.isFinite(v)) v = key === "p" ? pitchFor(P.Dc) : DEFAULTS[key];
@@ -114,7 +127,7 @@ export function clampParams(params) {
 export function validate(P) {
   const d = derived(P), w = [];
   const R = P.Dc / 2;
-  if (P.Dc > d.wall - 4) w.push(`El agujero de ⌀${P.Dc} no entra en el tabique de ${d.wall} (A − 2e): dejá al menos 2 mm por lado.`);
+  if (P.Dc > d.wall - 2 * WALL_MIN) w.push(`El agujero de ⌀${P.Dc} no entra en el tabique de ${d.wall} (A − 2e): dejá al menos ${WALL_MIN} mm por lado.`);
   if (P.Dn >= P.Dc) w.push(`La ranura del cuello (${P.Dn}) tiene que ser menor que el agujero del cuerpo (${P.Dc}).`);
   if (FIX.flareW <= P.Dn) w.push(`La ranura del cuello (${P.Dn}) es más ancha que la boca de 40 mm de la ranura.`);
   if (R < FIX.tongueW / 2 + 1) w.push(`Con ⌀${P.Dc} la lengüeta de apoyo de 33 mm no cabe en el agujero.`);
