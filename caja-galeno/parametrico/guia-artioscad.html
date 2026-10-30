@@ -10,7 +10,7 @@
   --ink:#0b1a2e;--soft:#3a4656;--rule:#cfdbea;--hairline:#d5dfeb;--crease:#6f7f92;
   --accent:#1d5fbf;--accent-deep:#174f9f;--eyebrow:#174f9f;--on-accent:#ffffff;--grid:rgba(29,95,191,0.09);
   --blue:#1f78e0;--blue-deep:#1662bd;--on-blue:#ffffff;
-  --warn:#a3471f;--note:#3a4656;--orange:#e8630a;--orange-deep:#c25105;--on-orange:#ffffff;--field:#ffffff;--flash:#e5edf8;
+  --warn:#a3471f;--note:#3a4656;--orange:#e8630a;--orange-deep:#c25105;--on-orange:#ffffff;--orange-soft:#fdeee3;--orange-ring:rgba(232,99,10,0.18);--field:#ffffff;--flash:#e5edf8;
   --shadow-float:0 10px 30px rgba(29,95,191,0.14);
   --display:Montserrat,Inter,sans-serif;--body:Inter,-apple-system,"Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
   color-scheme:light;
@@ -81,6 +81,17 @@ svg.plan{display:block;width:100%;min-width:680px;height:auto}
 .plan.simple .dim text{font-size:22px}
 .plan.simple .call{font-size:18px;fill:var(--accent);font-weight:600}
 .head h2{margin-right:auto}
+.var{border-radius:16px;margin:0 -8px;padding:4px 8px;transition:background-color .15s}
+.var.active{background:var(--orange-soft)}
+.var.active b,.var.active label{color:var(--orange-deep);font-weight:600}
+.var.active input[type=number]{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-ring)}
+.var.active input[type=range]{accent-color:var(--orange)}
+.dim.active path{stroke:var(--orange);stroke-width:2.4}
+.dim.active .ar{fill:var(--orange)}
+.dim.active text .fx,.dim.active text .val{fill:var(--orange-deep);font-weight:700}
+.dim.active text{font-size:20px}
+.plan.simple .dim.active text{font-size:28px}
+.call.active{fill:var(--orange-deep);font-weight:700;font-size:22px}
 .dim .fx{fill:var(--accent);font-weight:600}.dim .val{fill:var(--soft)}
 .dim.hot .val{fill:var(--accent);font-weight:600}
 .call{font:500 14px var(--mono);fill:var(--soft);text-anchor:middle}
@@ -650,6 +661,7 @@ for (const p of PARAMS) {
   }
   const row = document.createElement("div");
   row.className = "var";
+  row.dataset.key = p.key;
   // El deslizador arranca en el medio: su rango se centra en el valor original y llega a los dos extremos.
   const half = Math.max(DEFAULTS[p.key] - p.min, p.max - DEFAULTS[p.key]);
   const rMin = DEFAULTS[p.key] - half, rMax = DEFAULTS[p.key] + half;
@@ -662,6 +674,19 @@ function arrow(x0, y0, x1, y1) {
   const L = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / L, uy = (y1 - y0) / L, s = Math.min(9, L / 4), w = s * 0.35;
   const h = (x, y, dx, dy) => "M" + f1(x) + " " + f1(y) + "L" + f1(x + dx * s - dy * w) + " " + f1(y + dy * s + dx * w) + "L" + f1(x + dx * s + dy * w) + " " + f1(y + dy * s - dx * w) + "Z";
   return h(x0, y0, ux, uy) + h(x1, y1, -ux, -uy);
+}
+// Letras de variables que aparecen en una fórmula o llamada ("A − 4e/3" → A e).
+const lettersOf = (txt) => (txt.match(/Dc|Dn|(?<![A-Za-zÀ-ÿ])[LAHte](?![A-Za-zÀ-ÿ])/g) || []).join(" ");
+// Qué letras del plano mueve cada variable del panel.
+const TOUCHES = { Lb: ["L"], Dc: ["Dc"], Dn: ["Dn"], n: ["Dc", "Dn"], p: ["Dc", "Dn"], A: ["A"], H: ["H"], t: ["t"], e: ["e"] };
+let activeVar = null;
+function applyActive() {
+  document.querySelectorAll(".var").forEach((row) => row.classList.toggle("active", row.dataset.key === activeVar));
+  const want = activeVar ? TOUCHES[activeVar] : [];
+  document.querySelectorAll("#plan [data-vars]").forEach((el) => {
+    const vars = el.dataset.vars ? el.dataset.vars.split(" ") : [];
+    el.classList.toggle("active", vars.some((v) => want.includes(v)));
+  });
 }
 // Vista simple: sólo las cotas de las variables que se cargan (con su letra) y los totales de la plancha.
 const SIMPLE = { "h:costado": "A", "h:contrafrente": "L", "v:frente": "H", "v:puente": "t", "h:plano total": "", "v:plano total": "" };
@@ -697,7 +722,7 @@ function planSvg(prevDims) {
       if (!(key in SIMPLE) || seen.has(key)) return;
       seen.add(key);
     }
-    const hot = prevDims && prevDims[i] !== undefined && Math.abs(prevDims[i] - d.value) > 0.005 ? " hot" : "";
+    const hot = (prevDims && prevDims[i] !== undefined && Math.abs(prevDims[i] - d.value) > 0.005 ? " hot" : "") + '" data-vars="' + lettersOf(DIM_FORMULAS[d.src][d.name] ? DIM_FORMULAS[d.src][d.name][0] : "");
     const [plain, rich] = showFormulas ? text(d) : simpleText(d);
     const fits = plain.length * 10.4 < Math.abs(d.dir === "h" ? d.x1 - d.x0 : d.y1 - d.y0) - 12;
     if (d.dir === "h") {
@@ -729,7 +754,7 @@ function planSvg(prevDims) {
   if (ins.centres.length > 1) calls.push([ins.T([ins.x0 + ins.centres[1], ins.y0 + (r.p2 + r.c3) / 2 + 9]), "Dn"]);
   calls.push([ins.T([ins.x0 + ins.centres[ins.centres.length > 1 ? 1 : 0], ins.y0 + r.c1 / 2]), "muesca 35 × 4"]);
   const shown = showFormulas ? calls : calls.filter(([, t]) => t === "⌀Dc" || t === "Dn");
-  const callSvg = shown.map(([p, t]) => '<text class="call" x="' + f1(p[0]) + '" y="' + f1(Y(p[1])) + '">' + t + "</text>").join("");
+  const callSvg = shown.map(([p, t]) => '<text class="call" data-vars="' + lettersOf(t) + '" x="' + f1(p[0]) + '" y="' + f1(Y(p[1])) + '">' + t + "</text>").join("");
   return '<svg class="plan' + (showFormulas ? "" : " simple") + '" viewBox="' + f1(X0) + " 0 " + f1(X1 - X0) + " " + f1(Y1 - Y0) + '" role="img" aria-label="Troquel galeno ' + model.info.caja + ' mm' + (showFormulas ? " con cada cota expresada en sus variables" : " con las cotas de L, A, H y t") + '"><path class="c" d="' + paths.c + '"/><path class="h" d="' + paths.h + '"/><path class="p" d="' + paths.p + '"/>' + dims + callSvg + "</svg>";
 }
 const prevTables = {};
@@ -758,6 +783,7 @@ function render(source) {
     if (source === "commit" || source === rng) num.value = Math.round(model.P[p.key] * 100) / 100;
   }
   document.getElementById("plan").innerHTML = planSvg(prevDims);
+  applyActive();
     document.querySelectorAll("[data-onda]").forEach((b) => b.setAttribute("aria-pressed", String(Math.abs(ONDAS[b.dataset.onda] - model.P.e) < 1e-9)));
   const onda = Object.keys(ONDAS).find((k) => Math.abs(ONDAS[k] - model.P.e) < 1e-9);
   const P = model.P, ext = model.info.externa, x3 = (a) => a.map(fmtMm).join(" × ");
@@ -788,12 +814,19 @@ function download(text, ext) {
 document.getElementById("dl-dxf").addEventListener("click", () => download(toDxf(model, { name: name() }), "dxf"));
 document.getElementById("dl-cf2").addEventListener("click", () => download(toCf2(model, { name: name() }), "cf2"));
 form.addEventListener("input", (e) => render(e.target));
+// Variable activa: mientras se toca o tiene el foco, ella y sus cotas se marcan en naranja.
+const setActive = (key) => { if (activeVar !== key) { activeVar = key; applyActive(); } };
+form.addEventListener("focusin", (e) => { const row = e.target.closest(".var"); if (row) setActive(row.dataset.key); });
+form.addEventListener("focusout", () => setTimeout(() => { const row = document.activeElement && document.activeElement.closest && document.activeElement.closest(".var"); setActive(row ? row.dataset.key : null); }, 0));
+form.addEventListener("pointerdown", (e) => { const row = e.target.closest(".var"); if (row) setActive(row.dataset.key); });
+document.addEventListener("pointerup", () => { if (!form.contains(document.activeElement)) setActive(null); });
 document.getElementById("formulas").addEventListener("click", (e) => {
   showFormulas = !showFormulas;
   e.currentTarget.setAttribute("aria-pressed", String(showFormulas));
   e.currentTarget.textContent = showFormulas ? "Ocultar fórmulas" : "Ver fórmulas";
   document.getElementById("legend-dim").textContent = showFormulas ? "Fórmula = valor" : "Cota de variable";
   document.getElementById("plan").innerHTML = planSvg(null);
+  applyActive();
 });
 form.addEventListener("change", () => render("commit"));
 document.querySelectorAll("[data-onda]").forEach((b) => b.addEventListener("click", () => {
