@@ -15,30 +15,31 @@ export const DEFAULTS = {
   Dc: 80, // ⌀ del cuerpo de la botella: agujero del tabique
   Dn: 31, // ⌀ del cuello de la botella: ranura del tabique
   n: 3, // botellas
-  p: 86.25, // paso entre ejes de botellas
+  p: 86, // paso entre ejes de botellas (el 6463 tiene 86,25)
   A: 94, // profundidad de la caja (costados)
   H: 274, // alto del frente entre hendidos (largo del tubo)
   t: 28, // puente de los tabiques
   e: 3, // espesor del cartón: onda B (el 6463 está compensado para B)
 };
 export const lengthFor = (Lb, e) => Lb + 3 * e + BOTTLE_GAP;
-// El ancho sale de las botellas: n pasos más las paredes y el juego lateral del 6463 (274 = 3 × 86,25 + 2 × 3 + 9,25).
-export const SIDE_GAP = 9.25;
-export const widthFor = (n, p, e) => n * p + 2 * e + SIDE_GAP;
+// El ancho sale de las botellas: n pasos más las paredes y el juego lateral del 6463 (274 = 3 × 86 + 2 × 3 + 10),
+// redondeado al milímetro.
+export const SIDE_GAP = 10;
+export const widthFor = (n, p, e) => Math.round(n * p + 2 * e + SIDE_GAP);
 
 // Espesores de referencia por onda (mm). Cada fabricante tiene los suyos: e se puede editar.
 export const ONDAS = { E: 2, B: 3, C: 4 };
 
 export const PARAMS = [
   { key: "Lb", group: "Botella", label: "Largo de la botella", min: 180, max: 690, step: 1 },
-  { key: "Dc", group: "Botella", label: "⌀ cuerpo (agujero)", min: 36, max: 100, step: 0.5 },
-  { key: "Dn", group: "Botella", label: "⌀ cuello (ranura)", min: 8, max: 38, step: 0.5 },
+  { key: "Dc", group: "Botella", label: "⌀ cuerpo (agujero)", min: 36, max: 100, step: 1 },
+  { key: "Dn", group: "Botella", label: "⌀ cuello (ranura)", min: 8, max: 38, step: 1 },
   { key: "n", group: "Botella", label: "Cantidad de botellas", min: 1, max: 6, step: 1 },
-  { key: "p", group: "Botella", label: "Paso entre botellas", min: 20, max: 500, step: 0.25 },
+  { key: "p", group: "Botella", label: "Paso entre botellas", min: 20, max: 500, step: 1 },
   { key: "A", group: "Caja", label: "Profundidad (costados)", min: 60, max: 200, step: 1 },
   { key: "H", group: "Caja", label: "Alto del frente (tubo)", min: 120, max: 600, step: 1 },
   { key: "t", group: "Caja", label: "Puente de los tabiques", min: 10, max: 80, step: 1 },
-  { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 6, step: 0.1 },
+  { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 6, step: 1 },
 ];
 const L_RANGE = [210, 700];
 
@@ -73,6 +74,8 @@ export function limits(P) {
   lim.n = [1, Math.max(1, Math.min(st.n[1], 1 + Math.floor(room / pMin + 1e-9)))];
   const n = cl(Math.round(P.n), lim.n);
   lim.p = n > 1 ? [pMin, Math.max(pMin, Math.min(st.p[1], room / (n - 1)))] : [pMin, Math.max(pMin, st.p[1])];
+  // Todo en milímetros enteros: los rangos se redondean hacia adentro.
+  for (const k in lim) { const a = Math.ceil(lim[k][0] - 1e-9), b = Math.floor(lim[k][1] + 1e-9); lim[k] = [a, Math.max(a, b)]; }
   return lim;
 }
 
@@ -89,7 +92,7 @@ export function clampParams(params) {
     let v = key === "n" ? Math.round(P[key]) : P[key];
     if (!Number.isFinite(v)) v = DEFAULTS[key];
     const c = Math.min(b, Math.max(a, v));
-    if (Math.abs(c - P[key]) > 1e-9) notes.push(`${key} ajustado a ${Math.round(c * 100) / 100} (rango ${Math.round(a * 100) / 100}–${Math.round(b * 100) / 100} con estas medidas).`);
+    if (Math.abs(c - P[key]) > 1e-9) notes.push(`${key} ajustado a ${Math.round(c)} (rango ${a}–${b} con estas medidas).`);
     P[key] = c;
     if (key === "Lb") P.L = lengthFor(P.Lb, P.e);
   }
@@ -104,7 +107,7 @@ export function validate(P) {
   if (FIX.flareW <= P.Dn) w.push(`La ranura del cuello (${P.Dn}) es más ancha que la boca de 40 mm de la ranura.`);
   if (R < FIX.tongueW / 2 + 1) w.push(`Con ⌀${P.Dc} la lengüeta de apoyo de 33 mm no cabe en el agujero.`);
   const span = (P.n - 1) * P.p + P.Dc;
-  if (span > d.Wi - 6) w.push(`${P.n} botellas con paso ${P.p} ocupan ${span.toFixed(1)} mm y el interior mide ${d.Wi} (H − 2e).`);
+  if (span > d.Wi - 6) w.push(`${P.n} botellas con paso ${P.p} ocupan ${Math.round(span)} mm y el interior mide ${Math.round(d.Wi)} (H − 2e).`);
   if (P.n > 1 && P.p < P.Dc + 2) w.push(`El paso (${P.p}) es menor que el agujero más 2 mm: los agujeros se tocan.`);
   if (d.main < 40) w.push(`El panel entre tabiques queda en ${d.main} mm (L − 3e − 2t).`);
   return w;
@@ -350,13 +353,13 @@ export function generate(params, plantilla) {
   V_(dims, yMin, yMax, xMin - 210, "plano total");
   dims[dims.length - 1].src = "v";
   const info = {
-    caja: `${P.L} × ${P.A} × ${P.H}`,
+    caja: `${Math.round(P.L)} × ${Math.round(P.A)} × ${Math.round(P.H)}`,
     // Exterior del tubo armado: dos paredes en largo y profundidad; en alto, el contrafrente entre
     // los hendidos de las tapas (incluye los cierres de pared doble).
     externa: [P.L + 2 * P.e, P.A + 2 * P.e, P.H + (22 / 3) * P.e],
-    plancha: `${(xMax - xMin).toFixed(1)} × ${(yMax - yMin).toFixed(1)}`,
-    botella: `${P.n} × ${P.Lb} de largo · ⌀ ${P.Dc} cuerpo · ⌀ ${P.Dn} cuello`,
-    interior: `${d.Wi} × ${d.insertLen} (plegado ${d.folded} × ${d.Wi} × ${d.wall})`,
+    plancha: `${Math.round(xMax - xMin)} × ${Math.round(yMax - yMin)}`,
+    botella: `${Math.round(P.n)} × ${Math.round(P.Lb)} de largo · ⌀ ${Math.round(P.Dc)} cuerpo · ⌀ ${Math.round(P.Dn)} cuello`,
+    interior: `${Math.round(d.Wi)} × ${Math.round(d.insertLen)} (plegado ${Math.round(d.folded)} × ${Math.round(d.Wi)} × ${Math.round(d.wall)})`,
     bounds: { xMin, xMax, yMin, yMax },
   };
   ins.T = insT;
@@ -416,4 +419,4 @@ export function toCf2(model, { name = "GALENO" } = {}) {
   return lines.join("\r\n") + "\r\n";
 }
 
-export const fmt = (v) => (Math.abs(v - Math.round(v)) < 0.05 ? String(Math.round(v)) : v.toFixed(1));
+export const fmt = (v) => String(Math.round(v));

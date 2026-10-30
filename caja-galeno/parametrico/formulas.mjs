@@ -25,7 +25,7 @@ export const DIM_FORMULAS = {
 };
 
 const x = (a, b) => `${fmtMm(a)} × ${fmtMm(b)}`;
-export const fmtMm = (v) => (Math.abs(v - Math.round(v)) < 0.005 ? String(Math.round(v)) : (Math.round(v * 100) / 100).toString().replace(".", ","));
+export const fmtMm = (v) => String(Math.round(v));
 
 // [pieza, fórmula, valor(P)]
 export const TABLES = {

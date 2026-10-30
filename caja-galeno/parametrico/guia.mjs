@@ -57,9 +57,9 @@ p{margin:0;max-width:70ch}
 .sheet.plan-sheet{background-color:var(--mint);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px}
 .head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;align-items:baseline}
 .desk{display:grid;grid-template-columns:370px minmax(0,1fr);gap:22px;align-items:stretch}
-@media (max-width:860px){.desk{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:860px){.desk{grid-template-columns:minmax(0,1fr)}.plan-sheet #plan{height:420px}}
 .plan-sheet{grid-template-rows:auto auto 1fr}
-.plan-sheet #plan{display:grid;align-items:center}
+.plan-sheet #plan{display:block;height:620px;overflow:hidden}
 form{display:grid;gap:9px}
 .var{display:grid;grid-template-columns:30px minmax(0,1fr) 84px;gap:2px 10px;align-items:center}
 .var b{font:500 14px var(--mono);color:var(--accent)}
@@ -88,15 +88,13 @@ button.reset:hover{background:var(--orange-deep);border-color:var(--orange-deep)
 .facts dt{font:500 10.5px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--eyebrow)}
 .facts dd{margin:0;display:grid;gap:3px}
 .facts dd strong{font:700 16px/1.2 var(--display);white-space:nowrap;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
-.facts dd span{font:500 12px/1.3 var(--body);color:var(--soft)}
+.facts dd span{font:500 12px/1.3 var(--body);color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .side .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:14px;border-top:1px solid var(--rule)}
 .side .actions .status{grid-column:1 / -1}
 .side{grid-template-rows:auto auto auto auto auto 1fr}
-.warn{margin:0;padding:0;list-style:none;display:grid;gap:6px;color:var(--warn);font-size:13px}
-.warn li.note{color:var(--note)}
 .status{font:13px var(--mono);color:var(--soft);min-height:1.4em;margin:0}
 .scroll{overflow-x:auto}
-svg.plan{display:block;width:100%;min-width:680px;height:auto}
+svg.plan{display:block;width:100%;height:100%}
 .plan .k{fill:var(--kraft);stroke:var(--kraft);stroke-width:.8;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 .plan .c{fill:none;stroke:var(--ink);stroke-width:1.1;vector-effect:non-scaling-stroke}
 .plan .h{fill:none;stroke:var(--crease);stroke-width:.9;stroke-dasharray:6 4;vector-effect:non-scaling-stroke}
@@ -109,6 +107,7 @@ svg.plan{display:block;width:100%;min-width:680px;height:auto}
 .plan.simple .dim text{font-size:22px}
 .plan.simple .call{font-size:18px;fill:var(--accent);font-weight:600}
 .head h2{margin-right:auto}
+.head h2 .unit{font:500 13px var(--mono);color:var(--soft);letter-spacing:.08em;text-transform:uppercase;margin-left:6px}
 .var,.var b,.var label,.var input[type=number],.var input[type=range]{transition:background-color 1.5s ease,color 1.5s ease,border-color 1.5s ease,box-shadow 1.5s ease,accent-color 1.5s ease}
 .var.active,.var.active b,.var.active label,.var.active input{transition:none}
 .var{border-radius:16px;margin:0 -8px;padding:4px 8px}
@@ -167,7 +166,6 @@ li b{font-weight:500}
         <button type="button" data-onda="C">C · 4</button>
       </div>
       <button type="button" class="reset" id="reset">Reset</button>
-      <ul class="warn" id="warn"></ul>
       <div class="actions">
         <button type="button" class="primary" id="dl-dxf">Descargar DXF</button>
         <button type="button" class="primary" id="dl-cf2">Descargar CF2</button>
@@ -176,7 +174,7 @@ li b{font-weight:500}
     </section>
     <div class="right">
     <section class="sheet plan-sheet" aria-labelledby="t-plano">
-      <div class="head"><h2 id="t-plano">Plano</h2><button type="button" id="formulas" aria-pressed="false">Ver fórmulas</button></div>
+      <div class="head"><h2 id="t-plano">Plano <span class="unit">mm</span></h2><button type="button" id="formulas" aria-pressed="false">Ver fórmulas</button></div>
       <div class="legend" aria-hidden="true">
         <span><svg viewBox="0 0 28 8"><rect x=".5" y=".5" width="27" height="7" rx="2" fill="var(--kraft)" stroke="var(--ink)" stroke-width="1"/></svg>Cartón</span>
         <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--ink)" stroke-width="1.4"/></svg>Corte</span>
@@ -297,10 +295,10 @@ function planSvg(prevDims) {
   const map = (p) => model.anchors.rot(model.anchors.map(p)), ins = model.anchors.insert, r = ins.rows, rot = model.anchors.rot;
   const calls = [
     [map([530, 1090]), "guardapolvo A + 26"],
-    [map([944, 1090]), "A + 28,5"],
+    [map([944, 1090]), "A + 29"],
     [map([112, 1050]), "oreja × A/94"],
     [map([326, 1068]), "contratapa A − 2e"],
-    [map([741.5, 1000]), "traba 86,5 × 10e/3"],
+    [map([741.5, 1000]), "traba 87 × 10e/3"],
     [map([741.5, 1228]), "diente 85 × 5"],
     [ins.T([ins.x0 + ins.centres[0], ins.y0 + (r.p2 + r.c3) / 2]), "⌀Dc"],
   ];
@@ -327,7 +325,7 @@ function render(source) {
   }
   // Al cambiar la cantidad o el paso de las botellas, el ancho (H) se ajusta solo.
   if (source && /^[vr]-[np]$/.test(source.id || "")) {
-    state.H = Math.max(120, Math.round(widthFor(Math.min(6, state.n), state.p, state.e) * 100) / 100);
+    state.H = Math.max(120, widthFor(Math.min(6, state.n), state.p, state.e));
     document.getElementById("v-H").value = state.H;
     document.getElementById("r-H").value = state.H;
   }
@@ -337,9 +335,9 @@ function render(source) {
   const lim = limits(model.P);
   for (const p of PARAMS) {
     const [a, b2] = lim[p.key], rng = document.getElementById("r-" + p.key), num = document.getElementById("v-" + p.key);
-    num.min = Math.round(a * 100) / 100; num.max = Math.round(b2 * 100) / 100;
+    num.min = a; num.max = b2;
     rng.value = model.P[p.key];
-    if (source === "commit" || source === rng) num.value = Math.round(model.P[p.key] * 100) / 100;
+    if (source === "commit" || source === rng) num.value = Math.round(model.P[p.key]);
   }
   document.getElementById("plan").innerHTML = planSvg(prevDims);
   applyActive();
@@ -355,7 +353,6 @@ function render(source) {
     ["Plancha total", x3([b.xMax - b.xMin, b.yMax - b.yMin]), "ancho × alto"],
   ];
   document.getElementById("facts").innerHTML = facts.map(([k, v, hint]) => '<div class="row"><dt>' + k + "</dt><dd><strong>" + v + "</strong><span>" + hint + "</span></dd></div>").join("");
-  document.getElementById("warn").innerHTML = model.notes.map((w) => '<li class="note">' + w + "</li>").join("") + model.warnings.map((w) => "<li>" + w + "</li>").join("");
   clearTimeout(hotTimer);
   hotTimer = setTimeout(() => document.querySelectorAll(".hot").forEach((e) => e.classList.remove("hot")), 1400);
 }
