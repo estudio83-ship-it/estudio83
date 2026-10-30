@@ -29,7 +29,6 @@ export function crearDiseno(PLANTILLA) {
 .figura .pieza.lado{fill:var(--soft-bg)}
 .figura .pieza.frente{fill:#f8fafc}
 .figura .filete{fill:none;stroke:var(--ink);stroke-width:.8}
-.figura .hendido{fill:none;stroke:var(--crease);stroke-width:.9;stroke-dasharray:5 3}
 .figura .cota .fx{fill:var(--accent);font-weight:600}
 .figura .cota .val{fill:var(--soft);font-weight:500}
 .figura .cota.active .fx,.figura .cota.active .val{fill:var(--orange-deep);font-weight:700}

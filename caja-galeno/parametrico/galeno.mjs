@@ -40,8 +40,8 @@ export const pitchFor = (Dc) => Dc + PITCH_GAP;
 export const ONDAS = { E: 2, B: 3, C: 4 };
 
 export const PARAMS = [
-  { key: "Lb", group: "Botella", label: "Alto botella", min: 180, max: 690, step: 1 },
-  { key: "Dc", group: "Botella", label: "Diámetro botella", min: 36, max: 95, step: 1 },
+  { key: "Lb", group: "Botella", label: "Alto botella", min: 180, max: 350, step: 1 },
+  { key: "Dc", group: "Botella", label: "Diámetro botella", min: 36, max: 100, step: 1 },
   { key: "Dn", group: "Botella", label: "Diámetro cuello", min: 8, max: 38, step: 1 },
   { key: "n", group: "Botella", label: "Cantidad", min: 1, max: 6, step: 1 },
   { key: "A", group: "Caja", label: "Alto", min: 60, max: 200, step: 1 },

@@ -16,13 +16,14 @@ function flechas(x0, y0, x1, y1) {
 const rotulo = (x, y, letra, v, rot) => '<text x="' + r1(x) + '" y="' + r1(y) + '" text-anchor="middle"' + (rot ? ' transform="rotate(' + rot + " " + r1(x) + " " + r1(y) + ')"' : "") + '><tspan class="fx">' + letra + '</tspan><tspan class="val"> = ' + Math.round(v) + "</tspan></text>";
 const cota = (key, d, ar, tx) => '<g class="cota" data-var="' + key + '"><path d="' + d + '"/><path class="ar" d="' + ar + '"/>' + tx + "</g>";
 
-// Botella de vino bordelesa parada, en alzado y a escala (el mismo factor para alto y diámetros, así
-// mantiene sus proporciones reales), dibujada como el troquel: blanca con su contorno. Cuerpo recto
+// Botella de vino bordelesa parada, en alzado, dibujada como el troquel: blanca con su contorno. Cuerpo recto
 // 60 % del alto, hombro 12 %, cuello con la cápsula y el anillo del pico arriba.
+// La forma queda fija (la botella del 6463: 306 × ⌀80, cuello ⌀31); sólo cambian los valores de las cotas.
+const FORMA = { Lb: 306, Dc: 80, Dn: 31 };
 export function botellaSvg(P) {
   const W = 326, H = 214, cx = 160, base = 178, alto = 160;
-  const s = Math.min(alto / P.Lb, 84 / P.Dc);
-  const len = P.Lb * s, R = (P.Dc / 2) * s, rn = Math.max(1.4, (P.Dn / 2) * s), top = base - len;
+  const s = Math.min(alto / FORMA.Lb, 84 / FORMA.Dc);
+  const len = FORMA.Lb * s, R = (FORMA.Dc / 2) * s, rn = (FORMA.Dn / 2) * s, top = base - len;
   const Y = (f) => base - f * len;
   const yb = Y(0.6), ys = Y(0.72), yc = Y(0.84), yN = Y(0.78), heel = Math.min(R * 0.3, 0.04 * len), ring = Math.max(2.2, 0.028 * len), rr = rn + Math.max(1.2, 1.6 * s), yr = top + ring;
   const k1 = yb - (yb - ys) * 0.55, k2 = ys + (yb - ys) * 0.45;
@@ -46,7 +47,7 @@ export function botellaSvg(P) {
 }
 
 // La caja armada en isométrico, a escala, dibujada como el troquel: largo L (sale de la botella), ancho H
-// (de la cantidad de botellas) y alto A (del diámetro). La tapa marca su hendido sobre la cara de arriba.
+// (de la cantidad de botellas) y alto A (del diámetro).
 export function cajaSvg(P) {
   const W = 326, Hv = 196, c = Math.cos(Math.PI / 6), sn = 0.5;
   const L = P.L, Hb = P.H, A = P.A;
@@ -59,8 +60,6 @@ export function cajaSvg(P) {
   const caras = '<path class="pieza" d="' + poly([[0, 0, A], [L, 0, A], [L, Hb, A], [0, Hb, A]]) + '"/>' +
     '<path class="pieza lado" d="' + poly([[L, 0, 0], [L, Hb, 0], [L, Hb, A], [L, 0, A]]) + '"/>' +
     '<path class="pieza frente" d="' + poly([[0, Hb, 0], [L, Hb, 0], [L, Hb, A], [0, Hb, A]]) + '"/>';
-  // Hendido de la tapa sobre la cara de arriba, a lo largo del ancho.
-  const tapa = '<path class="hendido" d="M' + P2(pt(L * 0.08, 0, A)) + "L" + P2(pt(L * 0.08, Hb, A)) + '"/>';
   const borde = '<path class="filete" d="M' + P2(pt(L, Hb, A)) + "L" + P2(pt(L, Hb, 0)) + '"/>';
   // Cotas paralelas a las aristas, separadas 14 px por fuera.
   const off = (p, dx, dy) => [p[0] + dx, p[1] + dy];
@@ -78,7 +77,7 @@ export function cajaSvg(P) {
   const xa = pt(0, Hb, 0)[0] - 16;
   const cAlto = cota("A", "M" + P2(off(pt(0, Hb, 0), -3, 0)) + "H" + r1(xa - 5) + "M" + P2(off(pt(0, Hb, A), -3, 0)) + "H" + r1(xa - 5) + "M" + r1(xa) + " " + r1(pt(0, Hb, 0)[1]) + "V" + r1(pt(0, Hb, A)[1]), flechas(xa, pt(0, Hb, A)[1], xa, pt(0, Hb, 0)[1]), rotulo(xa - 6, (pt(0, Hb, 0)[1] + pt(0, Hb, A)[1]) / 2, "A", A, -90));
   return '<svg viewBox="0 0 ' + W + " " + Hv + '" role="img" aria-label="Caja de ' + Math.round(L) + " × " + Math.round(Hb) + " × " + Math.round(A) + ' mm (largo × ancho × alto)">' +
-    caras + tapa + borde + cLargo + cAncho + cAlto + "</svg>";
+    caras + borde + cLargo + cAncho + cAlto + "</svg>";
 }
 
 // Trozo de cartón corrugado en isométrico: dos papeles lisos y la onda entre ellos, a la vista en el

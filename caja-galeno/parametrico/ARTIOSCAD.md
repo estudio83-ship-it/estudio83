@@ -43,8 +43,8 @@ El troquel sale con la caja girada 90° a la derecha (tubo vertical) y el separa
 
 | Grupo | Var | En la página | Qué es | Original |
 |---|---|---|---|---|
-| Botella | `Lb` | Alto botella | Largo de la botella (va acostada a lo largo de la caja) | 306 |
-| Botella | `Dc` | Diámetro botella | Agujero del tabique (hasta 95, y hasta A − 2e − 4 y H − 2e − 6) | 80 |
+| Botella | `Lb` | Alto botella | Largo de la botella (va acostada a lo largo de la caja), hasta 350 | 306 |
+| Botella | `Dc` | Diámetro botella | Agujero del tabique (hasta 100, y hasta A − 2e − 4 y H − 2e − 6) | 80 |
 | Botella | `Dn` | Diámetro cuello | Ranura del tabique | 31 |
 | Botella | `n` | Cantidad | Botellas (hasta 6) | 3 |
 | Caja | `A` | Alto | Ancho de los costados; sale del diámetro, se puede corregir | 94 |

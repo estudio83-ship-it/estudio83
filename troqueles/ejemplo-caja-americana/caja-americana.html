@@ -457,17 +457,14 @@ for (const p of PARAMETROS) {
     const campo = document.createElement("label");
     campo.className = "campo";
     campo.dataset.key = p.key;
-    campo.innerHTML = '<input id="v-' + p.key + '" type="number" inputmode="numeric" aria-label="' + p.label + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + INICIAL[p.key] + '"><input id="r-' + p.key + '" type="range" hidden tabindex="-1" aria-hidden="true" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + INICIAL[p.key] + '">';
+    campo.innerHTML = '<input id="v-' + p.key + '" type="number" inputmode="numeric" aria-label="' + p.label + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + INICIAL[p.key] + '"><input id="r-' + p.key + '" type="range" hidden tabindex="-1" aria-hidden="true" min="0" max="1000" step="1" value="500">';
     fig.appendChild(campo);
     continue;
   }
   const row = document.createElement("div");
   row.className = "var";
   row.dataset.key = p.key;
-  // El deslizador arranca en el medio: su rango se centra en el valor original y llega a los dos extremos.
-  const half = Math.max(INICIAL[p.key] - p.min, p.max - INICIAL[p.key]);
-  const rMin = INICIAL[p.key] - half, rMax = INICIAL[p.key] + half;
-  row.innerHTML = '<b>' + p.key + '</b><label for="v-' + p.key + '">' + p.label + '</label><input id="v-' + p.key + '" type="number" inputmode="numeric" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + INICIAL[p.key] + '"><input id="r-' + p.key + '" type="range" aria-label="' + p.label + '" min="' + rMin + '" max="' + rMax + '" step="' + p.step + '" value="' + INICIAL[p.key] + '">';
+  row.innerHTML = '<b>' + p.key + '</b><label for="v-' + p.key + '">' + p.label + '</label><input id="v-' + p.key + '" type="number" inputmode="numeric" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + INICIAL[p.key] + '"><input id="r-' + p.key + '" type="range" aria-label="' + p.label + '" min="0" max="1000" step="1" value="500">';
   form.appendChild(row);
 }
 // Botones rápidos de una variable (por ejemplo, la onda del cartón).
@@ -562,12 +559,17 @@ function planSvg(prevDims) {
   const callSvg = calls.map(([p, t]) => '<text class="call" data-vars="' + lettersOf(t) + '" x="' + f1(p[0]) + '" y="' + f1(Y(p[1])) + '">' + t + "</text>").join("");
   return '<svg class="plan' + (showFormulas ? "" : " simple") + '" viewBox="' + f1(X0) + " 0 " + f1(X1 - X0) + " " + f1(Y1 - Y0) + '" role="img" aria-label="' + DESIGN.describir(model) + (showFormulas ? ", con cada cota expresada en sus variables" : ", con las cotas de las variables") + '"><path class="k" d="' + kraft + '"/><path class="c" d="' + paths.c + '"/><path class="h" d="' + paths.h + '"/><path class="p" d="' + paths.p + '"/>' + dims + callSvg + "</svg>";
 }
-const setValue = (key, v) => { state[key] = v; document.getElementById("v-" + key).value = v; document.getElementById("r-" + key).value = v; };
+// El deslizador arranca en el medio: la mitad izquierda va del mínimo al valor original y la derecha del
+// original al máximo, así llega a los dos extremos aunque el original no esté centrado.
+const deBarra = (p, r) => { const d = INICIAL[p.key], v = r < 500 ? p.min + ((d - p.min) * r) / 500 : d + ((p.max - d) * (r - 500)) / 500; return Math.round(v / p.step) * p.step; };
+const aBarra = (p, v) => { const d = INICIAL[p.key]; return v <= d ? (d === p.min ? 500 : (500 * (v - p.min)) / (d - p.min)) : (p.max === d ? 500 : 500 + (500 * (v - d)) / (p.max - d)); };
+const paramDe = (key) => PARAMETROS.find((q) => q.key === key);
+const setValue = (key, v) => { state[key] = v; document.getElementById("v-" + key).value = v; document.getElementById("r-" + key).value = aBarra(paramDe(key), v); };
 let hotTimer = 0;
 function render(source) {
   for (const p of PARAMETROS) {
     const num = document.getElementById("v-" + p.key), rng = document.getElementById("r-" + p.key);
-    if (source === rng) num.value = rng.value; else if (source === num) rng.value = num.value;
+    if (source === rng) num.value = deBarra(p, Number(rng.value)); else if (source === num) rng.value = aBarra(p, Number(num.value));
     const v = Number(num.value);
     // Todo en milímetros enteros cuando el paso es de 1 o más.
     if (Number.isFinite(v) && v > 0) state[p.key] = Math.min(p.max, Math.max(p.min, p.step >= 1 ? Math.round(v) : v));
@@ -582,7 +584,7 @@ function render(source) {
   for (const p of PARAMETROS) {
     const [a, b2] = lim[p.key] || [p.min, p.max], rng = document.getElementById("r-" + p.key), num = document.getElementById("v-" + p.key);
     num.min = a; num.max = b2;
-    rng.value = model.P[p.key];
+    rng.value = aBarra(p, model.P[p.key]);
     if (source === "commit" || source === rng) num.value = p.step >= 1 ? Math.round(model.P[p.key]) : model.P[p.key];
   }
   document.getElementById("plan").innerHTML = planSvg(prevDims);
