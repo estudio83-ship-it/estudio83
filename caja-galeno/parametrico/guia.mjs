@@ -34,7 +34,7 @@ const page = `<title>Caja tipo Galeno</title>
    pasada a azul por pedido. Un solo tema claro. Descargas en azul vivo y Reset en naranja. */
 :root{
   --paper:#fbfbfd;--sheet:#ffffff;--mint:#eef3fa;--soft-bg:#f3f6fa;--tint:#e5edf8;
-  --ink:#0b1a2e;--soft:#3a4656;--rule:#cfdbea;--hairline:#d5dfeb;--crease:#6f7f92;
+  --ink:#0b1a2e;--soft:#3a4656;--rule:#cfdbea;--hairline:#d5dfeb;--crease:#7a5a36;--kraft:#e9cc9f;--kraft-seam:#d3a774;
   --accent:#1d5fbf;--accent-deep:#174f9f;--eyebrow:#174f9f;--on-accent:#ffffff;--grid:rgba(29,95,191,0.09);
   --blue:#1f78e0;--blue-deep:#1662bd;--on-blue:#ffffff;
   --warn:#a3471f;--note:#3a4656;--orange:#e8630a;--orange-deep:#c25105;--on-orange:#ffffff;--orange-soft:#fdeee3;--orange-ring:rgba(232,99,10,0.18);--field:#ffffff;--flash:#e5edf8;
@@ -97,6 +97,7 @@ button.reset:hover{background:var(--orange-deep);border-color:var(--orange-deep)
 .status{font:13px var(--mono);color:var(--soft);min-height:1.4em;margin:0}
 .scroll{overflow-x:auto}
 svg.plan{display:block;width:100%;min-width:680px;height:auto}
+.plan .k{fill:var(--kraft);stroke:var(--kraft);stroke-width:.8;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 .plan .c{fill:none;stroke:var(--ink);stroke-width:1.1;vector-effect:non-scaling-stroke}
 .plan .h{fill:none;stroke:var(--crease);stroke-width:.9;stroke-dasharray:6 4;vector-effect:non-scaling-stroke}
 .plan .p{fill:none;stroke:var(--crease);stroke-width:.9;stroke-dasharray:2 3;vector-effect:non-scaling-stroke}
@@ -118,9 +119,10 @@ svg.plan{display:block;width:100%;min-width:680px;height:auto}
 .var.active b,.var.active label{color:var(--orange-deep);font-weight:600}
 .var.active input[type=number]{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-ring)}
 .var.active input[type=range]{accent-color:var(--orange)}
-.dim.active path{stroke:var(--orange);stroke-width:2.4}
+.dim.active path{stroke:var(--orange);stroke-width:3.2}
 .dim.active .ar{fill:var(--orange)}
 .dim.active text .fx,.dim.active text .val{fill:var(--orange-deep);font-weight:700}
+.dim.active text,.call.active{paint-order:stroke;stroke:var(--sheet);stroke-width:5px;stroke-linejoin:round}
 .dim.active text{font-size:20px}
 .plan.simple .dim.active text{font-size:28px}
 .call.active{fill:var(--orange-deep);font-weight:700;font-size:22px}
@@ -176,6 +178,7 @@ li b{font-weight:500}
     <section class="sheet plan-sheet" aria-labelledby="t-plano">
       <div class="head"><h2 id="t-plano">Plano</h2><button type="button" id="formulas" aria-pressed="false">Ver fórmulas</button></div>
       <div class="legend" aria-hidden="true">
+        <span><svg viewBox="0 0 28 8"><rect width="28" height="8" rx="2" fill="var(--kraft)"/></svg>Cartón</span>
         <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--ink)" stroke-width="1.4"/></svg>Corte</span>
         <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--crease)" stroke-width="1.2" stroke-dasharray="6 4"/></svg>Hendido</span>
         <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--crease)" stroke-width="1.2" stroke-dasharray="2 3"/></svg>Intermitente 5×5</span>
@@ -194,6 +197,7 @@ li b{font-weight:500}
 <script>
 ${strip("galeno.mjs")}
 ${strip("formulas.mjs")}
+${strip("carton.mjs")}
 const PLANTILLA = ${plantillaText};
 const form = document.getElementById("form");
 const state = { ...DEFAULTS };
@@ -254,6 +258,7 @@ function planSvg(prevDims) {
       paths[e.k] += "M" + f1(s[0]) + " " + f1(Y(s[1])) + "A" + f1(e.r) + " " + f1(e.r) + " 0 " + (sweep > 180 ? 1 : 0) + " 0 " + f1(t[0]) + " " + f1(Y(t[1]));
     }
   }
+  const kraft = cartonRings(model).map((r) => "M" + r.map((p) => f1(p[0]) + " " + f1(Y(p[1]))).join("L") + "Z").join("");
   const text = (d) => {
     const entry = DIM_FORMULAS[d.src][d.name], v = fmt(d.value).replace(".", ",");
     return entry && entry[0] !== v ? [entry[0] + " = " + v, '<tspan class="fx">' + entry[0] + '</tspan><tspan class="val"> = ' + v + "</tspan>"] : [v, '<tspan class="val">' + v + "</tspan>"];
@@ -303,7 +308,7 @@ function planSvg(prevDims) {
   calls.push([ins.T([ins.x0 + ins.centres[ins.centres.length > 1 ? 1 : 0], ins.y0 + r.c1 / 2]), "muesca 35 × 4"]);
   const shown = showFormulas ? calls : calls.filter(([, t]) => t === "⌀Dc" || t === "Dn");
   const callSvg = shown.map(([p, t]) => '<text class="call" data-vars="' + lettersOf(t) + '" x="' + f1(p[0]) + '" y="' + f1(Y(p[1])) + '">' + t + "</text>").join("");
-  return '<svg class="plan' + (showFormulas ? "" : " simple") + '" viewBox="' + f1(X0) + " 0 " + f1(X1 - X0) + " " + f1(Y1 - Y0) + '" role="img" aria-label="Troquel galeno ' + model.info.caja + ' mm' + (showFormulas ? " con cada cota expresada en sus variables" : " con las cotas de L, A, H y t") + '"><path class="c" d="' + paths.c + '"/><path class="h" d="' + paths.h + '"/><path class="p" d="' + paths.p + '"/>' + dims + callSvg + "</svg>";
+  return '<svg class="plan' + (showFormulas ? "" : " simple") + '" viewBox="' + f1(X0) + " 0 " + f1(X1 - X0) + " " + f1(Y1 - Y0) + '" role="img" aria-label="Troquel galeno ' + model.info.caja + ' mm' + (showFormulas ? " con cada cota expresada en sus variables" : " con las cotas de L, A, H y t") + '"><path class="k" d="' + kraft + '"/><path class="c" d="' + paths.c + '"/><path class="h" d="' + paths.h + '"/><path class="p" d="' + paths.p + '"/>' + dims + callSvg + "</svg>";
 }
 const prevTables = {};
 function tableHtml(key) {
