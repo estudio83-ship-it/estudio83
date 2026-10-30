@@ -17,7 +17,7 @@ export function crearDiseno(PLANTILLA) {
     // Las medidas de la caja acompañan a las botellas (después se pueden corregir a mano):
     // la cantidad mueve el ancho H; el diámetro mueve el alto A y el ancho H (el paso es Dc + 6).
     enlazar(s, key) {
-      const ancho = Math.max(120, Math.min(660, widthFor(Math.min(6, s.n), pitchFor(s.Dc), s.e)));
+      const ancho = Math.max(120, Math.min(600, widthFor(Math.min(6, s.n), pitchFor(s.Dc), s.e)));
       if (key === "n") return { H: ancho };
       if (key === "Dc") return { A: Math.max(60, Math.min(200, depthFor(s.Dc, s.e))), H: ancho };
       return null;

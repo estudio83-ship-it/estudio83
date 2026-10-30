@@ -45,9 +45,9 @@ export const PARAMS = [
   { key: "Dn", group: "Botella", label: "Diámetro cuello", min: 8, max: 38, step: 1 },
   { key: "n", group: "Botella", label: "Cantidad", min: 1, max: 6, step: 1 },
   { key: "A", group: "Caja", label: "Alto", min: 60, max: 200, step: 1 },
-  { key: "H", group: "Caja", label: "Ancho", min: 120, max: 660, step: 1 },
-  { key: "t", group: "Caja", label: "Puente separador", min: 10, max: 80, step: 1 },
-  { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 6, step: 1 },
+  { key: "H", group: "Caja", label: "Ancho", min: 120, max: 600, step: 1 },
+  { key: "t", group: "Caja", label: "Puente separador", min: 10, max: 50, step: 1 },
+  { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 7, step: 1 },
 ];
 const L_RANGE = [210, 700];
 
@@ -109,7 +109,7 @@ export function clampParams(params) {
   const given = (k) => params && params[k] !== undefined;
   if (!given("p")) P.p = pitchFor(P.Dc);
   if (!given("A") && given("Dc")) P.A = Math.max(60, Math.min(200, depthFor(P.Dc, P.e)));
-  if (!given("H") && (given("n") || given("p") || given("Dc"))) P.H = Math.max(120, Math.min(660, widthFor(Math.round(P.n), P.p, P.e)));
+  if (!given("H") && (given("n") || given("p") || given("Dc"))) P.H = Math.max(120, Math.min(600, widthFor(Math.round(P.n), P.p, P.e)));
   const notes = [];
   const lim = limits(P);
   for (const key of ["e", "Lb", "t", "Dc", "Dn", "n", "p", "A", "H"]) {

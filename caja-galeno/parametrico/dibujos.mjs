@@ -97,7 +97,7 @@ export function cajaSvg(P) {
 // corte. La onda crece con el espesor (E 2, B 3, C 4: más alta y más espaciada).
 export function ondaSvg(P, ondas) {
   // Todo a escala k (0,8: el ícono un 20 % más chico que el original).
-  const k = 0.8, e = P.e, T = (6 + e * 3) * k, pitch = (4 + e * 3) * k, W = 120 * k, D = 36 * k, liner = 1.4 * k, Tmax = (6 + 6 * 3) * k;
+  const k = 0.8, e = P.e, T = (6 + e * 3) * k, pitch = (4 + e * 3) * k, W = 120 * k, D = 36 * k, liner = 1.4 * k, Tmax = (6 + 7 * 3) * k;
   const c = Math.cos(Math.PI / 6), sn = Math.sin(Math.PI / 6);
   // Alto fijo (el del espesor máximo) para que el panel no cambie de tamaño; el trozo apoya abajo.
   const ox = 163 - ((W - D) * c) / 2, oy = 6 + Tmax - T, Hv = Tmax + (W + D) * sn + 30;
