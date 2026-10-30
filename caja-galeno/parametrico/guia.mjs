@@ -13,7 +13,7 @@ const outAt = process.argv.indexOf("--out");
 const plantillaText = readFileSync(join(HERE, "plantilla-caja.json"), "utf8");
 
 // Cada fórmula del plano tiene que dar lo que mide la geometría generada.
-for (const params of [{}, { L: 370 }, { L: 400, A: 110, H: 300, t: 32, n: 4, Dc: 70, Dn: 28, p: 72 }, { L: 250, A: 70, H: 200, n: 2, Dc: 56, Dn: 22, p: 64 }, { e: 1.5 }, { e: 4 }, { e: 4, L: 370, t: 40 }, { e: 1.5, A: 120, H: 300, t: 15 }]) {
+for (const params of [{}, { L: 370 }, { L: 400, A: 110, H: 300, t: 32, n: 4, Dc: 70, Dn: 28, p: 72 }, { L: 250, A: 70, H: 200, n: 2, Dc: 56, Dn: 22, p: 64 }, { e: 2 }, { e: 4 }, { e: 4, L: 370, t: 40 }, { e: 2, A: 120, H: 300, t: 15 }]) {
   const m = generate(params, JSON.parse(plantillaText));
   for (const d of m.dims) {
     const entry = DIM_FORMULAS[d.src][d.name];
@@ -122,7 +122,7 @@ li b{font-weight:500}
       <form id="form" autocomplete="off"></form>
       <div class="presets onda" role="group" aria-label="Onda del cartón">
         <span class="tag">Onda</span>
-        <button type="button" data-onda="E">E · 1,5</button>
+        <button type="button" data-onda="E">E · 2</button>
         <button type="button" data-onda="B">B · 3</button>
         <button type="button" data-onda="C">C · 4</button>
       </div>

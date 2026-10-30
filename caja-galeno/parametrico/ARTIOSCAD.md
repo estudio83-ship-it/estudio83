@@ -50,7 +50,7 @@ El troquel sale con la caja girada 90° a la derecha (tubo vertical) y el separa
 | `Dn` | Ancho de la ranura del cuello | 31 |
 | `p` | Paso entre frascos | 86,25 |
 | `t` | Puente de los tabiques | 28 |
-| `e` | Espesor del cartón: onda E 1,5 · B 3 · C 4 (el 6463 es onda B) | 3 |
+| `e` | Espesor del cartón: onda E 2 · B 3 · C 4 (el 6463 es onda B) | 3 |
 
 Derivadas: el separador plegado ocupa `L − 3e` de largo (si crece `t`, se achica el panel central `L − 3e − 2t`, la caja no cambia); frasco hasta `L − 3e − 5`; interior de `H − 2e` de ancho por `4A + L − 11e` de largo.
 
@@ -114,5 +114,5 @@ Frascos en `Wi/2 + (i − (n−1)/2)·p`, alternados: los pares apoyan el cuerpo
 ## Límites
 
 - El `.ARD` de ArtiosCAD es un formato cerrado: no se puede generar un paramétrico nativo desde afuera. El DXF/CF2 trae la geometría exacta para cada juego de variables; las fórmulas de arriba son para rearmarlo como paramétrico dentro de ArtiosCAD.
-- Las compensaciones de espesor salen del 6463 (onda B) escaladas por `e/3`. Los espesores por onda (E 1,5 · B 3 · C 4) son de referencia: usá los de tu cartonera.
+- Las compensaciones de espesor salen del 6463 (onda B) escaladas por `e/3`. Los espesores por onda (E 2 · B 3 · C 4) son de referencia: usá los de tu cartonera.
 - La variante +50 que hizo `estirar.mjs` corría la ranura de traba y el diente 50 mm juntos (quedaban alineados pero 28,5 mm fuera del centro del contrafrente). Este generador reparte el estiramiento a ambos lados de la traba, así que con `--L 370` queda centrada.

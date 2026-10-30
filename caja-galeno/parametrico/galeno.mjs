@@ -20,7 +20,7 @@ export const DEFAULTS = {
 };
 
 // Espesores de referencia por onda (mm). Cada fabricante tiene los suyos: e se puede editar.
-export const ONDAS = { E: 1.5, B: 3, C: 4 };
+export const ONDAS = { E: 2, B: 3, C: 4 };
 
 export const PARAMS = [
   { key: "L", label: "Largo interior (contrafrente)", min: 210, max: 700, step: 1 },
