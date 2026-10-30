@@ -29,7 +29,7 @@ y `caja-galeno/parametrico/` (completo, armado desde el DXF del troquel 6463).
 5. **Verificar.** `node check.mjs` (cientos de combinaciones sin problemas) y `node pagina.mjs` (falla si
    una fórmula no coincide con el plano). Mirá la página con Playwright: vista simple, con fórmulas, y
    arrastrando un deslizador (la cota en naranja).
-6. **Publicar** con `node pagina.mjs --artefacto --out <scratchpad>/<nombre>.html` y la herramienta
+6. **Publicar** con `node pagina.mjs --out <scratchpad>/<nombre>.html` (con `--proteger` si lleva clave) y la herramienta
    Artifact con el permiso `downloads`. Si ya hay un artefacto de ese diseño, actualizalo por su URL.
 
 ## Lo que el usuario ya pidió (respetarlo en todos los diseños)

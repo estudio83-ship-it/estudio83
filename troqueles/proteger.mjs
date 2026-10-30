@@ -28,6 +28,10 @@ export async function protegerPagina(html, clave) {
   const sobre = JSON.stringify({ s: b64(sal), i: b64(iv), d: b64(cifrado), n: VUELTAS });
   return `<title>${title}</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<script>
+// El permiso de descargas de claude.ai se pide antes que nada; la página, al abrirse, usa esta misma respuesta.
+window.__descargas = window.claude && window.claude.use ? window.claude.use("downloads") : null;
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>

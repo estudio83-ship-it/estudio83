@@ -28,8 +28,7 @@ export function verificarFormulas(design) {
 // fuentes: archivos del diseño a copiar en la página, en orden de dependencia.
 // prologo: código que va antes (por ejemplo, la plantilla JSON en una constante).
 // crear: expresión que crea el diseño dentro de la página.
-// artefacto: true para publicarla en claude.ai (descargas por el permiso "downloads").
-export function armarPagina({ design, fuentes, prologo = "", crear, artefacto = false }) {
+export function armarPagina({ design, fuentes, prologo = "", crear }) {
   verificarFormulas(design);
   const comunes = ["cad.mjs", "carton.mjs"].map((f) => copiar(join(AQUI, f))).join("\n");
   return `<title>${design.titulo}</title>
@@ -328,35 +327,41 @@ function render(source) {
 }
 const name = () => DESIGN.archivo(model);
 const say = (t) => (document.getElementById("status").textContent = t);
-${artefacto ? `// En claude.ai el visor guarda archivos sólo con el permiso de descargas. Se intenta el .dxf o .cf2
-// directo; si el visor no acepta esa extensión, se guarda con .txt al final para renombrar.
+// En claude.ai los archivos se guardan con el permiso de descargas (la página protegida lo pide apenas
+// carga, en window.__descargas). claude.ai no acepta .dxf ni .cf2: se guardan con .txt al final para
+// renombrar. Fuera de claude.ai, o si el permiso no está, descarga directa del navegador.
 let downloads = null;
-window.claude?.use?.("downloads").then((d) => { downloads = d; }).catch(() => {});
+const pedido = window.__descargas || (window.claude && window.claude.use ? window.claude.use("downloads") : null);
+if (pedido) pedido.then((d) => { downloads = d; }).catch(() => {});
+function directa(text, file) {
+  try {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: "application/octet-stream" }));
+    a.download = file;
+    document.body.appendChild(a); a.click(); a.remove();
+    say("Descarga iniciada: " + file + ".");
+  } catch (e) { say("No se pudo descargar."); }
+}
 async function download(text, ext) {
-  if (!downloads) { say("Las descargas no están disponibles en esta vista."); return; }
   const file = name() + "." + ext;
+  if (!downloads && pedido) { say("Preparando la descarga…"); try { downloads = await pedido; } catch (e) {} }
+  if (!downloads) { directa(text, file); return; }
   try {
     await downloads.save({ filename: file, data: text });
     say("Guardado " + file + ".");
   } catch (e) {
-    if (e && e.code === "rejected_extension") {
+    if (e && (e.code === "rejected_extension" || e.code === "extension_not_enabled")) {
       try {
         await downloads.save({ filename: file + ".txt", data: text });
-        say("claude.ai no deja guardar ." + ext + ": se guardó " + file + ".txt. Borrale el .txt del nombre y abrilo en ArtiosCAD.");
-      } catch (e2) { say(e2 && e2.code === "declined" ? "Descarga cancelada." : "No se pudo descargar."); }
+        say("Se guardó " + file + ".txt: borrale el .txt del nombre y abrilo en ArtiosCAD.");
+      } catch (e2) { say(e2 && e2.code === "declined" ? "Descarga cancelada." : "No se pudo descargar (" + ((e2 && e2.code) || "error") + ")."); }
       return;
     }
-    say(e && e.code === "declined" ? "Descarga cancelada." : "No se pudo descargar (" + ((e && e.code) || "error") + ").");
+    if (e && e.code === "declined") { say("Descarga cancelada."); return; }
+    if (e && e.code === "rate_limited") { say("Ya hay una descarga esperando confirmación."); return; }
+    directa(text, file);
   }
-}` : `function download(text, ext) {
-  try {
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([text], { type: "application/octet-stream" }));
-    a.download = name() + "." + ext;
-    document.body.appendChild(a); a.click(); a.remove();
-    say("Descarga iniciada: " + a.download + ".");
-  } catch (e) { say("No se pudo descargar."); }
-}`}
+}
 document.getElementById("dl-dxf").addEventListener("click", () => download(DESIGN.dxf(model, name()), "dxf"));
 document.getElementById("dl-cf2").addEventListener("click", () => download(DESIGN.cf2(model, name()), "cf2"));
 form.addEventListener("input", (e) => render(e.target));

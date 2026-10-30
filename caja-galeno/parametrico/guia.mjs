@@ -1,6 +1,6 @@
 // Escribe guia-artioscad.html: la página interactiva del galeno paramétrico, armada con la
 // plantilla de troqueles (../../troqueles). Verifica antes que cada fórmula dé lo que mide el plano.
-// node guia.mjs [--artefacto] [--proteger] [--out archivo.html]
+// node guia.mjs [--proteger] [--out archivo.html]
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,7 +17,6 @@ const abierta = armarPagina({
   fuentes: ["galeno.mjs", "formulas.mjs", "diseno.mjs"].map((f) => join(HERE, f)),
   prologo: `const PLANTILLA = ${plantillaText};`,
   crear: "crearDiseno(PLANTILLA)",
-  artefacto: process.argv.includes("--artefacto"),
 });
 // --proteger encripta la página con la clave de la variable de entorno TROQUEL_CLAVE.
 const proteger = process.argv.includes("--proteger");

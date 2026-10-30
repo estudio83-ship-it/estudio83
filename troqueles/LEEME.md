@@ -27,7 +27,7 @@ Diseños hechos con la plantilla: `ejemplo-caja-americana/` y `../caja-galeno/pa
 ## Proteger una página con clave
 
 ```bash
-TROQUEL_CLAVE='la-clave' node caja-galeno/parametrico/guia.mjs --artefacto --proteger --out caja-galeno.html
+TROQUEL_CLAVE='la-clave' node caja-galeno/parametrico/guia.mjs --proteger --out caja-galeno.html
 ```
 
 La página sale encriptada (AES-GCM 256, clave derivada con PBKDF2-SHA256 de 600 000 vueltas): muestra sólo el título y un campo para la clave, y sin ella el diseño, el generador y las fórmulas son ilegibles. Para cambiar la clave se vuelve a generar con la nueva y se reemplaza el archivo publicado: la versión nueva no abre con la clave vieja. Las copias que alguien ya tenga guardadas siguen abriendo con la clave vieja (un archivo que ya se entregó no se puede revocar). La clave nunca va al repositorio.
@@ -59,15 +59,15 @@ La página sale encriptada (AES-GCM 256, clave derivada con PBKDF2-SHA256 de 600
 
 **Modelo.** `entities`: líneas `{ t: "L", k, a: [x, y], b: [x, y] }` y arcos `{ t: "A", k, c: [x, y], r, a0, a1 }` (grados, antihorario), con `k` = `"c"` corte, `"h"` hendido, `"p"` perforado. Las líneas se tocan sólo en sus extremos o con un extremo sobre otra línea (uniones en T); no se cruzan ni se superponen. `dims`: `{ dir: "h", x0, x1, at, value, src: "h", name }` o `{ dir: "v", y0, y1, at, value, src: "v", name }`; `name` es la clave de `formulas` y de `simple`. Medidas en mm, y hacia arriba.
 
-3. `pagina.mjs` del diseño llama a `armarPagina({ design, fuentes, crear, artefacto })`; `check.mjs` llama a `verificarDiseno`.
+3. `pagina.mjs` del diseño llama a `armarPagina({ design, fuentes, crear })`; `check.mjs` llama a `verificarDiseno`.
 
 ```bash
 node troqueles/ejemplo-caja-americana/check.mjs
 node troqueles/ejemplo-caja-americana/pagina.mjs
-node troqueles/ejemplo-caja-americana/pagina.mjs --artefacto --out caja-americana.html
+TROQUEL_CLAVE='la-clave' node troqueles/ejemplo-caja-americana/pagina.mjs --proteger --out caja-americana.html
 ```
 
-`--artefacto` arma la versión para publicar en claude.ai (las descargas usan el permiso "downloads").
+La misma página sirve para publicar en claude.ai (las descargas usan el permiso "downloads"; .dxf y .cf2 se guardan con .txt al final) y para abrir en el navegador (descarga directa).
 
 **Reglas de los archivos que van a la página.** Se copian dentro del HTML sin `import` ni `export`, así que: sólo pueden importar de `troqueles/` o de otros archivos que también estén en `fuentes`; y no pueden declarar nombres que ya use la plantilla (`DESIGN`, `PARAMETROS`, `INICIAL`, `state`, `model`, `render`, `planSvg`, `mm`, `f1`, `name`, `say`, `download` y los de `cad.mjs` y `carton.mjs`).
 

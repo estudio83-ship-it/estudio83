@@ -1,4 +1,4 @@
-// node pagina.mjs [--artefacto] [--proteger] [--out archivo.html] → caja-americana.html
+// node pagina.mjs [--proteger] [--out archivo.html] → caja-americana.html
 import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,7 +12,6 @@ const abierta = armarPagina({
   design: crearDiseno(),
   fuentes: [join(HERE, "diseno.mjs")],
   crear: "crearDiseno()",
-  artefacto: process.argv.includes("--artefacto"),
 });
 // --proteger encripta la página con la clave de la variable de entorno TROQUEL_CLAVE.
 const proteger = process.argv.includes("--proteger");

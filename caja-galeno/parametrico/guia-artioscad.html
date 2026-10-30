@@ -995,14 +995,40 @@ function render(source) {
 }
 const name = () => DESIGN.archivo(model);
 const say = (t) => (document.getElementById("status").textContent = t);
-function download(text, ext) {
+// En claude.ai los archivos se guardan con el permiso de descargas (la página protegida lo pide apenas
+// carga, en window.__descargas). claude.ai no acepta .dxf ni .cf2: se guardan con .txt al final para
+// renombrar. Fuera de claude.ai, o si el permiso no está, descarga directa del navegador.
+let downloads = null;
+const pedido = window.__descargas || (window.claude && window.claude.use ? window.claude.use("downloads") : null);
+if (pedido) pedido.then((d) => { downloads = d; }).catch(() => {});
+function directa(text, file) {
   try {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([text], { type: "application/octet-stream" }));
-    a.download = name() + "." + ext;
+    a.download = file;
     document.body.appendChild(a); a.click(); a.remove();
-    say("Descarga iniciada: " + a.download + ".");
+    say("Descarga iniciada: " + file + ".");
   } catch (e) { say("No se pudo descargar."); }
+}
+async function download(text, ext) {
+  const file = name() + "." + ext;
+  if (!downloads && pedido) { say("Preparando la descarga…"); try { downloads = await pedido; } catch (e) {} }
+  if (!downloads) { directa(text, file); return; }
+  try {
+    await downloads.save({ filename: file, data: text });
+    say("Guardado " + file + ".");
+  } catch (e) {
+    if (e && (e.code === "rejected_extension" || e.code === "extension_not_enabled")) {
+      try {
+        await downloads.save({ filename: file + ".txt", data: text });
+        say("Se guardó " + file + ".txt: borrale el .txt del nombre y abrilo en ArtiosCAD.");
+      } catch (e2) { say(e2 && e2.code === "declined" ? "Descarga cancelada." : "No se pudo descargar (" + ((e2 && e2.code) || "error") + ")."); }
+      return;
+    }
+    if (e && e.code === "declined") { say("Descarga cancelada."); return; }
+    if (e && e.code === "rate_limited") { say("Ya hay una descarga esperando confirmación."); return; }
+    directa(text, file);
+  }
 }
 document.getElementById("dl-dxf").addEventListener("click", () => download(DESIGN.dxf(model, name()), "dxf"));
 document.getElementById("dl-cf2").addEventListener("click", () => download(DESIGN.cf2(model, name()), "cf2"));
