@@ -14,7 +14,7 @@ Generador paramétrico de la caja tipo galeno (troquel 6463) con su interior par
 | `check.mjs` | Verifica que con los valores por defecto sale el troquel original (32 paneles y solapas) y que ninguna combinación deje líneas sueltas, cruzadas o superpuestas. |
 
 ```bash
-node generar.mjs --L 370
+node generar.mjs --Lb 356
 node generar.mjs --L 400 --A 110 --H 300 --n 4 --Dc 70 --Dn 28 --p 72 --nombre GALENO-4F
 node guia.mjs
 node check.mjs   # 410 combinaciones: sin líneas sueltas, cruces ni superposiciones
@@ -40,17 +40,19 @@ Guardá esa tabla de conversión para reutilizarla con cada variante. Unidades: 
 El troquel sale con la caja girada 90° a la derecha (tubo vertical) y el separador a su derecha, a 8 mm, con el largo vertical. El DXF lleva las líneas del troquel y sólo las cotas H y L (`--todas-las-cotas` para el resto).
 
 
-| Var | Qué es | Original |
-|---|---|---|
-| `L` | Largo interior: ancho del contrafrente, sentido del frasco | 320 |
-| `A` | Profundidad: ancho de los costados | 94 |
-| `H` | Alto del frente entre hendidos (largo del tubo) | 274 |
-| `n` | Cantidad de frascos | 3 |
-| `Dc` | ⌀ del agujero del cuerpo (hasta 100, y hasta A − 10 y H − 12) | 80 |
-| `Dn` | Ancho de la ranura del cuello | 31 |
-| `p` | Paso entre frascos | 86,25 |
-| `t` | Puente de los tabiques | 28 |
-| `e` | Espesor del cartón: onda E 2 · B 3 · C 4 (el 6463 es onda B) | 3 |
+| Grupo | Var | Qué es | Original |
+|---|---|---|---|
+| Botella | `Lb` | Largo de la botella (va acostada a lo largo de la caja) | 306 |
+| Botella | `Dc` | ⌀ del cuerpo: agujero del tabique (hasta 100, y hasta A − 2e − 4 y H − 2e − 6) | 80 |
+| Botella | `Dn` | ⌀ del cuello: ranura del tabique | 31 |
+| Botella | `n` | Cantidad de botellas | 3 |
+| Botella | `p` | Paso entre ejes de botellas | 86,25 |
+| Caja | `A` | Profundidad: ancho de los costados | 94 |
+| Caja | `H` | Alto del frente entre hendidos (largo del tubo) | 274 |
+| Caja | `t` | Puente de los tabiques | 28 |
+| Cartón | `e` | Espesor: onda E 2 · B 3 · C 4 (el 6463 es onda B) | 3 |
+
+El largo de la caja sale de la botella: `L = Lb + 3e + 5` (entra en el separador plegado, `L − 3e`, con 5 mm de juego). Con la botella del 6463 y onda B, L = 320.
 
 Derivadas: el separador plegado ocupa `L − 3e` de largo (si crece `t`, se achica el panel central `L − 3e − 2t`, la caja no cambia); frasco hasta `L − 3e − 5`; interior de `H − 2e` de ancho por `4A + L − 11e` de largo.
 

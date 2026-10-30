@@ -61,6 +61,8 @@ form{display:grid;gap:9px}
 input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .presets.onda .tag{margin-right:4px}
+h3.group{font:600 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--soft);margin:10px 0 0;padding-top:12px;border-top:1px solid var(--rule)}
+h3.group:first-child{margin-top:0;padding-top:0;border-top:0}
 button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--flash);font-weight:600}
 button{font:500 13px var(--body);color:var(--ink);background:transparent;border:1px solid var(--rule);border-radius:999px;padding:7px 14px;cursor:pointer}
 button:hover{border-color:var(--ink)}
@@ -113,7 +115,6 @@ li b{font-weight:500}
   <header>
     <span class="tag">Troquel 6463 · caja tipo galeno · guía de diseño paramétrico</span>
     <h1>Galeno 6463 para ArtiosCAD</h1>
-    <p class="lede">Mové las variables y el troquel se rearma con cada cota escrita en su fórmula y su valor; lo que cambió se marca en azul. El DXF descargado lleva sólo las líneas del troquel y las cotas H y L.</p>
   </header>
 
   <div class="desk">
@@ -155,7 +156,15 @@ const PLANTILLA = ${plantillaText};
 const form = document.getElementById("form");
 const state = { ...DEFAULTS };
 let model, last = null;
+let group = "";
 for (const p of PARAMS) {
+  if (p.group !== group) {
+    group = p.group;
+    const h = document.createElement("h3");
+    h.className = "group";
+    h.textContent = group;
+    form.appendChild(h);
+  }
   const row = document.createElement("div");
   row.className = "var";
   row.innerHTML = '<b>' + p.key + '</b><label for="v-' + p.key + '">' + p.label + '</label><input id="v-' + p.key + '" type="number" inputmode="decimal" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + DEFAULTS[p.key] + '"><input id="r-' + p.key + '" type="range" aria-label="' + p.label + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + DEFAULTS[p.key] + '">';
@@ -252,7 +261,7 @@ function render(source) {
   document.getElementById("caption").textContent = "L " + fmtMm(model.P.L) + " · A " + fmtMm(model.P.A) + " · H " + fmtMm(model.P.H) + " · t " + fmtMm(model.P.t) + " · e " + fmtMm(model.P.e) + " · plancha " + model.info.plancha;
   document.querySelectorAll("[data-onda]").forEach((b) => b.setAttribute("aria-pressed", String(Math.abs(ONDAS[b.dataset.onda] - model.P.e) < 1e-9)));
   const onda = Object.keys(ONDAS).find((k) => Math.abs(ONDAS[k] - model.P.e) < 1e-9);
-  const facts = [["Cartón", (onda ? "onda " + onda + " · " : "") + "e = " + fmtMm(model.P.e) + " mm"], ["Caja", model.info.caja + " mm"], ["Plancha", model.info.plancha + " mm"], ["Frasco", model.info.frasco], ["Interior", model.info.interior]];
+  const facts = [["Cartón", (onda ? "onda " + onda + " · " : "") + "e = " + fmtMm(model.P.e) + " mm"], ["Botella", model.info.botella], ["Largo de caja", "L = Lb + 3e + 5 = " + fmtMm(model.P.L)], ["Caja", model.info.caja + " mm"], ["Plancha", model.info.plancha + " mm"], ["Separador", model.info.interior]];
   document.getElementById("facts").innerHTML = facts.map(([k, v]) => "<dt>" + k + "</dt><dd>" + v + "</dd>").join("");
   document.getElementById("warn").innerHTML = model.notes.map((w) => '<li class="note">' + w + "</li>").join("") + model.warnings.map((w) => "<li>" + w + "</li>").join("");
   clearTimeout(hotTimer);

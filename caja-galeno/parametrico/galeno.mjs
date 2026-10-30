@@ -5,34 +5,39 @@
 //
 // La caja se arma desde la plantilla del troquel 6463 (sus mismas curvas y compensaciones) moviendo
 // zonas rectas con L, A y H; las orejas curvas escalan con A. El interior se dibuja desde cero con
-// las medidas de los frascos.
+// las medidas de las botellas.
 
+// La botella manda: su largo fija el largo de la caja, L = Lb + 3e + 5 (entra en el separador
+// plegado, L − 3e, con 5 mm de juego). Con la botella del 6463 (306) y onda B, L = 320.
+export const BOTTLE_GAP = 5;
 export const DEFAULTS = {
-  L: 320, // largo interior (contrafrente), sentido del frasco
-  A: 94, // profundidad (costados)
+  Lb: 306, // largo de la botella (va acostada a lo largo de la caja)
+  Dc: 80, // ⌀ del cuerpo de la botella: agujero del tabique
+  Dn: 31, // ⌀ del cuello de la botella: ranura del tabique
+  n: 3, // botellas
+  p: 86.25, // paso entre ejes de botellas
+  A: 94, // profundidad de la caja (costados)
   H: 274, // alto del frente entre hendidos (largo del tubo)
-  n: 3, // frascos
-  Dc: 80, // ⌀ agujero del cuerpo
-  Dn: 31, // ancho de la ranura del cuello
-  p: 86.25, // paso entre frascos
   t: 28, // puente de los tabiques
   e: 3, // espesor del cartón: onda B (el 6463 está compensado para B)
 };
+export const lengthFor = (Lb, e) => Lb + 3 * e + BOTTLE_GAP;
 
 // Espesores de referencia por onda (mm). Cada fabricante tiene los suyos: e se puede editar.
 export const ONDAS = { E: 2, B: 3, C: 4 };
 
 export const PARAMS = [
-  { key: "L", label: "Largo interior (contrafrente)", min: 210, max: 700, step: 1 },
-  { key: "A", label: "Profundidad (costados)", min: 60, max: 200, step: 1 },
-  { key: "H", label: "Alto del frente (tubo)", min: 120, max: 600, step: 1 },
-  { key: "n", label: "Cantidad de frascos", min: 1, max: 8, step: 1 },
-  { key: "Dc", label: "⌀ agujero del cuerpo", min: 36, max: 100, step: 0.5 },
-  { key: "Dn", label: "Ancho ranura del cuello", min: 8, max: 38, step: 0.5 },
-  { key: "p", label: "Paso entre frascos", min: 20, max: 500, step: 0.25 },
-  { key: "t", label: "Puente de los tabiques", min: 10, max: 80, step: 1 },
-  { key: "e", label: "Espesor del cartón (onda)", min: 1, max: 6, step: 0.1 },
+  { key: "Lb", group: "Botella", label: "Largo de la botella", min: 180, max: 690, step: 1 },
+  { key: "Dc", group: "Botella", label: "⌀ cuerpo (agujero)", min: 36, max: 100, step: 0.5 },
+  { key: "Dn", group: "Botella", label: "⌀ cuello (ranura)", min: 8, max: 38, step: 0.5 },
+  { key: "n", group: "Botella", label: "Cantidad de botellas", min: 1, max: 8, step: 1 },
+  { key: "p", group: "Botella", label: "Paso entre botellas", min: 20, max: 500, step: 0.25 },
+  { key: "A", group: "Caja", label: "Profundidad (costados)", min: 60, max: 200, step: 1 },
+  { key: "H", group: "Caja", label: "Alto del frente (tubo)", min: 120, max: 600, step: 1 },
+  { key: "t", group: "Caja", label: "Puente de los tabiques", min: 10, max: 80, step: 1 },
+  { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 6, step: 0.1 },
 ];
+const L_RANGE = [210, 700];
 
 // Medidas fijas del troquel original que no dependen de los parámetros.
 const FIX = { tongueW: 33, tongueFromCentre: 13, notchW: 25, flareW: 40, flareLen: 23.8, edgeNotchW: 35, edgeNotchD: 4, gap: 8 };
@@ -41,22 +46,25 @@ const FIX = { tongueW: 33, tongueFromCentre: 13, notchW: 25, flareW: 40, flareLe
 // se achica el panel central, así la caja no cambia.
 export function derived(P) {
   const e = P.e, wall = P.A - 2 * e, folded = P.L - 3 * e, main = folded - 2 * P.t, Wi = P.H - 2 * e;
-  return { wall, main, Wi, folded, bottle: folded - 5, insertLen: 4 * wall + 2 * P.t + main };
+  return { wall, main, Wi, folded, bottle: folded - BOTTLE_GAP, insertLen: 4 * wall + 2 * P.t + main };
 }
 
 // Rango válido de cada variable dado el resto, para que el troquel no tenga líneas cruzadas ni sueltas.
 // El orden importa: Dc depende de A y H; Dn de Dc; n y p de Dc y H.
 export function limits(P) {
   const st = Object.fromEntries(PARAMS.map((q) => [q.key, [q.min, q.max]]));
-  const lim = { e: st.e, L: st.L, A: st.A, H: st.H };
+  const lim = { e: st.e, A: st.A, H: st.H };
   const cl = (v, [a, b]) => Math.min(b, Math.max(a, v));
-  const e = cl(P.e, lim.e), A = cl(P.A, lim.A), H = cl(P.H, lim.H), L = cl(P.L, lim.L);
+  const e = cl(P.e, lim.e), A = cl(P.A, lim.A), H = cl(P.H, lim.H);
+  // La caja que sale de la botella tiene que quedar entre 210 y 700 de largo.
+  lim.Lb = [Math.max(st.Lb[0], L_RANGE[0] - 3 * e - BOTTLE_GAP), Math.min(st.Lb[1], L_RANGE[1] - 3 * e - BOTTLE_GAP)];
+  const L = lengthFor(cl(P.Lb, lim.Lb), e);
   // El panel central del separador (L − 3e − 2t) no baja de 40.
   lim.t = [st.t[0], Math.max(st.t[0], Math.min(st.t[1], (L - 3 * e - 40) / 2))];
   lim.Dc = [st.Dc[0], Math.min(st.Dc[1], A - 2 * e - 4, H - 2 * e - 6)];
   const Dc = cl(P.Dc, lim.Dc);
   lim.Dn = [st.Dn[0], Math.min(st.Dn[1], Dc - 6)];
-  const room = H - 2 * e - 6 - 2 * Math.max(Dc / 2, FIX.flareW / 2); // de centro a centro de los frascos extremos
+  const room = H - 2 * e - 6 - 2 * Math.max(Dc / 2, FIX.flareW / 2); // de centro a centro de las botellas extremas
   const pMin = Math.max(Dc + 2, Dc / 2 + FIX.flareW / 2 + 3);
   lim.n = [1, Math.max(1, Math.min(st.n[1], 1 + Math.floor(room / pMin + 1e-9)))];
   const n = cl(Math.round(P.n), lim.n);
@@ -66,15 +74,18 @@ export function limits(P) {
 
 export function clampParams(params) {
   const P = { ...DEFAULTS, ...params };
+  // Compatibilidad: si viene L (largo de caja) y no Lb, se deduce la botella.
+  if (params && params.L !== undefined && params.Lb === undefined) P.Lb = params.L - 3 * P.e - BOTTLE_GAP;
   const notes = [];
   const lim = limits(P);
-  for (const key of ["e", "L", "A", "H", "t", "Dc", "Dn", "n", "p"]) {
+  for (const key of ["e", "Lb", "A", "H", "t", "Dc", "Dn", "n", "p"]) {
     const [a, b] = limits(P)[key];
     let v = key === "n" ? Math.round(P[key]) : P[key];
     if (!Number.isFinite(v)) v = DEFAULTS[key];
     const c = Math.min(b, Math.max(a, v));
     if (Math.abs(c - P[key]) > 1e-9) notes.push(`${key} ajustado a ${Math.round(c * 100) / 100} (rango ${Math.round(a * 100) / 100}–${Math.round(b * 100) / 100} con estas medidas).`);
     P[key] = c;
+    if (key === "Lb") P.L = lengthFor(P.Lb, P.e);
   }
   return { P, notes, limits: lim };
 }
@@ -87,7 +98,7 @@ export function validate(P) {
   if (FIX.flareW <= P.Dn) w.push(`La ranura del cuello (${P.Dn}) es más ancha que la boca de 40 mm de la ranura.`);
   if (R < FIX.tongueW / 2 + 1) w.push(`Con ⌀${P.Dc} la lengüeta de apoyo de 33 mm no cabe en el agujero.`);
   const span = (P.n - 1) * P.p + P.Dc;
-  if (span > d.Wi - 6) w.push(`${P.n} frascos con paso ${P.p} ocupan ${span.toFixed(1)} mm y el interior mide ${d.Wi} (H − 2e).`);
+  if (span > d.Wi - 6) w.push(`${P.n} botellas con paso ${P.p} ocupan ${span.toFixed(1)} mm y el interior mide ${d.Wi} (H − 2e).`);
   if (P.n > 1 && P.p < P.Dc + 2) w.push(`El paso (${P.p}) es menor que el agujero más 2 mm: los agujeros se tocan.`);
   if (d.main < 40) w.push(`El panel entre tabiques queda en ${d.main} mm (L − 3e − 2t).`);
   return w;
@@ -334,7 +345,7 @@ export function generate(params, plantilla) {
   const info = {
     caja: `${P.L} × ${P.A} × ${P.H}`,
     plancha: `${(xMax - xMin).toFixed(1)} × ${(yMax - yMin).toFixed(1)}`,
-    frasco: `largo máx. ≈ ${d.bottle} · ⌀ cuerpo < ${P.Dc} · ⌀ cuello ≤ ${P.Dn}`,
+    botella: `${P.n} × ${P.Lb} de largo · ⌀ ${P.Dc} cuerpo · ⌀ ${P.Dn} cuello`,
     interior: `${d.Wi} × ${d.insertLen} (plegado ${d.folded} × ${d.Wi} × ${d.wall})`,
     bounds: { xMin, xMax, yMin, yMax },
   };
