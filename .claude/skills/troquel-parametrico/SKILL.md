@@ -12,7 +12,8 @@ description: >-
 
 La plantilla vive en `troqueles/` (leé `troqueles/LEEME.md` antes de empezar: ahí está el contrato del
 diseño). Hay dos diseños hechos para mirar: `troqueles/ejemplo-caja-americana/` (chico, el molde a copiar)
-y `caja-galeno/parametrico/` (completo, armado desde el DXF del troquel 6463).
+`caja-galeno/parametrico/` (completo, armado desde el DXF del troquel 6463) y `caja-fefco-201/`
+(caja FEFCO 0201 dibujada desde cero, con dibujos de la caja y del cartón en el panel).
 
 ## Pasos
 

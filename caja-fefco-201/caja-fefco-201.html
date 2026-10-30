@@ -1,0 +1,878 @@
+<title>Caja FEFCO 201</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Estilo de la casa: tipografías y radios del sistema Cartocor en azul, cuadrícula técnica de 32 px,
+   un solo tema claro. Descargas en azul, Reset en naranja, cartón en blanco, variable activa en naranja. */
+:root{
+  --paper:#fbfbfd;--sheet:#ffffff;--mint:#eef3fa;--soft-bg:#f3f6fa;--tint:#e5edf8;
+  --ink:#0b1a2e;--soft:#3a4656;--rule:#cfdbea;--hairline:#d5dfeb;--crease:#6f7f92;--kraft:#ffffff;
+  --accent:#1d5fbf;--accent-deep:#174f9f;--eyebrow:#174f9f;--on-accent:#ffffff;--grid:rgba(29,95,191,0.09);
+  --blue:#1f78e0;--blue-deep:#1662bd;--on-blue:#ffffff;
+  --warn:#a3471f;--note:#3a4656;--orange:#e8630a;--orange-deep:#c25105;--on-orange:#ffffff;--orange-soft:#fdeee3;--orange-ring:rgba(232,99,10,0.18);--field:#ffffff;--flash:#e5edf8;
+  --shadow-float:0 10px 30px rgba(29,95,191,0.14);
+  --display:Montserrat,Inter,sans-serif;--body:Inter,-apple-system,"Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:1480px;margin:0 auto;padding-block:40px 72px;display:grid;gap:22px}
+header{display:grid;gap:10px}
+.tag{font:500 12px/1.4 var(--mono);color:var(--soft);letter-spacing:.14em;text-transform:uppercase}
+header .tag{color:var(--eyebrow);letter-spacing:.16em}
+h1{font:700 clamp(34px,5vw,56px)/1.02 var(--display);letter-spacing:-.04em;margin:0;text-wrap:balance}
+h1 span{display:block;color:var(--accent)}
+h2{font:700 20px/1.15 var(--display);letter-spacing:-.02em;margin:0}
+.sheet{background:var(--sheet);border:1px solid var(--rule);border-radius:28px;padding:22px;display:grid;gap:14px;min-width:0;align-content:start}
+.sheet.plan-sheet{background-color:var(--mint);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;align-items:baseline}
+.desk{display:grid;grid-template-columns:370px minmax(0,1fr);gap:22px;align-items:stretch}
+@media (max-width:860px){.desk{grid-template-columns:minmax(0,1fr)}.plan-sheet #plan{height:420px}}
+.plan-sheet{grid-template-rows:auto minmax(0,1fr)}
+/* El plano ocupa todo el alto que deja el recuadro (que se estira al alto del panel de variables). */
+.plan-sheet #plan{display:block;position:relative;min-height:560px;overflow:hidden;margin-bottom:44px}
+.plan-sheet #plan svg{position:absolute;inset:0}
+@media (max-width:860px){.plan-sheet #plan{height:420px;min-height:0}}
+form{display:grid;gap:9px}
+.var{display:grid;grid-template-columns:30px minmax(0,1fr) 84px;gap:2px 10px;align-items:center}
+.var b{font:500 14px var(--mono);color:var(--accent)}
+.var label{font-size:14px;color:var(--soft);line-height:1.25}
+.var input[type=number]{width:100%;font:500 14px var(--mono);color:var(--ink);background:var(--field);border:1px solid var(--rule);border-radius:980px;padding:6px 12px;text-align:right;font-variant-numeric:tabular-nums}
+.var input[type=range]{grid-column:2 / 4;width:100%;accent-color:var(--accent);margin:0}
+input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.presets.onda .tag{margin-right:4px}
+form{gap:14px}
+.grupo{display:grid;gap:9px;background:var(--soft-bg);border:1px solid var(--rule);border-radius:22px;padding:16px 18px 14px}
+h3.group{font:700 20px/1.15 var(--display);letter-spacing:-.02em;color:var(--ink);margin:0}
+.grupo .presets{margin-top:2px}
+button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--flash);font-weight:600}
+button{font:500 14px var(--body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:980px;padding:8px 16px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--blue);color:var(--on-blue);border-color:var(--blue);font-weight:600;box-shadow:var(--shadow-float)}
+button.primary:hover{background:var(--blue-deep);border-color:var(--blue-deep)}
+button.primary:disabled{opacity:.5;cursor:default}
+button.reset{justify-self:start;background:var(--orange);color:var(--on-orange);border-color:var(--orange);font-weight:600;padding:7px 22px}
+button.reset:hover{background:var(--orange-deep);border-color:var(--orange-deep)}
+
+.right{display:grid;grid-template-rows:1fr auto;gap:22px;min-width:0}
+.facts{margin:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+@media (max-width:1200px){.facts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:600px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.facts .row{display:grid;align-content:start;gap:6px;padding:14px 13px;background:var(--soft-bg);border:1px solid var(--rule);border-radius:22px;min-width:0}
+.facts dt{font:500 10.5px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--eyebrow)}
+.facts dd{margin:0;display:grid;gap:3px}
+.facts dd strong{font:700 16px/1.2 var(--display);white-space:nowrap;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+.facts dd span{font:500 12px/1.3 var(--body);color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plan-sheet{position:relative}
+.descargas{position:absolute;right:22px;bottom:22px;display:flex;align-items:center;gap:8px;max-width:calc(100% - 44px)}
+.descargas .status{font-size:12px;text-align:right;max-width:280px;margin-right:4px}
+.status{font:13px var(--mono);color:var(--soft);min-height:1.4em;margin:0}
+
+svg.plan{display:block;width:100%;height:100%}
+.plan .k{fill:var(--kraft);stroke:var(--kraft);stroke-width:.8;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.plan .c{fill:none;stroke:var(--ink);stroke-width:1.1;vector-effect:non-scaling-stroke}
+.plan .h{fill:none;stroke:var(--crease);stroke-width:.9;stroke-dasharray:6 4;vector-effect:non-scaling-stroke}
+.plan .p{fill:none;stroke:var(--crease);stroke-width:.9;stroke-dasharray:2 3;vector-effect:non-scaling-stroke}
+.dim path{fill:none;stroke:var(--accent);stroke-width:.6;vector-effect:non-scaling-stroke}
+.dim .ar{fill:var(--accent);stroke:none}
+.dim text{font:500 17px var(--mono);text-anchor:middle}
+.dim text.side{text-anchor:start;font-size:15px}
+.dim text.side-l,.dim text.down{text-anchor:end;font-size:15px}
+.plan.simple .dim text{font-size:22px}
+.plan.simple .call{font-size:18px;fill:var(--accent);font-weight:600}
+.head h2{margin-right:auto}
+.var,.var b,.var label,.var input[type=number],.var input[type=range]{transition:background-color 1.5s ease,color 1.5s ease,border-color 1.5s ease,box-shadow 1.5s ease,accent-color 1.5s ease}
+.var.active,.var.active b,.var.active label,.var.active input{transition:none}
+.var{border-radius:16px;margin:0 -8px;padding:4px 8px}
+#plan .dim path,#plan .dim .ar,#plan .dim text,#plan .dim tspan,#plan .call{transition:stroke 1.5s ease,stroke-width 1.5s ease,fill 1.5s ease,font-size 1.5s ease}
+#plan .active path,#plan .active .ar,#plan .active text,#plan .active tspan,#plan .call.active{transition:none}
+@media (prefers-reduced-motion:reduce){.var,.var *,#plan *{transition:none!important}}
+.var.active{background:var(--orange-soft)}
+.var.active b,.var.active label{color:var(--orange-deep);font-weight:600}
+.var.active input[type=number]{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-ring)}
+.var.active input[type=range]{accent-color:var(--orange)}
+.dim.active path{stroke:var(--orange);stroke-width:3.2}
+.dim.active .ar{fill:var(--orange)}
+.dim.active text .fx,.dim.active text .val{fill:var(--orange-deep);font-weight:700}
+.dim.active text,.call.active{paint-order:stroke;stroke:var(--sheet);stroke-width:5px;stroke-linejoin:round}
+.dim.active text{font-size:20px}
+.plan.simple .dim.active text{font-size:28px}
+.call.active{fill:var(--orange-deep);font-weight:700;font-size:22px}
+.dim .fx{fill:var(--accent);font-weight:600}.dim .val{fill:var(--soft)}
+.dim.hot .val{fill:var(--accent);font-weight:600}
+.call{font:500 14px var(--mono);fill:var(--soft);text-anchor:middle}
+.figura{margin:2px 0 4px;position:relative}
+.campo{position:absolute;transform:translate(-50%,-50%);display:block}
+.campo .paso{position:relative;display:block;background:var(--field);border:1px solid var(--rule);border-radius:980px;padding:2px 22px;box-shadow:0 1px 3px rgba(11,26,46,.08);transition:border-color 1.5s ease,box-shadow 1.5s ease}
+.campo input[type=number]{display:block;width:40px;font:600 13px var(--mono);color:var(--ink);background:none;border:0;padding:3px 0;text-align:center;font-variant-numeric:tabular-nums;-moz-appearance:textfield;appearance:textfield;transition:color 1.5s ease}
+.campo input[type=number]:focus-visible{outline:none}
+.campo input::-webkit-outer-spin-button,.campo input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+/* Flechas al borde derecho; el número queda centrado en el campo (mismo margen a los dos lados). */
+.campo .flechas{position:absolute;right:4px;top:50%;transform:translateY(-50%);display:grid}
+.campo .flechas button{display:grid;place-items:center;width:18px;height:11px;padding:0;border:0;border-radius:4px;background:none;color:var(--accent);cursor:pointer}
+.campo .flechas button:hover{background:var(--flash)}
+.campo .flechas svg{width:9px;height:6px;fill:currentColor}
+.campo:focus-within .paso{outline:2px solid var(--accent);outline-offset:1px}
+.campo.active .paso{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-ring);transition:none}
+.campo.active input[type=number]{color:var(--orange-deep);transition:none}
+.campo.active .flechas button{color:var(--orange-deep)}
+.figura svg{display:block;width:100%;height:auto;overflow:visible}
+.figura .tx{font:500 10.5px var(--mono);fill:var(--soft)}
+.figura .cota path{fill:none;stroke:var(--accent);stroke-width:.8}
+.figura .cota .ar{fill:var(--accent);stroke:none}
+.figura .cota text{font:600 10.5px var(--mono);fill:var(--accent)}
+.figura [data-var] path,.figura [data-var] text{transition:stroke 1.5s ease,fill 1.5s ease,stroke-width 1.5s ease}
+.figura [data-var].active path,.figura [data-var].active text{transition:none}
+.figura .cota.active path{stroke:var(--orange);stroke-width:1.6}
+.figura .cota.active .ar,.figura .cota.active text{fill:var(--orange-deep)}
+@media (prefers-reduced-motion:reduce){.figura *{transition:none!important}}
+/* Pantallas de escritorio y notebook (de 1100 px de ancho para arriba): todo entra en una pantalla,
+   sin desplazarse. Título en una línea, secciones de variables en dos columnas, y el plano y el resumen
+   ocupan el alto que queda. Probado a 1536 × 730 (notebook de 14" con la escala de Windows al 125 %). */
+@media (min-width:1100px){
+  main{height:100vh;padding-block:14px 16px;gap:12px;grid-template-rows:auto minmax(0,1fr)}
+  header{display:flex;align-items:baseline;gap:18px}
+  header .tag{order:2}
+  h1{font-size:30px}
+  .desk{grid-template-columns:minmax(500px,560px) minmax(0,1fr);gap:16px;min-height:0}
+  .sheet{padding:14px 16px;gap:10px;border-radius:24px}
+  .side{overflow:auto;align-content:start}
+  form{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:start}
+  form .grupo:nth-child(2){grid-row:span 2}
+  .grupo{padding:10px 12px;gap:6px;border-radius:18px}
+  h3.group{font-size:17px}
+  .var{grid-template-columns:24px minmax(0,1fr) 64px;gap:0 6px}
+  .var input[type=number]{padding:4px 10px;font-size:13px}
+  .var label{font-size:13px}
+  .presets{gap:4px}
+  .presets button{padding:5px 12px}
+  .right{grid-template-rows:minmax(0,1fr) auto;gap:12px;min-height:0}
+  .plan-sheet #plan{min-height:0}
+  .descargas{right:16px;bottom:12px}
+  .plan-sheet #plan{margin-bottom:38px}
+  .campo .paso{padding:1px 18px}
+  .campo input[type=number]{width:34px;font-size:12px;padding:2px 0}
+  .campo .flechas{right:2px}
+  .campo .flechas button{height:9px}
+  .summary .head h2{font-size:17px}
+  .facts .row{padding:8px 10px;gap:3px;border-radius:16px}
+  .facts dd strong{font-size:14px}
+  .facts dd span{font-size:11px}
+}
+
+.figura .pieza{fill:var(--sheet);stroke:var(--ink);stroke-width:1.1;stroke-linejoin:round}
+.figura .pieza.lado{fill:var(--soft-bg)}
+.figura .pieza.frente{fill:#f8fafc}
+.figura .filete{fill:none;stroke:var(--ink);stroke-width:.8}
+.figura .union{fill:none;stroke:var(--crease);stroke-width:.8;stroke-dasharray:4 3}
+.figura .cota .fx{fill:var(--accent);font-weight:600}
+.figura .cota .val{fill:var(--soft);font-weight:500}
+.figura .cota.active .fx,.figura .cota.active .val{fill:var(--orange-deep);font-weight:700}
+.figura .carton .sup{fill:var(--sheet)}
+.figura .carton .lado{fill:var(--soft-bg)}
+.figura .carton .corte{fill:var(--tint)}
+.figura .carton .liner{fill:none;stroke:var(--soft);stroke-width:.7}
+.figura .carton .onda{fill:none;stroke:var(--accent);stroke-width:1.4;stroke-linejoin:round}
+.figura .carton .borde{fill:none;stroke:var(--ink);stroke-width:1;stroke-linejoin:round}
+.figura .carton.active .onda{stroke:var(--orange)}
+
+</style>
+<main>
+  <header>
+    <span class="tag">Troquel paramétrico para ArtiosCAD</span>
+    <h1>Caja FEFCO 201</h1>
+  </header>
+
+  <div class="desk">
+    <section class="sheet side" aria-label="Variables">
+      <form id="form" autocomplete="off"></form>
+      <div class="presets onda" id="atajos" role="group"></div>
+      <button type="button" class="reset" id="reset">Reset</button>
+    </section>
+    <div class="right">
+    <section class="sheet plan-sheet" aria-labelledby="t-plano">
+      <div class="head"><h2 id="t-plano">Plano</h2><button type="button" id="formulas" aria-pressed="false">Ver fórmulas</button></div>
+      <div id="plan"></div>
+      <div class="descargas">
+        <p class="status" id="status" role="status"></p>
+        <button type="button" class="primary" id="dl-dxf">Descargar DXF</button>
+        <button type="button" class="primary" id="dl-cf2">Descargar CF2</button>
+      </div>
+    </section>
+    <section class="sheet summary" aria-labelledby="t-res">
+      <div class="head"><h2 id="t-res">Resumen</h2></div>
+      <dl class="facts" id="facts"></dl>
+    </section>
+    </div>
+  </div>
+
+</main>
+<script>
+// Salidas para ArtiosCAD, comunes a todos los diseños: DXF R12 por capas y CF2.
+// Un modelo trae entities: { t: "L", k, a, b } o { t: "A", k, c, r, a0, a1 } (grados, antihorario),
+// con k = "c" corte, "h" hendido, "p" perforado; y dims: { dir, x0, x1, y0, y1, at, value }.
+// La página copia este archivo tal cual: los nombres no pueden chocar con los de un diseño.
+
+const CAPAS_CAD = { c: ["CORTE", 1], h: ["HENDIDO", 2], p: ["PERFORADO", 6] };
+const mmEntero = (v) => String(Math.round(v));
+
+// cotas: lista de cotas a dibujar en la capa COTAS (color 7, blanco); rotulo(d) da el texto ("H=274").
+function escribirDxf(model, { cotas = [], rotulo = (d) => mmEntero(d.value) } = {}) {
+  const out = [];
+  const put = (c, v) => out.push(String(c).padStart(3), String(v));
+  const f = (v) => (Math.round(v * 1e4) / 1e4).toString();
+  put(0, "SECTION"); put(2, "HEADER"); put(9, "$ACADVER"); put(1, "AC1009"); put(9, "$INSUNITS"); put(70, 4); put(9, "$MEASUREMENT"); put(70, 1); put(0, "ENDSEC");
+  put(0, "SECTION"); put(2, "TABLES"); put(0, "TABLE"); put(2, "LAYER"); put(70, 4);
+  for (const [n, c] of [...Object.values(CAPAS_CAD), ["COTAS", 7]]) { put(0, "LAYER"); put(2, n); put(70, 0); put(62, c); put(6, "CONTINUOUS"); }
+  put(0, "ENDTAB"); put(0, "ENDSEC");
+  put(0, "SECTION"); put(2, "ENTITIES");
+  for (const e of model.entities) {
+    const [layer, color] = CAPAS_CAD[e.k];
+    if (e.t === "L") { put(0, "LINE"); put(8, layer); put(62, color); put(10, f(e.a[0])); put(20, f(e.a[1])); put(30, 0); put(11, f(e.b[0])); put(21, f(e.b[1])); put(31, 0); }
+    else { put(0, "ARC"); put(8, layer); put(62, color); put(10, f(e.c[0])); put(20, f(e.c[1])); put(30, 0); put(40, f(e.r)); put(50, f(((e.a0 % 360) + 360) % 360)); put(51, f(((e.a1 % 360) + 360) % 360)); }
+  }
+  const line = (a, b) => { put(0, "LINE"); put(8, "COTAS"); put(62, 7); put(10, f(a[0])); put(20, f(a[1])); put(30, 0); put(11, f(b[0])); put(21, f(b[1])); put(31, 0); };
+  const text = (at, s, rot) => { put(0, "TEXT"); put(8, "COTAS"); put(62, 7); put(10, f(at[0])); put(20, f(at[1])); put(30, 0); put(40, 10); put(1, s); if (rot) put(50, rot); put(72, 1); put(11, f(at[0])); put(21, f(at[1])); put(31, 0); };
+  for (const d of cotas) {
+    const v = rotulo(d);
+    if (d.dir === "h") { line([d.x0, d.at], [d.x1, d.at]); line([d.x0, d.at - 7], [d.x0, d.at + 7]); line([d.x1, d.at - 7], [d.x1, d.at + 7]); text([(d.x0 + d.x1) / 2, d.at + 5], v); }
+    else { line([d.at, d.y0], [d.at, d.y1]); line([d.at - 7, d.y0], [d.at + 7, d.y0]); line([d.at - 7, d.y1], [d.at + 7, d.y1]); text([d.at - 5, (d.y0 + d.y1) / 2], v, 90); }
+  }
+  put(0, "ENDSEC"); put(0, "EOF");
+  return out.join("\r\n") + "\r\n";
+}
+
+// CF2 (Common Format 2): formato de intercambio de troquelería que ArtiosCAD importa.
+// Tipo de línea: 1 corte, 2 hendido, 3 perforado. Pointage 2 pt. Arcos: dirección 1 antihorario.
+function escribirCf2(model, { name = "TROQUEL" } = {}) {
+  const b = model.info.bounds;
+  const f = (v) => (Math.round(v * 1e3) / 1e3).toFixed(3);
+  const type = { c: 1, h: 2, p: 3 };
+  const lines = ["$BOF", "V2", "ORDER", `MAIN,${name}`, "END", `MAIN,${name}`, "UM", `LL,${f(b.xMin)},${f(b.yMin)}`, `UR,${f(b.xMax)},${f(b.yMax)}`, "SCALE,1,1"];
+  for (const e of model.entities) {
+    if (e.t === "L") lines.push(`L,2,${type[e.k]},0,${f(e.a[0])},${f(e.a[1])},${f(e.b[0])},${f(e.b[1])},0,0`);
+    else {
+      const p = (a) => [e.c[0] + e.r * Math.cos((a * Math.PI) / 180), e.c[1] + e.r * Math.sin((a * Math.PI) / 180)];
+      const [s, t] = [p(e.a0), p(e.a1)];
+      lines.push(`A,2,${type[e.k]},0,${f(s[0])},${f(s[1])},${f(t[0])},${f(t[1])},${f(e.c[0])},${f(e.c[1])},1,0,0`);
+    }
+  }
+  lines.push("END", "$EOF");
+  return lines.join("\r\n") + "\r\n";
+}
+
+// Caja envolvente de las entidades (los arcos por puntos).
+function limitesDe(entities) {
+  const pts = [];
+  for (const e of entities) {
+    if (e.t === "L") { pts.push(e.a, e.b); continue; }
+    let sw = e.a1 - e.a0; while (sw <= 0) sw += 360;
+    for (let i = 0; i <= 16; i++) { const a = ((e.a0 + (sw * i) / 16) * Math.PI) / 180; pts.push([e.c[0] + e.r * Math.cos(a), e.c[1] + e.r * Math.sin(a)]); }
+  }
+  const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+  return { xMin: Math.min(...xs), xMax: Math.max(...xs), yMin: Math.min(...ys), yMax: Math.max(...ys) };
+}
+
+// Superficie de cartón del troquel: las caras del grafo plano que tienen algún hendido o intermitente,
+// con sus huecos. Es la misma regla que facesOf de ../troquel.mjs, con una grilla para que alcance
+// a redibujarse mientras se arrastra un deslizador.
+
+function cartonRings(model) {
+  const segs = [];
+  for (const e of model.entities) {
+    if (e.t === "L") { segs.push([e.a, e.b, e.k]); continue; }
+    let sweep = e.a1 - e.a0; while (sweep <= 0) sweep += 360; while (sweep > 360) sweep -= 360;
+    const a0 = (e.a0 * Math.PI) / 180, sw = (sweep * Math.PI) / 180;
+    const n = Math.max(2, Math.ceil((sw * e.r) / (e.r < 5 ? 0.6 : 4)));
+    const at = (i) => [e.c[0] + e.r * Math.cos(a0 + (sw * i) / n), e.c[1] + e.r * Math.sin(a0 + (sw * i) / n)];
+    for (let i = 0; i < n; i++) segs.push([at(i), at(i + 1), e.k]);
+  }
+  const tol = 0.2, cell = 40;
+  const key = (x, y) => Math.floor(x / cell) + "," + Math.floor(y / cell);
+  // Grilla de segmentos por caja envolvente.
+  const grid = new Map();
+  segs.forEach((s, i) => {
+    const x0 = Math.min(s[0][0], s[1][0]) - tol, x1 = Math.max(s[0][0], s[1][0]) + tol;
+    const y0 = Math.min(s[0][1], s[1][1]) - tol, y1 = Math.max(s[0][1], s[1][1]) + tol;
+    for (let gx = Math.floor(x0 / cell); gx <= Math.floor(x1 / cell); gx++)
+      for (let gy = Math.floor(y0 / cell); gy <= Math.floor(y1 / cell); gy++) {
+        const k = gx + "," + gy;
+        if (!grid.has(k)) grid.set(k, []);
+        grid.get(k).push(i);
+      }
+  });
+  const near = (i) => {
+    const s = segs[i], found = new Set();
+    const x0 = Math.min(s[0][0], s[1][0]) - tol, x1 = Math.max(s[0][0], s[1][0]) + tol;
+    const y0 = Math.min(s[0][1], s[1][1]) - tol, y1 = Math.max(s[0][1], s[1][1]) + tol;
+    for (let gx = Math.floor(x0 / cell); gx <= Math.floor(x1 / cell); gx++)
+      for (let gy = Math.floor(y0 / cell); gy <= Math.floor(y1 / cell); gy++) for (const j of grid.get(gx + "," + gy) || []) if (j !== i) found.add(j);
+    return found;
+  };
+  // Parte cada segmento donde lo toca otro (uniones en T y cruces).
+  const cuts = segs.map(() => [0, 1]);
+  segs.forEach((s, i) => {
+    const dx = s[1][0] - s[0][0], dy = s[1][1] - s[0][1], len2 = dx * dx + dy * dy;
+    for (const j of near(i)) {
+      const o = segs[j];
+      for (const p of [o[0], o[1]]) {
+        const t = ((p[0] - s[0][0]) * dx + (p[1] - s[0][1]) * dy) / len2;
+        if (t <= 1e-4 || t >= 1 - 1e-4) continue;
+        if (Math.hypot(s[0][0] + dx * t - p[0], s[0][1] + dy * t - p[1]) < tol) cuts[i].push(t);
+      }
+      const ex = o[1][0] - o[0][0], ey = o[1][1] - o[0][1], den = dx * ey - dy * ex;
+      if (Math.abs(den) < 1e-9) continue;
+      const wx = o[0][0] - s[0][0], wy = o[0][1] - s[0][1];
+      const t = (wx * ey - wy * ex) / den, u = (wx * dy - wy * dx) / den;
+      if (t > 1e-4 && t < 1 - 1e-4 && u > 1e-4 && u < 1 - 1e-4) cuts[i].push(t);
+    }
+  });
+  // Vértices soldados con una grilla fina.
+  const verts = [], vgrid = new Map();
+  const vid = (p) => {
+    const gx = Math.floor(p[0] / 1), gy = Math.floor(p[1] / 1);
+    for (let a = gx - 1; a <= gx + 1; a++) for (let b = gy - 1; b <= gy + 1; b++)
+      for (const k of vgrid.get(a + "," + b) || []) if (Math.hypot(verts[k][0] - p[0], verts[k][1] - p[1]) < tol) return k;
+    verts.push(p);
+    const k = gx + "," + gy;
+    if (!vgrid.has(k)) vgrid.set(k, []);
+    vgrid.get(k).push(verts.length - 1);
+    return verts.length - 1;
+  };
+  const edges = new Map();
+  segs.forEach((s, i) => {
+    const ts = [...new Set(cuts[i].map((t) => Math.round(t * 1e6) / 1e6))].sort((a, b) => a - b);
+    const pt = (t) => [s[0][0] + (s[1][0] - s[0][0]) * t, s[0][1] + (s[1][1] - s[0][1]) * t];
+    for (let k = 0; k + 1 < ts.length; k++) {
+      const u = vid(pt(ts[k])), v = vid(pt(ts[k + 1]));
+      if (u === v) continue;
+      const id = u < v ? u + "," + v : v + "," + u, prev = edges.get(id);
+      if (!prev || prev.k !== "c") edges.set(id, { u, v, k: s[2] });
+    }
+  });
+  // Caras por recorrido de medias aristas.
+  const out = verts.map(() => []), half = [];
+  [...edges.values()].forEach((e) => {
+    for (const [a, b] of [[e.u, e.v], [e.v, e.u]]) {
+      const h = { from: a, to: b, e, ang: Math.atan2(verts[b][1] - verts[a][1], verts[b][0] - verts[a][0]) };
+      half.push(h);
+      out[a].push(h);
+    }
+  });
+  out.forEach((l) => l.sort((p, q) => p.ang - q.ang));
+  const seen = new Set(), rings = [];
+  for (const h0 of half) {
+    if (seen.has(h0)) continue;
+    const ring = [];
+    let h = h0, material = false;
+    while (!seen.has(h)) {
+      seen.add(h);
+      ring.push(verts[h.from]);
+      if (h.e.k !== "c") material = true;
+      const list = out[h.to], at = list.findIndex((o) => o.to === h.from && o.e === h.e);
+      h = list[(at - 1 + list.length) % list.length];
+    }
+    let area = 0;
+    for (let i = 0; i < ring.length; i++) { const p = ring[i], q = ring[(i + 1) % ring.length]; area += p[0] * q[1] - p[1] * q[0]; }
+    // Material: caras con área positiva y algún hendido; las de puro corte son huecos.
+    if (area > 0 && material) rings.push(ring);
+  }
+  return rings;
+}
+
+// Dibujos del panel de variables, con el estilo del plano del troquel: la caja FEFCO 201 armada en
+// isométrico con sus cotas (y la unión de las solapas al centro de la tapa), y un trozo de cartón
+// corrugado con la onda elegida. Se redibujan con cada cambio.
+
+const r1 = (v) => (Math.round(v * 10) / 10).toString();
+
+// Punta de flecha con la punta en (x, y) y el cuerpo hacia (dx, dy).
+const punta = (x, y, dx, dy, s = 5) => { const w = s * 0.38; return "M" + r1(x) + " " + r1(y) + "L" + r1(x + dx * s - dy * w) + " " + r1(y + dy * s + dx * w) + "L" + r1(x + dx * s + dy * w) + " " + r1(y + dy * s - dx * w) + "Z"; };
+// Flechas cerradas en las dos puntas de una cota.
+function flechas(x0, y0, x1, y1) {
+  const n = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / n, uy = (y1 - y0) / n, s = Math.min(5, n / 3);
+  return punta(x0, y0, ux, uy, s) + punta(x1, y1, -ux, -uy, s);
+}
+
+// Texto de una cota como en el plano: la letra de la variable y su valor.
+const rotulo = (x, y, letra, v, rot) => '<text x="' + r1(x) + '" y="' + r1(y) + '" text-anchor="middle"' + (rot ? ' transform="rotate(' + r1(rot) + " " + r1(x) + " " + r1(y) + ')"' : "") + '><tspan class="fx">' + letra + '</tspan><tspan class="val"> = ' + Math.round(v) + "</tspan></text>";
+const cota = (key, d, ar, tx) => '<g class="cota" data-var="' + key + '"><path d="' + d + '"/><path class="ar" d="' + ar + '"/>' + tx + "</g>";
+
+// La caja armada en isométrico, a escala, con las medidas interiores: largo L, ancho A y alto H.
+function caja201Svg(P) {
+  const W = 326, Hv = 210, c = Math.cos(Math.PI / 6), sn = 0.5;
+  const L = P.L, A = P.A, H = P.H;
+  const s = Math.min(232 / ((L + A) * c), 150 / ((L + A) * sn + H));
+  const ox = W / 2 + 6 - ((L - A) * c * s) / 2, oy = (Hv - ((L + A) * sn + H) * s) / 2 - 4;
+  // x: largo hacia la derecha-abajo; y: ancho hacia la izquierda-abajo; z: alto.
+  const pt = (x, y, z) => [ox + (x - y) * c * s, oy + ((x + y) * sn - z + H) * s];
+  const P2 = (q) => r1(q[0]) + " " + r1(q[1]);
+  const poly = (ps) => "M" + ps.map((p) => P2(pt(...p))).join("L") + "Z";
+  const caras = '<path class="pieza" d="' + poly([[0, 0, H], [L, 0, H], [L, A, H], [0, A, H]]) + '"/>' +
+    '<path class="pieza lado" d="' + poly([[L, 0, 0], [L, A, 0], [L, A, H], [L, 0, H]]) + '"/>' +
+    '<path class="pieza frente" d="' + poly([[0, A, 0], [L, A, 0], [L, A, H], [0, A, H]]) + '"/>';
+  const borde = '<path class="filete" d="M' + P2(pt(L, A, H)) + "L" + P2(pt(L, A, 0)) + '"/>';
+  // Las solapas de afuera se tocan al centro de la tapa, a lo largo.
+  const union = '<path class="union" d="M' + P2(pt(0, A / 2, H)) + "L" + P2(pt(L, A / 2, H)) + '"/>';
+  const off = (p, dx, dy) => [p[0] + dx, p[1] + dy];
+  // Cotas paralelas a las aristas, separadas 14 px por fuera.
+  const paralela = (key, a, b, n, v) => {
+    const a1 = off(a, n[0] * 14, n[1] * 14), b1 = off(b, n[0] * 14, n[1] * 14), ang = (Math.atan2(b1[1] - a1[1], b1[0] - a1[0]) * 180) / Math.PI;
+    const m = [(a1[0] + b1[0]) / 2 + n[0] * 9, (a1[1] + b1[1]) / 2 + n[1] * 9 + 3];
+    return cota(key, "M" + P2(off(a, n[0] * 3, n[1] * 3)) + "L" + P2(off(a, n[0] * 18, n[1] * 18)) + "M" + P2(off(b, n[0] * 3, n[1] * 3)) + "L" + P2(off(b, n[0] * 18, n[1] * 18)) + "M" + P2(a1) + "L" + P2(b1), flechas(a1[0], a1[1], b1[0], b1[1]), rotulo(m[0], m[1], key, v, ang > 90 || ang < -90 ? ang + 180 : ang));
+  };
+  // Normales hacia afuera en pantalla: el frente (y = A) baja a la izquierda, el lado (x = L) a la derecha.
+  const cLargo = paralela("L", pt(0, A, 0), pt(L, A, 0), [-sn, c], L);
+  const cAncho = paralela("A", pt(L, 0, 0), pt(L, A, 0), [sn, c], A);
+  const xa = pt(0, A, 0)[0] - 16, y0 = pt(0, A, 0)[1], y1 = pt(0, A, H)[1];
+  const cAlto = cota("H", "M" + P2(off(pt(0, A, 0), -3, 0)) + "H" + r1(xa - 5) + "M" + P2(off(pt(0, A, H), -3, 0)) + "H" + r1(xa - 5) + "M" + r1(xa) + " " + r1(y0) + "V" + r1(y1), flechas(xa, y1, xa, y0), rotulo(xa - 6, (y0 + y1) / 2, "H", H, -90));
+  return '<svg viewBox="0 0 ' + W + " " + Hv + '" role="img" aria-label="Caja de ' + Math.round(L) + " × " + Math.round(A) + " × " + Math.round(H) + ' mm interiores (largo × ancho × alto)">' +
+    caras + union + borde + cLargo + cAncho + cAlto + "</svg>";
+}
+
+// Trozo de cartón corrugado en isométrico: dos papeles lisos y la onda entre ellos, a la vista en el
+// corte. La onda crece con el espesor (E 2, B 3, C 4: más alta y más espaciada).
+function onda201Svg(P, ondas) {
+  const k = 0.8, e = P.e, T = (6 + e * 3) * k, paso = (4 + e * 3) * k, W = 120 * k, D = 36 * k, liner = 1.4 * k, Tmax = (6 + 7 * 3) * k;
+  const c = Math.cos(Math.PI / 6), sn = Math.sin(Math.PI / 6);
+  // Alto fijo (el del espesor máximo) para que el panel no cambie de tamaño; el trozo apoya abajo.
+  const ox = 163 - ((W - D) * c) / 2, oy = 6 + Tmax - T, Hv = Tmax + (W + D) * sn + 30;
+  const pt = (x, y, z) => r1(ox + (x - y) * c) + " " + r1(oy + (x + y) * sn - z + T);
+  const poly = (ps) => "M" + ps.map((p) => pt(...p)).join("L") + "Z";
+  const amp = (T - 2 * liner) / 2 - 0.6, mid = T / 2;
+  let onda = "";
+  for (let i = 0; i <= 60; i++) { const x = (W * i) / 60; onda += (i ? "L" : "M") + pt(x, D, mid + amp * Math.sin((2 * Math.PI * x) / paso)); }
+  const tipo = Object.keys(ondas).find((n) => ondas[n] === e);
+  return '<svg viewBox="0 0 326 ' + r1(Hv) + '" role="img" aria-label="Cartón corrugado ' + (tipo ? "onda " + tipo : "") + ", " + e + ' mm">' +
+    '<g data-var="e" class="carton">' +
+    '<path class="sup" d="' + poly([[0, 0, T], [W, 0, T], [W, D, T], [0, D, T]]) + '"/>' +
+    '<path class="lado" d="' + poly([[W, 0, 0], [W, D, 0], [W, D, T], [W, 0, T]]) + '"/>' +
+    '<path class="corte" d="' + poly([[0, D, 0], [W, D, 0], [W, D, T], [0, D, T]]) + '"/>' +
+    '<path class="liner" d="M' + pt(0, D, liner) + "L" + pt(W, D, liner) + "L" + pt(W, 0, liner) + "M" + pt(0, D, T - liner) + "L" + pt(W, D, T - liner) + "L" + pt(W, 0, T - liner) + '"/>' +
+    '<path class="onda" d="' + onda + '"/>' +
+    '<path class="borde" d="' + poly([[0, 0, T], [W, 0, T], [W, 0, 0], [W, D, 0], [0, D, 0], [0, D, T]]) + "M" + pt(0, D, T) + "L" + pt(W, D, T) + "L" + pt(W, 0, T) + "M" + pt(W, D, T) + "L" + pt(W, D, 0) + '"/>' +
+    '<text class="tx" x="163" y="' + r1(Hv - 6) + '" text-anchor="middle">' + (tipo ? "Onda " + tipo + " · " : "") + e + " mm</text>" +
+    "</g></svg>";
+}
+
+// Caja FEFCO 0201 (caja americana: solapas que se tocan al centro) como diseño de la plantilla de
+// troqueles (../troqueles/LEEME.md). Se dibuja desde cero con las medidas interiores y el espesor.
+//
+// Compensaciones (las de las tablas de onda B: L + 3, A + 3, H + 6):
+//  · paneles de largo y de ancho, entre hendidos: L + e y A + e;
+//  · alto entre los hendidos de las solapas: H + 2e (arriba y abajo van dos solapas, una sobre otra);
+//  · solapas: (A + e)/2, se tocan al centro;
+//  · ranuras entre solapas de e + 2; solapa de pegado g con biseles de 10.
+
+const ONDAS_201 = { E: 2, B: 3, C: 4 };
+const BISEL_201 = 10; // biseles de la solapa de pegado, en las puntas
+
+const PARAMS_201 = [
+  { key: "L", group: "Caja", label: "Largo interior", min: 100, max: 800, step: 1 },
+  { key: "A", group: "Caja", label: "Ancho interior", min: 80, max: 600, step: 1 },
+  { key: "H", group: "Caja", label: "Alto interior", min: 50, max: 800, step: 1 },
+  { key: "g", group: "Caja", label: "Solapa de pegado", min: 25, max: 50, step: 1 },
+  { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 7, step: 1 },
+];
+const DEFAULTS_201 = { L: 300, A: 200, H: 250, g: 35, e: 3 };
+
+// Medidas que salen de las variables.
+function medidas201(P) {
+  const { L, A, H, e } = P;
+  const largo = L + e, ancho = A + e, alto = H + 2 * e, solapa = Math.round((A + e) / 2), ranura = e + 2;
+  return { largo, ancho, alto, solapa, ranura, externa: [L + 2 * e, A + 2 * e, H + 4 * e] };
+}
+
+function generar201(params) {
+  const P = { ...DEFAULTS_201 };
+  for (const p of PARAMS_201) {
+    const v = Number(params[p.key]);
+    if (Number.isFinite(v)) P[p.key] = Math.min(p.max, Math.max(p.min, Math.round(v)));
+  }
+  const M = medidas201(P), { largo, ancho, alto, solapa: F } = M, r = M.ranura / 2, g = P.g;
+  // Hendidos verticales: largo, ancho, largo, ancho (la solapa de pegado va a la izquierda del primer largo).
+  const xs = [0, largo, largo + ancho, 2 * largo + ancho, 2 * largo + 2 * ancho];
+  const entities = [];
+  const line = (k, a, b) => entities.push({ t: "L", k, a, b });
+  // Solapas de arriba y de abajo, separadas por ranuras que bajan hasta el hendido.
+  for (const [y0, y1] of [[alto, alto + F], [0, -F]]) {
+    for (let i = 0; i < 4; i++) {
+      const xl = i === 0 ? xs[0] : xs[i] + r, xr = i === 3 ? xs[4] : xs[i + 1] - r;
+      line("c", [xl, y1], [xr, y1]);
+      line("c", [xl, y0], [xl, y1]);
+      line("c", [xr, y0], [xr, y1]);
+      line("h", [xl, y0], [xr, y0]);
+      if (i < 3) line("c", [xr, y0], [xs[i + 1] + r, y0]);
+    }
+  }
+  for (const x of xs.slice(0, 4)) line("h", [x, 0], [x, alto]);
+  line("c", [xs[4], 0], [xs[4], alto]);
+  // Solapa de pegado con sus biseles.
+  line("c", [0, alto], [-g, alto - BISEL_201]);
+  line("c", [-g, alto - BISEL_201], [-g, BISEL_201]);
+  line("c", [-g, BISEL_201], [0, 0]);
+
+  const bounds = limitesDe(entities);
+  const dims = [];
+  const h = (x0, x1, at, name) => dims.push({ dir: "h", x0, x1, at, value: x1 - x0, src: "h", name });
+  const v = (y0, y1, at, name) => dims.push({ dir: "v", y0, y1, at, value: y1 - y0, src: "v", name });
+  h(-g, 0, alto + F + 30, "pegado");
+  ["largo", "ancho", "largo", "ancho"].forEach((n, i) => h(xs[i], xs[i + 1], -F - 40, n));
+  v(0, alto, -g - 50, "alto");
+  v(alto, alto + F, -g - 50, "solapa");
+  v(-F, 0, -g - 50, "solapa");
+  h(bounds.xMin, bounds.xMax, -F - 100, "plano total");
+  v(bounds.yMin, bounds.yMax, -g - 110, "plano total");
+  return { P, entities, dims, info: { bounds, ...M, xs } };
+}
+
+const ondaDe = (e) => Object.keys(ONDAS_201).find((k) => ONDAS_201[k] === e);
+
+function crearDiseno() {
+  return {
+    titulo: "Caja FEFCO 201",
+    bajada: "Troquel paramétrico para ArtiosCAD",
+    PARAMS: PARAMS_201,
+    DEFAULTS: DEFAULTS_201,
+    generate: generar201,
+    atajos: { titulo: "Onda", key: "e", opciones: Object.entries(ONDAS_201) },
+    // Dibujos del panel: la caja armada con sus cotas y el cartón con su onda.
+    figuras: { Caja: (P) => caja201Svg(P), "Cartón": (P) => onda201Svg(P, ONDAS_201) },
+    estilos: `
+.figura .pieza{fill:var(--sheet);stroke:var(--ink);stroke-width:1.1;stroke-linejoin:round}
+.figura .pieza.lado{fill:var(--soft-bg)}
+.figura .pieza.frente{fill:#f8fafc}
+.figura .filete{fill:none;stroke:var(--ink);stroke-width:.8}
+.figura .union{fill:none;stroke:var(--crease);stroke-width:.8;stroke-dasharray:4 3}
+.figura .cota .fx{fill:var(--accent);font-weight:600}
+.figura .cota .val{fill:var(--soft);font-weight:500}
+.figura .cota.active .fx,.figura .cota.active .val{fill:var(--orange-deep);font-weight:700}
+.figura .carton .sup{fill:var(--sheet)}
+.figura .carton .lado{fill:var(--soft-bg)}
+.figura .carton .corte{fill:var(--tint)}
+.figura .carton .liner{fill:none;stroke:var(--soft);stroke-width:.7}
+.figura .carton .onda{fill:none;stroke:var(--accent);stroke-width:1.4;stroke-linejoin:round}
+.figura .carton .borde{fill:none;stroke:var(--ink);stroke-width:1;stroke-linejoin:round}
+.figura .carton.active .onda{stroke:var(--orange)}
+`,
+    formulas: {
+      h: {
+        largo: ["L + e", (P) => P.L + P.e],
+        ancho: ["A + e", (P) => P.A + P.e],
+        pegado: ["g", (P) => P.g],
+        "plano total": ["2L + 2A + 4e + g", (P) => 2 * P.L + 2 * P.A + 4 * P.e + P.g],
+      },
+      v: {
+        alto: ["H + 2e", (P) => P.H + 2 * P.e],
+        solapa: ["(A + e)/2", (P) => Math.round((P.A + P.e) / 2)],
+        "plano total": ["H + 2e + 2 × solapa", (P) => P.H + 2 * P.e + 2 * Math.round((P.A + P.e) / 2)],
+      },
+    },
+    // Vista simple: las cotas de las variables (con su letra) y los totales de la plancha.
+    simple: { "h:largo": "L", "h:ancho": "A", "v:alto": "H", "h:pegado": "g", "h:plano total": "", "v:plano total": "" },
+    letras: "(?<![A-Za-zÀ-ÿ])[LAHge](?![A-Za-zÀ-ÿ])",
+    toca: { L: ["L"], A: ["A"], H: ["H"], g: ["g"], e: ["e"] },
+    // Notas sobre el plano, sólo con las fórmulas a la vista.
+    llamadas(model) {
+      const { xs, alto, solapa } = model.info;
+      return [
+        [[(xs[0] + xs[1]) / 2, alto + solapa / 2], "solapa exterior"],
+        [[(xs[1] + xs[2]) / 2, alto + solapa / 2], "solapa interior"],
+        [[(xs[0] + xs[1]) / 2, -solapa / 2], "ranuras e + 2"],
+        [[-model.P.g / 2, alto + 14], "bisel 10"],
+      ];
+    },
+    resumen(model) {
+      const P = model.P, b = model.info.bounds, x3 = (a) => a.map(mmEntero).join(" × "), onda = ondaDe(P.e);
+      return [
+        ["Tipo de cartón", onda ? "Onda " + onda : "Espesor propio", "espesor " + P.e + " mm"],
+        ["Medidas internas", x3([P.L, P.A, P.H]), "L × A × H"],
+        ["Medidas externas", x3(model.info.externa), "aproximadas"],
+        ["Solapas", mmEntero(model.info.solapa), "se tocan al centro"],
+        ["Plancha total", x3([b.xMax - b.xMin, b.yMax - b.yMin]), "ancho × alto"],
+      ];
+    },
+    archivo: (model) => "FEFCO201-" + model.P.L + "x" + model.P.A + "x" + model.P.H + "-" + (ondaDe(model.P.e) ? "onda" + ondaDe(model.P.e) : "e" + model.P.e),
+    // Al DXF van las líneas y las cotas de L, A y H (una de cada).
+    dxf(model) {
+      const una = (n) => model.dims.find((d) => d.name === n);
+      const rot = { largo: "L=", ancho: "A=", alto: "H=" };
+      return escribirDxf(model, { cotas: ["largo", "ancho", "alto"].map(una), rotulo: (d) => rot[d.name] + mmEntero(d.value) });
+    },
+    cf2: (model, nombre) => escribirCf2(model, { name: nombre }),
+    describir: (model) => "Caja FEFCO 201 de " + model.P.L + " × " + model.P.A + " × " + model.P.H + " mm interiores",
+    casosFormulas: [{}, { L: 500, A: 120, H: 400, g: 25, e: 2 }, { L: 100, A: 600, H: 50, g: 50, e: 7 }, { A: 201, e: 4 }],
+  };
+}
+
+
+const DESIGN = crearDiseno();
+const PARAMETROS = DESIGN.PARAMS, INICIAL = DESIGN.DEFAULTS;
+const form = document.getElementById("form");
+const state = { ...INICIAL };
+let model;
+let group = "", caja = form;
+for (const p of PARAMETROS) {
+  if (p.group !== group) {
+    group = p.group;
+    // Cada grupo va en su propio recuadro, con su título.
+    caja = document.createElement("section");
+    caja.className = "grupo";
+    caja.dataset.group = group;
+    const h = document.createElement("h3");
+    h.className = "group";
+    h.textContent = group;
+    caja.appendChild(h);
+    form.appendChild(caja);
+    // Dibujo del grupo (DESIGN.figuras), redibujado con cada cambio.
+    if (DESIGN.figuras && DESIGN.figuras[group]) {
+      const fig = document.createElement("div");
+      fig.className = "figura";
+      fig.dataset.group = group;
+      fig.innerHTML = '<div class="lienzo"></div>';
+      caja.appendChild(fig);
+    }
+  }
+  // Variables que se escriben sobre las cotas del dibujo del grupo (DESIGN.campos): el campo va encima
+  // del dibujo, en el lugar de su cota, y el deslizador queda oculto.
+  const fig = form.querySelector('.figura[data-group="' + p.group + '"]');
+  if (fig && DESIGN.campos && DESIGN.campos[p.group] && DESIGN.campos[p.group](INICIAL)[p.key]) {
+    const campo = document.createElement("label");
+    campo.className = "campo";
+    campo.dataset.key = p.key;
+    // Campo con flechas para subir y bajar de a un paso (también con las flechas del teclado).
+    const pico = (dir) => '<button type="button" data-paso="' + dir + '" tabindex="-1" aria-label="' + (dir > 0 ? "Subir " : "Bajar ") + p.label + '"><svg viewBox="0 0 10 6"><path d="' + (dir > 0 ? "M0 6L5 0L10 6Z" : "M0 0L10 0L5 6Z") + '"/></svg></button>';
+    campo.innerHTML = '<span class="paso"><input id="v-' + p.key + '" type="number" inputmode="numeric" aria-label="' + p.label + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + INICIAL[p.key] + '"><span class="flechas">' + pico(1) + pico(-1) + '</span></span><input id="r-' + p.key + '" type="range" hidden tabindex="-1" aria-hidden="true" min="0" max="1000" step="1" value="500">';
+    fig.appendChild(campo);
+    continue;
+  }
+  const row = document.createElement("div");
+  row.className = "var";
+  row.dataset.key = p.key;
+  row.innerHTML = '<b>' + p.key + '</b><label for="v-' + p.key + '">' + p.label + '</label><input id="v-' + p.key + '" type="number" inputmode="numeric" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + INICIAL[p.key] + '"><input id="r-' + p.key + '" type="range" aria-label="' + p.label + '" min="0" max="1000" step="1" value="500">';
+  caja.appendChild(row);
+}
+// Botones rápidos de una variable (por ejemplo, la onda del cartón).
+const atajos = document.getElementById("atajos");
+const paramDeInicio = (key) => PARAMETROS.find((q) => q.key === key);
+if (DESIGN.atajos) {
+  atajos.setAttribute("aria-label", DESIGN.atajos.titulo);
+  atajos.innerHTML = '<span class="tag">' + DESIGN.atajos.titulo + "</span>" + DESIGN.atajos.opciones.map(([n, v]) => '<button type="button" data-atajo="' + v + '" data-nombre="' + n + '" aria-label="' + DESIGN.atajos.titulo + " " + n + ", " + v + ' mm">' + n + "</button>").join("");
+  // Los atajos van en el recuadro del grupo de su variable.
+  form.querySelector('.grupo[data-group="' + paramDeInicio(DESIGN.atajos.key).group + '"]').appendChild(atajos);
+} else atajos.remove();
+const f1 = (v) => (Math.round(v * 10) / 10).toString();
+const mm = (v) => String(Math.round(v));
+function arrow(x0, y0, x1, y1) {
+  const L = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / L, uy = (y1 - y0) / L, s = Math.min(9, L / 4), w = s * 0.35;
+  const h = (x, y, dx, dy) => "M" + f1(x) + " " + f1(y) + "L" + f1(x + dx * s - dy * w) + " " + f1(y + dy * s + dx * w) + "L" + f1(x + dx * s + dy * w) + " " + f1(y + dy * s - dx * w) + "Z";
+  return h(x0, y0, ux, uy) + h(x1, y1, -ux, -uy);
+}
+// Letras de variables que aparecen en una fórmula o llamada ("A − 4e/3" → A e).
+const LETRAS = new RegExp(DESIGN.letras, "g");
+const lettersOf = (txt) => (txt.match(LETRAS) || []).join(" ");
+const formulaOf = (d) => (DESIGN.formulas[d.src] && DESIGN.formulas[d.src][d.name]) || null;
+let activeVar = null;
+function applyActive() {
+  form.querySelectorAll("[data-key]").forEach((row) => row.classList.toggle("active", row.dataset.key === activeVar));
+  document.querySelectorAll(".figura [data-var]").forEach((el) => el.classList.toggle("active", el.dataset.var === activeVar));
+  const want = activeVar ? DESIGN.toca[activeVar] || [] : [];
+  document.querySelectorAll("#plan [data-vars]").forEach((el) => {
+    const vars = el.dataset.vars ? el.dataset.vars.split(" ") : [];
+    el.classList.toggle("active", vars.some((v) => want.includes(v)));
+  });
+}
+let showFormulas = false;
+function planSvg(prevDims) {
+  const b = model.info.bounds;
+  const cx = (b.xMin + b.xMax) / 2;
+  // Cotas que se ven: todas con fórmulas; en la vista simple, una por cada clave de DESIGN.simple.
+  const seen = new Set();
+  const shown = model.dims.map((d, i) => [d, i]).filter(([d]) => {
+    if (showFormulas) return true;
+    const key = d.src + ":" + d.name;
+    if (!(key in DESIGN.simple) || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  // El marco abarca el troquel y las cotas visibles, con aire para los textos.
+  let X0 = b.xMin, X1 = b.xMax, Y0 = b.yMin, Y1 = b.yMax;
+  for (const [d] of shown) {
+    if (d.dir === "h") { X0 = Math.min(X0, d.x0); X1 = Math.max(X1, d.x1); Y0 = Math.min(Y0, d.at); Y1 = Math.max(Y1, d.at); }
+    else { X0 = Math.min(X0, d.at); X1 = Math.max(X1, d.at); Y0 = Math.min(Y0, d.y0); Y1 = Math.max(Y1, d.y1); }
+  }
+  X0 -= 40; X1 += showFormulas ? 120 : 100; Y0 -= 30; Y1 += 20;
+  const Y = (y) => Y1 - y;
+  const paths = { c: "", h: "", p: "" };
+  for (const e of model.entities) {
+    if (e.t === "L") paths[e.k] += "M" + f1(e.a[0]) + " " + f1(Y(e.a[1])) + "L" + f1(e.b[0]) + " " + f1(Y(e.b[1]));
+    else {
+      let sweep = e.a1 - e.a0; while (sweep <= 0) sweep += 360; while (sweep > 360) sweep -= 360;
+      const at = (a) => [e.c[0] + e.r * Math.cos(a * Math.PI / 180), e.c[1] + e.r * Math.sin(a * Math.PI / 180)];
+      const s = at(e.a0), t = at(e.a1);
+      paths[e.k] += "M" + f1(s[0]) + " " + f1(Y(s[1])) + "A" + f1(e.r) + " " + f1(e.r) + " 0 " + (sweep > 180 ? 1 : 0) + " 0 " + f1(t[0]) + " " + f1(Y(t[1]));
+    }
+  }
+  const kraft = cartonRings(model).map((r) => "M" + r.map((p) => f1(p[0]) + " " + f1(Y(p[1]))).join("L") + "Z").join("");
+  const text = (d) => {
+    const entry = formulaOf(d), v = mm(d.value);
+    return entry && entry[0] !== v ? [entry[0] + " = " + v, '<tspan class="fx">' + entry[0] + '</tspan><tspan class="val"> = ' + v + "</tspan>"] : [v, '<tspan class="val">' + v + "</tspan>"];
+  };
+  const simpleText = (d) => {
+    const letter = DESIGN.simple[d.src + ":" + d.name], v = mm(d.value);
+    return letter ? [letter + " = " + v, '<tspan class="fx">' + letter + '</tspan><tspan class="val"> = ' + v + "</tspan>"] : [v, '<tspan class="val">' + v + "</tspan>"];
+  };
+  let dims = "";
+  for (const [d, i] of shown) {
+    const hot = (prevDims && prevDims[i] !== undefined && Math.abs(prevDims[i] - d.value) > 0.005 ? " hot" : "") + '" data-vars="' + lettersOf(formulaOf(d) ? formulaOf(d)[0] : "");
+    const [plain, rich] = showFormulas ? text(d) : simpleText(d);
+    const fits = plain.length * 10.4 < Math.abs(d.dir === "h" ? d.x1 - d.x0 : d.y1 - d.y0) - 12;
+    if (d.dir === "h") {
+      const y = Y(d.at), xm = (d.x0 + d.x1) / 2;
+      const base = '<g class="dim' + hot + '"><path d="M' + f1(d.x0) + " " + f1(y - 8) + "V" + f1(y + 8) + "M" + f1(d.x1) + " " + f1(y - 8) + "V" + f1(y + 8) + "M" + f1(d.x0) + " " + f1(y) + "H" + f1(d.x1) + '"/><path class="ar" d="' + arrow(d.x0, y, d.x1, y) + '"/>';
+      // Si no entra a lo largo, la etiqueta baja en vertical desde la cota.
+      dims += fits
+        ? base + '<text x="' + f1(xm) + '" y="' + f1(y - 7) + '">' + rich + "</text></g>"
+        : base + '<text class="down" x="' + f1(xm + 5) + '" y="' + f1(y + 12) + '" transform="rotate(-90 ' + f1(xm + 5) + " " + f1(y + 12) + ')">' + rich + "</text></g>";
+    } else {
+      const x = d.at, ym = Y((d.y0 + d.y1) / 2);
+      const base = '<g class="dim' + hot + '"><path d="M' + f1(x - 8) + " " + f1(Y(d.y0)) + "H" + f1(x + 8) + "M" + f1(x - 8) + " " + f1(Y(d.y1)) + "H" + f1(x + 8) + "M" + f1(x) + " " + f1(Y(d.y0)) + "V" + f1(Y(d.y1)) + '"/><path class="ar" d="' + arrow(x, Y(d.y0), x, Y(d.y1)) + '"/>';
+      const left = x < cx;
+      dims += fits
+        ? base + '<text x="' + f1(x - 7) + '" y="' + f1(ym) + '" transform="rotate(-90 ' + f1(x - 7) + " " + f1(ym) + ')">' + rich + "</text></g>"
+        : base + '<text class="' + (left ? "side-l" : "side") + '" x="' + f1(left ? x - 10 : x + 10) + '" y="' + f1(ym + 6) + '">' + rich + "</text></g>";
+    }
+  }
+  const calls = (DESIGN.llamadas ? DESIGN.llamadas(model) : []).filter((c) => showFormulas || c[2]);
+  const callSvg = calls.map(([p, t]) => '<text class="call" data-vars="' + lettersOf(t) + '" x="' + f1(p[0]) + '" y="' + f1(Y(p[1])) + '">' + t + "</text>").join("");
+  return '<svg class="plan' + (showFormulas ? "" : " simple") + '" viewBox="' + f1(X0) + " 0 " + f1(X1 - X0) + " " + f1(Y1 - Y0) + '" role="img" aria-label="' + DESIGN.describir(model) + (showFormulas ? ", con cada cota expresada en sus variables" : ", con las cotas de las variables") + '"><path class="k" d="' + kraft + '"/><path class="c" d="' + paths.c + '"/><path class="h" d="' + paths.h + '"/><path class="p" d="' + paths.p + '"/>' + dims + callSvg + "</svg>";
+}
+// El deslizador arranca en el medio: la mitad izquierda va del mínimo al valor original y la derecha del
+// original al máximo, así llega a los dos extremos aunque el original no esté centrado.
+const deBarra = (p, r) => { const d = INICIAL[p.key], v = r < 500 ? p.min + ((d - p.min) * r) / 500 : d + ((p.max - d) * (r - 500)) / 500; return Math.round(v / p.step) * p.step; };
+const aBarra = (p, v) => { const d = INICIAL[p.key]; return v <= d ? (d === p.min ? 500 : (500 * (v - p.min)) / (d - p.min)) : (p.max === d ? 500 : 500 + (500 * (v - d)) / (p.max - d)); };
+const paramDe = (key) => PARAMETROS.find((q) => q.key === key);
+const setValue = (key, v) => { state[key] = v; document.getElementById("v-" + key).value = v; document.getElementById("r-" + key).value = aBarra(paramDe(key), v); };
+let hotTimer = 0;
+function render(source) {
+  for (const p of PARAMETROS) {
+    const num = document.getElementById("v-" + p.key), rng = document.getElementById("r-" + p.key);
+    if (source === rng) num.value = deBarra(p, Number(rng.value)); else if (source === num) rng.value = aBarra(p, Number(num.value));
+    const v = Number(num.value);
+    // Todo en milímetros enteros cuando el paso es de 1 o más.
+    if (Number.isFinite(v) && v > 0) state[p.key] = Math.min(p.max, Math.max(p.min, p.step >= 1 ? Math.round(v) : v));
+  }
+  // Variables que siguen a otras (DESIGN.enlazar).
+  const key = source && source.id ? source.id.slice(2) : null;
+  if (key && DESIGN.enlazar) { const sigue = DESIGN.enlazar(state, key); if (sigue) for (const k in sigue) setValue(k, sigue[k]); }
+  const prevDims = model ? model.dims.map((d) => d.value) : null;
+  model = DESIGN.generate(state);
+  // Rangos que dependen de las otras medidas: el deslizador no deja pasarlos.
+  const lim = DESIGN.limits ? DESIGN.limits(model.P) : {};
+  for (const p of PARAMETROS) {
+    const [a, b2] = lim[p.key] || [p.min, p.max], rng = document.getElementById("r-" + p.key), num = document.getElementById("v-" + p.key);
+    num.min = a; num.max = b2;
+    rng.value = aBarra(p, model.P[p.key]);
+    if (source === "commit" || source === rng) num.value = p.step >= 1 ? Math.round(model.P[p.key]) : model.P[p.key];
+  }
+  document.getElementById("plan").innerHTML = planSvg(prevDims);
+  document.querySelectorAll(".figura").forEach((fig) => {
+    fig.querySelector(".lienzo").innerHTML = DESIGN.figuras[fig.dataset.group](model.P);
+    // Los campos siguen a sus cotas: posiciones en unidades del viewBox del dibujo.
+    if (!DESIGN.campos || !DESIGN.campos[fig.dataset.group]) return;
+    const pos = DESIGN.campos[fig.dataset.group](model.P), vb = fig.querySelector("svg").viewBox.baseVal;
+    fig.querySelectorAll(".campo").forEach((c) => { const q = pos[c.dataset.key]; c.style.left = (100 * q[0]) / vb.width + "%"; c.style.top = (100 * q[1]) / vb.height + "%"; });
+  });
+  // La leyenda muestra sólo los tipos de línea que tiene el troquel.
+  applyActive();
+  if (DESIGN.atajos) document.querySelectorAll("[data-atajo]").forEach((b) => b.setAttribute("aria-pressed", String(Math.abs(Number(b.dataset.atajo) - model.P[DESIGN.atajos.key]) < 1e-9)));
+  document.getElementById("facts").innerHTML = DESIGN.resumen(model).map(([k, v, hint]) => '<div class="row"><dt>' + k + "</dt><dd><strong>" + v + "</strong><span>" + hint + "</span></dd></div>").join("");
+  clearTimeout(hotTimer);
+  hotTimer = setTimeout(() => document.querySelectorAll(".hot").forEach((e) => e.classList.remove("hot")), 1400);
+}
+const name = () => DESIGN.archivo(model);
+const say = (t) => (document.getElementById("status").textContent = t);
+// En claude.ai los archivos se guardan con el permiso de descargas (la página protegida lo pide apenas
+// carga, en window.__descargas). claude.ai no acepta .dxf ni .cf2: se guardan con .txt al final para
+// renombrar. Fuera de claude.ai, o si el permiso no está, descarga directa del navegador.
+let downloads = null;
+const pedido = window.__descargas || (window.claude && window.claude.use ? window.claude.use("downloads") : null);
+if (pedido) pedido.then((d) => { downloads = d; }).catch(() => {});
+function directa(text, file) {
+  try {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: "application/octet-stream" }));
+    a.download = file;
+    document.body.appendChild(a); a.click(); a.remove();
+    say("Descarga iniciada: " + file + ".");
+  } catch (e) { say("No se pudo descargar."); }
+}
+async function download(text, ext) {
+  const file = name() + "." + ext;
+  if (!downloads && pedido) { say("Preparando la descarga…"); try { downloads = await pedido; } catch (e) {} }
+  if (!downloads) { directa(text, file); return; }
+  try {
+    await downloads.save({ filename: file, data: text });
+    say("Guardado " + file + ".");
+  } catch (e) {
+    if (e && (e.code === "rejected_extension" || e.code === "extension_not_enabled")) {
+      try {
+        await downloads.save({ filename: file + ".txt", data: text });
+        say("Se guardó " + file + ".txt: borrale el .txt del nombre y abrilo en ArtiosCAD.");
+      } catch (e2) { say(e2 && e2.code === "declined" ? "Descarga cancelada." : "No se pudo descargar (" + ((e2 && e2.code) || "error") + ")."); }
+      return;
+    }
+    if (e && e.code === "declined") { say("Descarga cancelada."); return; }
+    if (e && e.code === "rate_limited") { say("Ya hay una descarga esperando confirmación."); return; }
+    directa(text, file);
+  }
+}
+document.getElementById("dl-dxf").addEventListener("click", () => download(DESIGN.dxf(model, name()), "dxf"));
+document.getElementById("dl-cf2").addEventListener("click", () => download(DESIGN.cf2(model, name()), "cf2"));
+form.addEventListener("input", (e) => render(e.target));
+// Flechas de los campos sobre el dibujo: suben o bajan un paso dentro del rango de la variable; lo que
+// dependa de otras medidas lo ajusta la página (por ejemplo, el ancho de la caja sigue a la cantidad).
+form.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-paso]");
+  if (!b) return;
+  const num = b.closest(".campo").querySelector('input[type="number"]');
+  const p = paramDe(b.closest(".campo").dataset.key);
+  const v = Math.min(p.max, Math.max(p.min, Number(num.value) + Number(b.dataset.paso) * p.step));
+  num.value = v;
+  num.dispatchEvent(new Event("input", { bubbles: true }));
+  num.dispatchEvent(new Event("change", { bubbles: true }));
+});
+// Variable activa: mientras se toca o tiene el foco, ella y sus cotas se marcan en naranja.
+const setActive = (key) => { if (activeVar !== key) { activeVar = key; applyActive(); } };
+// Al soltar (dejar de arrastrar, terminar de escribir o salir del campo) vuelve a la normalidad con
+// un fundido de 1,5 s; al tocar de nuevo, el naranja aparece al instante.
+let releaseTimer = 0;
+const hold = (key) => { clearTimeout(releaseTimer); setActive(key); };
+const release = (delay = 0) => { clearTimeout(releaseTimer); releaseTimer = setTimeout(() => setActive(null), delay); };
+form.addEventListener("pointerdown", (e) => { const row = e.target.closest("[data-key]"); if (row) hold(row.dataset.key); });
+document.addEventListener("pointerup", () => { if (activeVar) release(); });
+document.addEventListener("pointercancel", () => { if (activeVar) release(); });
+form.addEventListener("keydown", (e) => { const row = e.target.closest("[data-key]"); if (row) hold(row.dataset.key); });
+form.addEventListener("keyup", () => release(700));
+form.addEventListener("change", () => release());
+form.addEventListener("focusout", () => release());
+document.getElementById("formulas").addEventListener("click", (e) => {
+  showFormulas = !showFormulas;
+  e.currentTarget.setAttribute("aria-pressed", String(showFormulas));
+  e.currentTarget.textContent = showFormulas ? "Ocultar fórmulas" : "Ver fórmulas";
+  document.getElementById("plan").innerHTML = planSvg(null);
+  applyActive();
+});
+form.addEventListener("change", () => render("commit"));
+document.querySelectorAll("[data-atajo]").forEach((b) => b.addEventListener("click", () => {
+  setValue(DESIGN.atajos.key, Number(b.dataset.atajo));
+  render("commit"); say(DESIGN.atajos.titulo + " " + b.dataset.nombre + ": " + b.dataset.atajo + " mm.");
+}));
+document.getElementById("reset").addEventListener("click", () => {
+  for (const k in INICIAL) setValue(k, INICIAL[k]);
+  render("commit"); say("");
+});
+render();
+</script>

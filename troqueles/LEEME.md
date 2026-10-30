@@ -11,7 +11,7 @@ Todo lo que tiene la página de la Caja tipo Galeno, listo para usar con cualqui
 | `verificar.mjs` | `verificarDiseno(...)`: prueba cientos de combinaciones de medidas: sin líneas sueltas, cruzadas ni superpuestas. |
 | `ejemplo-caja-americana/` | Un diseño completo y chico (caja americana) para copiar como punto de partida. |
 
-Diseños hechos con la plantilla: `ejemplo-caja-americana/` y `../caja-galeno/parametrico/` (la Caja tipo Galeno).
+Diseños hechos con la plantilla: `ejemplo-caja-americana/`, `../caja-galeno/parametrico/` (la Caja tipo Galeno) y `../caja-fefco-201/` (la Caja FEFCO 201).
 
 ## Lo que trae cada página
 
