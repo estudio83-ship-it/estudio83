@@ -179,6 +179,16 @@ svg.plan{display:block;width:100%;height:100%}
 .figura .carton.active .onda{stroke:var(--orange)}
 #atajos{flex-wrap:nowrap;gap:5px}
 #atajos button{padding:7px 11px}
+/* Cartón debajo de Caja, en una sola columna; en cada grupo, el dibujo a la izquierda y las variables a la derecha. */
+@media (min-width:1100px){
+  form{grid-template-columns:minmax(0,1fr)}
+  form .grupo:nth-child(2){grid-row:auto}
+  .grupo{grid-template-columns:230px minmax(0,1fr);column-gap:14px;align-items:center}
+  .grupo h3.group{grid-column:1 / -1}
+  .grupo > :not(h3):not(.figura){grid-column:2}
+  .grupo[data-group="Caja"] .figura{grid-column:1;grid-row:2 / span 4}
+  .grupo[data-group="Cartón"] .figura{grid-column:1;grid-row:2 / span 2}
+}
 
 </style>
 <main>
@@ -569,6 +579,16 @@ function crearDiseno() {
 .figura .carton.active .onda{stroke:var(--orange)}
 #atajos{flex-wrap:nowrap;gap:5px}
 #atajos button{padding:7px 11px}
+/* Cartón debajo de Caja, en una sola columna; en cada grupo, el dibujo a la izquierda y las variables a la derecha. */
+@media (min-width:1100px){
+  form{grid-template-columns:minmax(0,1fr)}
+  form .grupo:nth-child(2){grid-row:auto}
+  .grupo{grid-template-columns:230px minmax(0,1fr);column-gap:14px;align-items:center}
+  .grupo h3.group{grid-column:1 / -1}
+  .grupo > :not(h3):not(.figura){grid-column:2}
+  .grupo[data-group="Caja"] .figura{grid-column:1;grid-row:2 / span 4}
+  .grupo[data-group="Cartón"] .figura{grid-column:1;grid-row:2 / span 2}
+}
 `,
     formulas: {
       h: {
