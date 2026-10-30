@@ -2,7 +2,7 @@
 // todo lo que la página necesita saber de este troquel en particular.
 import { DEFAULTS, PARAMS, ONDAS, generate, limits, widthFor, depthFor, pitchFor, toDxf, toCf2 } from "./galeno.mjs";
 import { DIM_FORMULAS } from "./formulas.mjs";
-import { botellaSvg, ondaSvg } from "./dibujos.mjs";
+import { botellaSvg, botellaCampos, ondaSvg } from "./dibujos.mjs";
 
 export function crearDiseno(PLANTILLA) {
   return {
@@ -24,13 +24,15 @@ export function crearDiseno(PLANTILLA) {
     },
     // Dibujos del panel: la botella con sus cotas y el cartón con su onda.
     figuras: { Botella: (P) => botellaSvg(P), "Cartón": (P) => ondaSvg(P, ONDAS) },
+    // Las variables de la botella se escriben sobre sus cotas en el dibujo.
+    campos: { Botella: (P) => botellaCampos(P) },
     estilos: `
-.figura .vidrio{fill:var(--tint)}
+.figura .vidrio{fill:#2e4a37}
 .figura .contorno{fill:none;stroke:var(--ink);stroke-width:1.1;stroke-linejoin:round}
-.figura .etiqueta{fill:var(--sheet);stroke:var(--rule);stroke-width:.8}
-.figura .raya{fill:none;stroke:var(--rule);stroke-width:1.4;stroke-linecap:round}
-.figura .capsula{fill:var(--soft);stroke:var(--ink);stroke-width:.8}
-.figura .brillo{fill:none;stroke:var(--sheet);stroke-width:1.6;stroke-linecap:round;opacity:.9}
+.figura .capsula{fill:#6e1f2f;stroke:var(--ink);stroke-width:.8}
+.figura .rotulo{font:500 10.5px var(--mono);fill:var(--soft);transition:fill 1.5s ease}
+.figura .rotulo.active{fill:var(--orange-deep);transition:none}
+.figura .brillo{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;opacity:.35}
 .figura .carton .sup{fill:var(--sheet)}
 .figura .carton .lado{fill:var(--soft-bg)}
 .figura .carton .corte{fill:var(--tint)}

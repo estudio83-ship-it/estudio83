@@ -102,7 +102,12 @@ svg.plan{display:block;width:100%;height:100%}
 .legend{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:13px;color:var(--soft)}
 .legend span{display:inline-flex;align-items:center;gap:8px}.legend svg{width:28px;height:8px}
 .legend [hidden]{display:none}
-.figura{margin:2px 0 4px}
+.figura{margin:2px 0 4px;position:relative}
+.campo{position:absolute;transform:translate(-50%,-50%);display:block}
+.campo input[type=number]{width:62px;font:600 13px var(--mono);color:var(--ink);background:var(--field);border:1px solid var(--rule);border-radius:980px;padding:4px 8px;text-align:center;font-variant-numeric:tabular-nums;box-shadow:0 1px 3px rgba(11,26,46,.08);transition:border-color 1.5s ease,box-shadow 1.5s ease,color 1.5s ease}
+.campo input[type=number]{-moz-appearance:textfield;appearance:textfield}
+.campo input::-webkit-outer-spin-button,.campo input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.campo.active input[type=number]{border-color:var(--orange);color:var(--orange-deep);box-shadow:0 0 0 3px var(--orange-ring);transition:none}
 .figura svg{display:block;width:100%;height:auto;overflow:visible}
 .figura .tx{font:500 10.5px var(--mono);fill:var(--soft)}
 .figura .cota path{fill:none;stroke:var(--accent);stroke-width:.8}
@@ -441,8 +446,20 @@ for (const p of PARAMETROS) {
       const fig = document.createElement("div");
       fig.className = "figura";
       fig.dataset.group = group;
+      fig.innerHTML = '<div class="lienzo"></div>';
       form.appendChild(fig);
     }
+  }
+  // Variables que se escriben sobre las cotas del dibujo del grupo (DESIGN.campos): el campo va encima
+  // del dibujo, en el lugar de su cota, y el deslizador queda oculto.
+  const fig = form.querySelector('.figura[data-group="' + p.group + '"]');
+  if (fig && DESIGN.campos && DESIGN.campos[p.group] && DESIGN.campos[p.group](INICIAL)[p.key]) {
+    const campo = document.createElement("label");
+    campo.className = "campo";
+    campo.dataset.key = p.key;
+    campo.innerHTML = '<input id="v-' + p.key + '" type="number" inputmode="numeric" aria-label="' + p.label + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + INICIAL[p.key] + '"><input id="r-' + p.key + '" type="range" hidden tabindex="-1" aria-hidden="true" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + INICIAL[p.key] + '">';
+    fig.appendChild(campo);
+    continue;
   }
   const row = document.createElement("div");
   row.className = "var";
@@ -472,7 +489,7 @@ const lettersOf = (txt) => (txt.match(LETRAS) || []).join(" ");
 const formulaOf = (d) => (DESIGN.formulas[d.src] && DESIGN.formulas[d.src][d.name]) || null;
 let activeVar = null;
 function applyActive() {
-  document.querySelectorAll(".var").forEach((row) => row.classList.toggle("active", row.dataset.key === activeVar));
+  form.querySelectorAll("[data-key]").forEach((row) => row.classList.toggle("active", row.dataset.key === activeVar));
   document.querySelectorAll(".figura [data-var]").forEach((el) => el.classList.toggle("active", el.dataset.var === activeVar));
   const want = activeVar ? DESIGN.toca[activeVar] || [] : [];
   document.querySelectorAll("#plan [data-vars]").forEach((el) => {
@@ -569,7 +586,13 @@ function render(source) {
     if (source === "commit" || source === rng) num.value = p.step >= 1 ? Math.round(model.P[p.key]) : model.P[p.key];
   }
   document.getElementById("plan").innerHTML = planSvg(prevDims);
-  document.querySelectorAll(".figura").forEach((fig) => { fig.innerHTML = DESIGN.figuras[fig.dataset.group](model.P); });
+  document.querySelectorAll(".figura").forEach((fig) => {
+    fig.querySelector(".lienzo").innerHTML = DESIGN.figuras[fig.dataset.group](model.P);
+    // Los campos siguen a sus cotas: posiciones en unidades del viewBox del dibujo.
+    if (!DESIGN.campos || !DESIGN.campos[fig.dataset.group]) return;
+    const pos = DESIGN.campos[fig.dataset.group](model.P), vb = fig.querySelector("svg").viewBox.baseVal;
+    fig.querySelectorAll(".campo").forEach((c) => { const q = pos[c.dataset.key]; c.style.left = (100 * q[0]) / vb.width + "%"; c.style.top = (100 * q[1]) / vb.height + "%"; });
+  });
   // La leyenda muestra sólo los tipos de línea que tiene el troquel.
   document.querySelectorAll(".legend [data-k]").forEach((el) => { el.hidden = !model.entities.some((e) => e.k === el.dataset.k); });
   applyActive();
@@ -625,10 +648,10 @@ const setActive = (key) => { if (activeVar !== key) { activeVar = key; applyActi
 let releaseTimer = 0;
 const hold = (key) => { clearTimeout(releaseTimer); setActive(key); };
 const release = (delay = 0) => { clearTimeout(releaseTimer); releaseTimer = setTimeout(() => setActive(null), delay); };
-form.addEventListener("pointerdown", (e) => { const row = e.target.closest(".var"); if (row) hold(row.dataset.key); });
+form.addEventListener("pointerdown", (e) => { const row = e.target.closest("[data-key]"); if (row) hold(row.dataset.key); });
 document.addEventListener("pointerup", () => { if (activeVar) release(); });
 document.addEventListener("pointercancel", () => { if (activeVar) release(); });
-form.addEventListener("keydown", (e) => { const row = e.target.closest(".var"); if (row) hold(row.dataset.key); });
+form.addEventListener("keydown", (e) => { const row = e.target.closest("[data-key]"); if (row) hold(row.dataset.key); });
 form.addEventListener("keyup", () => release(700));
 form.addEventListener("change", () => release());
 form.addEventListener("focusout", () => release());

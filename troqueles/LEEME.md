@@ -47,6 +47,7 @@ La página sale encriptada (AES-GCM 256, clave derivada con PBKDF2-SHA256 de 600
 | `enlazar(state, key)` | Opcional. Variables que siguen a otra: devuelve `{ H: ... }` cuando cambia `key`. |
 | `atajos` | Opcional. `{ titulo, key, opciones: [[nombre, valor], ...] }`; los botones muestran sólo el nombre. |
 | `figuras` | Opcional. `{ grupo: (P) => svg }`: un dibujo debajo del título del grupo, redibujado con cada cambio. Las cotas del dibujo llevan `class="cota" data-var="clave"` para marcarse en naranja con su variable. El alto del SVG tiene que ser fijo. |
+| `campos` | Opcional. `{ grupo: (P) => ({ clave: [x, y] }) }`: esas variables se escriben sobre su cota en el dibujo del grupo (en unidades del viewBox), sin fila ni deslizador. |
 | `estilos` | Opcional. CSS propio del diseño (los colores de sus dibujos). |
 | `formulas` | `{ h: { nombre: ["L + e", (P) => P.L + P.e] }, v: { ... } }`: la fórmula de cada cota. |
 | `simple` | Cotas de la vista simple: `{ "h:largo": "L", "h:plano total": "" }` (la letra que se muestra). |
