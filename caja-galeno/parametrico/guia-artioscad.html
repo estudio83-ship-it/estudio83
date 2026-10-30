@@ -1,18 +1,17 @@
-<title>Galeno 6463 para ArtiosCAD</title>
+<title>Caja tipo Galeno</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Sistema CARTOCOR: fondo claro, tinta verde oscura, acento green-700, cuadrícula técnica de 32 px en el plano.
-   Un solo tema claro (el sistema pide fondos claros o verdes, nunca negros). Descargas en azul y Reset en
-   naranja por pedido expreso. */
+/* Sistema CARTOCOR en azul: mismas tipografías, radios y cuadrícula técnica de 32 px, con la paleta verde
+   pasada a azul por pedido. Un solo tema claro. Descargas en azul vivo y Reset en naranja. */
 :root{
-  --paper:#fbfbfd;--sheet:#ffffff;--mint:#eef7f0;--soft-bg:#f3f7f4;--tint:#e6f6eb;
-  --ink:#0b2a16;--soft:#3a4a40;--rule:#cfe3d5;--hairline:#d5e2d9;--crease:#6f8a78;
-  --accent:#007a31;--accent-deep:#00612b;--eyebrow:#00612b;--on-accent:#ffffff;--grid:rgba(0,186,73,0.09);
-  --blue:#1f6fd6;--blue-deep:#1558b0;--on-blue:#ffffff;
-  --warn:#a3471f;--note:#3a4a40;--orange:#e8630a;--orange-deep:#c25105;--on-orange:#ffffff;--field:#ffffff;--flash:#e6f6eb;
-  --shadow-float:0 10px 30px rgba(0,122,49,0.12);
+  --paper:#fbfbfd;--sheet:#ffffff;--mint:#eef3fa;--soft-bg:#f3f6fa;--tint:#e5edf8;
+  --ink:#0b1a2e;--soft:#3a4656;--rule:#cfdbea;--hairline:#d5dfeb;--crease:#6f7f92;
+  --accent:#1d5fbf;--accent-deep:#174f9f;--eyebrow:#174f9f;--on-accent:#ffffff;--grid:rgba(29,95,191,0.09);
+  --blue:#1f78e0;--blue-deep:#1662bd;--on-blue:#ffffff;
+  --warn:#a3471f;--note:#3a4656;--orange:#e8630a;--orange-deep:#c25105;--on-orange:#ffffff;--field:#ffffff;--flash:#e5edf8;
+  --shadow-float:0 10px 30px rgba(29,95,191,0.14);
   --display:Montserrat,Inter,sans-serif;--body:Inter,-apple-system,"Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
   color-scheme:light;
 }
@@ -43,7 +42,7 @@ form{display:grid;gap:9px}
 input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .presets.onda .tag{margin-right:4px}
-h3.group{font:500 12px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--eyebrow);margin:10px 0 0;padding-top:12px;border-top:1px solid var(--rule)}
+h3.group{font:700 12px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--eyebrow);margin:10px 0 0;padding-top:12px;border-top:1px solid var(--rule)}
 h3.group:first-child{margin-top:0;padding-top:0;border-top:0}
 button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--flash);font-weight:600}
 button{font:500 14px var(--body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:980px;padding:8px 16px;cursor:pointer}
@@ -95,8 +94,8 @@ li b{font-weight:500}
 </style>
 <main>
   <header>
-    <span class="tag">Troquel 6463 — caja tipo galeno</span>
-    <h1>Galeno 6463.<span>Paramétrico para ArtiosCAD.</span></h1>
+    <span class="tag">Troquel 6463 — paramétrico para ArtiosCAD</span>
+    <h1>Caja tipo Galeno</h1>
   </header>
 
   <div class="desk">
@@ -628,7 +627,10 @@ for (const p of PARAMS) {
   }
   const row = document.createElement("div");
   row.className = "var";
-  row.innerHTML = '<b>' + p.key + '</b><label for="v-' + p.key + '">' + p.label + '</label><input id="v-' + p.key + '" type="number" inputmode="decimal" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + DEFAULTS[p.key] + '"><input id="r-' + p.key + '" type="range" aria-label="' + p.label + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + DEFAULTS[p.key] + '">';
+  // El deslizador arranca en el medio: su rango se centra en el valor original y llega a los dos extremos.
+  const half = Math.max(DEFAULTS[p.key] - p.min, p.max - DEFAULTS[p.key]);
+  const rMin = DEFAULTS[p.key] - half, rMax = DEFAULTS[p.key] + half;
+  row.innerHTML = '<b>' + p.key + '</b><label for="v-' + p.key + '">' + p.label + '</label><input id="v-' + p.key + '" type="number" inputmode="decimal" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + DEFAULTS[p.key] + '"><input id="r-' + p.key + '" type="range" aria-label="' + p.label + '" min="' + rMin + '" max="' + rMax + '" step="' + p.step + '" value="' + DEFAULTS[p.key] + '">';
   form.appendChild(row);
 }
 const f1 = (v) => (Math.round(v * 10) / 10).toString();
@@ -714,9 +716,9 @@ function render(source) {
   const lim = limits(model.P);
   for (const p of PARAMS) {
     const [a, b2] = lim[p.key], rng = document.getElementById("r-" + p.key), num = document.getElementById("v-" + p.key);
-    rng.min = num.min = Math.round(a * 100) / 100; rng.max = num.max = Math.round(b2 * 100) / 100;
+    num.min = Math.round(a * 100) / 100; num.max = Math.round(b2 * 100) / 100;
     rng.value = model.P[p.key];
-    if (source === "commit") num.value = Math.round(model.P[p.key] * 100) / 100;
+    if (source === "commit" || source === rng) num.value = Math.round(model.P[p.key] * 100) / 100;
   }
   document.getElementById("plan").innerHTML = planSvg(prevDims);
   document.getElementById("caption").textContent = "L " + fmtMm(model.P.L) + " · A " + fmtMm(model.P.A) + " · H " + fmtMm(model.P.H) + " · t " + fmtMm(model.P.t) + " · e " + fmtMm(model.P.e) + " · plancha " + model.info.plancha;
