@@ -23,7 +23,7 @@ TROQUEL_CLAVE='la-clave' node caja-fefco-201/pagina.mjs --proteger --out caja-fe
 | Caja | `A` | Ancho interior | 80 a 600 | 200 |
 | Caja | `H` | Alto interior | 50 a 800 | 250 |
 | Caja | `g` | Solapa de pegado | 25 a 50 | 35 |
-| Caja | `d` | Desplazar hendidos de las solapas interiores (0: sin desplazar) | 0 a 10 | 0 |
+| Caja | `dh` | Hendidos desplazados de las solapas interiores: Sí / No (el desplazamiento `d` sale de la onda) | No / Sí | No |
 | Cartón | `e` | Espesor del cartón (simples E 2 · B 3 · C 4; dobles EB 5 · BC 7) | 1 a 7 | 3 |
 
 ## Fórmulas del plano
@@ -34,7 +34,8 @@ TROQUEL_CLAVE='la-clave' node caja-fefco-201/pagina.mjs --proteger --out caja-fe
 | Paneles de ancho | `A + e` |
 | Alto entre hendidos de las solapas | `H + 2e` (arriba y abajo van dos solapas, una sobre otra) |
 | Solapas | `(A + e)/2`, se tocan al centro |
-| Solapas interiores (paneles de ancho) | `(A + e)/2 − d`: su hendido corre `d` hacia afuera, arriba y abajo; las puntas siguen alineadas |
+| Solapas interiores (paneles de ancho) | `(A + e)/2 − d`: con hendidos desplazados, su hendido corre `d` hacia afuera, arriba y abajo; las puntas siguen alineadas |
+| Desplazamiento `d` | Un espesor de la onda: E 2 · B 3 · C 4 · EB 5 · BC 7 (con espesor propio, `e`); 0 si no se desplazan |
 | Ranuras entre solapas | `e + 2` |
 | Solapa de pegado | `g`, con biseles de 10 |
 | Plancha | `2L + 2A + 4e + g` × `H + 2e + 2 × solapa` |

@@ -6,13 +6,18 @@
 //  · alto entre los hendidos de las solapas: H + 2e (arriba y abajo van dos solapas, una sobre otra);
 //  · solapas: (A + e)/2, se tocan al centro;
 //  · ranuras entre solapas de e + 2; solapa de pegado g con biseles de 10;
-//  · opcional: los hendidos de las solapas interiores (paneles de ancho) corridos d hacia afuera, arriba y
-//    abajo; las puntas de todas las solapas siguen alineadas, así que las interiores miden (A + e)/2 − d.
+//  · opcional (dh: Sí / No): los hendidos de las solapas interiores (paneles de ancho) corridos d hacia
+//    afuera, arriba y abajo. d sale de la onda (DESPLAZA_201: un espesor del cartón, para que la solapa
+//    exterior apoye plana sobre la interior). Las puntas de todas las solapas siguen alineadas, así que las
+//    interiores miden (A + e)/2 − d.
 import { escribirDxf, escribirCf2, limitesDe, mmEntero } from "../troqueles/cad.mjs";
 import { caja201Svg, onda201Svg } from "./dibujos.mjs";
 
 // Simples (E, B, C) y dobles (EB, BC): espesor de referencia en mm.
 export const ONDAS_201 = { E: 2, B: 3, C: 4, EB: 5, BC: 7 };
+// Desplazamiento de los hendidos de las solapas interiores para cada onda (mm). Con un espesor propio, d = e.
+export const DESPLAZA_201 = { E: 2, B: 3, C: 4, EB: 5, BC: 7 };
+export const desplazamiento201 = (e) => DESPLAZA_201[Object.keys(ONDAS_201).find((k) => ONDAS_201[k] === e)] ?? e;
 export const BISEL_201 = 10; // biseles de la solapa de pegado, en las puntas
 
 export const PARAMS_201 = [
@@ -20,10 +25,10 @@ export const PARAMS_201 = [
   { key: "A", group: "Caja", label: "Ancho interior", min: 80, max: 600, step: 1 },
   { key: "H", group: "Caja", label: "Alto interior", min: 50, max: 800, step: 1 },
   { key: "g", group: "Caja", label: "Solapa de pegado", min: 25, max: 50, step: 1 },
-  { key: "d", group: "Caja", label: "Desplazar hendidos", min: 0, max: 10, step: 1 },
+  { key: "dh", group: "Caja", label: "Desplazar hendidos", min: 0, max: 1, step: 1, opciones: [["No", 0], ["Sí", 1]] },
   { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 7, step: 1 },
 ];
-export const DEFAULTS_201 = { L: 300, A: 200, H: 250, g: 35, d: 0, e: 3 };
+export const DEFAULTS_201 = { L: 300, A: 200, H: 250, g: 35, dh: 0, e: 3 };
 
 // Medidas que salen de las variables.
 export function medidas201(P) {
@@ -38,6 +43,7 @@ export function generar201(params) {
     const v = Number(params[p.key]);
     if (Number.isFinite(v)) P[p.key] = Math.min(p.max, Math.max(p.min, Math.round(v)));
   }
+  P.d = P.dh ? desplazamiento201(P.e) : 0;
   const M = medidas201(P), { largo, ancho, alto, solapa: F } = M, r = M.ranura / 2, g = P.g;
   // Hendidos verticales: largo, ancho, largo, ancho (la solapa de pegado va a la izquierda del primer largo).
   const xs = [0, largo, largo + ancho, 2 * largo + ancho, 2 * largo + 2 * ancho];
@@ -136,7 +142,7 @@ export function crearDiseno() {
     // Vista simple: las cotas de las variables (con su letra) y los totales de la plancha.
     simple: { "h:largo": "L", "h:ancho": "A", "v:alto": "H", "h:pegado": "g", "v:solapa interior": "", "h:plano total": "", "v:plano total": "" },
     letras: "(?<![A-Za-zÀ-ÿ])[LAHgde](?![A-Za-zÀ-ÿ])",
-    toca: { L: ["L"], A: ["A"], H: ["H"], g: ["g"], d: ["d"], e: ["e"] },
+    toca: { L: ["L"], A: ["A"], H: ["H"], g: ["g"], dh: ["d"], e: ["e"] },
     // Notas sobre el plano, sólo con las fórmulas a la vista.
     llamadas(model) {
       const { xs, alto, solapa } = model.info;
@@ -145,7 +151,7 @@ export function crearDiseno() {
         [[(xs[1] + xs[2]) / 2, alto + solapa / 2], "solapa interior"],
         [[(xs[0] + xs[1]) / 2, -solapa / 2], "ranuras e + 2"],
         [[-model.P.g / 2, alto + 14], "bisel 10"],
-        ...(model.P.d ? [[[(xs[3] + xs[4]) / 2, alto - 18], "hendido corrido d = " + model.P.d, true]] : []),
+        ...(model.P.d ? [[[(xs[3] + xs[4]) / 2, alto - 18], "corridos d = " + model.P.d, true]] : []),
       ];
     },
     resumen(model) {
@@ -154,7 +160,7 @@ export function crearDiseno() {
         ["Tipo de cartón", onda ? "Onda " + onda : "Espesor propio", "espesor " + P.e + " mm"],
         ["Medidas internas", x3([P.L, P.A, P.H]), "L × A × H"],
         ["Medidas externas", x3(model.info.externa), "aproximadas"],
-        ["Solapas", mmEntero(model.info.solapa), P.d ? "interiores " + mmEntero(model.info.solapa - P.d) + " · d " + P.d : "se tocan al centro"],
+        ["Solapas", mmEntero(model.info.solapa), P.d ? "interiores " + mmEntero(model.info.solapa - P.d) + " · hendidos +" + P.d : "se tocan al centro"],
         ["Plancha total", x3([b.xMax - b.xMin, b.yMax - b.yMin]), "ancho × alto"],
       ];
     },
@@ -167,6 +173,6 @@ export function crearDiseno() {
     },
     cf2: (model, nombre) => escribirCf2(model, { name: nombre }),
     describir: (model) => "Caja FEFCO 201 de " + model.P.L + " × " + model.P.A + " × " + model.P.H + " mm interiores",
-    casosFormulas: [{}, { L: 500, A: 120, H: 400, g: 25, e: 2 }, { L: 100, A: 600, H: 50, g: 50, e: 7 }, { A: 201, e: 4 }, { d: 6 }, { A: 80, e: 1, d: 10 }],
+    casosFormulas: [{}, { L: 500, A: 120, H: 400, g: 25, e: 2 }, { L: 100, A: 600, H: 50, g: 50, e: 7 }, { A: 201, e: 4 }, { dh: 1 }, { A: 80, e: 1, dh: 1 }, { e: 7, dh: 1 }],
   };
 }

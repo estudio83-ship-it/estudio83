@@ -42,6 +42,9 @@ form{display:grid;gap:9px}
 .var input[type=range]{grid-column:2 / 4;width:100%;accent-color:var(--accent);margin:0}
 input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.var.opciones{grid-template-columns:30px minmax(0,1fr) auto}
+.var.opciones .sino{display:flex;gap:4px}
+.var.opciones .sino button{padding:4px 14px}
 .presets.onda .tag{margin-right:4px}
 form{gap:14px}
 .grupo{display:grid;gap:9px;background:var(--soft-bg);border:1px solid var(--rule);border-radius:22px;padding:16px 18px 14px}
@@ -506,6 +509,13 @@ for (const p of PARAMETROS) {
   const row = document.createElement("div");
   row.className = "var";
   row.dataset.key = p.key;
+  // Variable de opciones (p.opciones = [[nombre, valor], ...]): botones tipo pastilla en lugar de deslizador.
+  if (p.opciones) {
+    row.classList.add("opciones");
+    row.innerHTML = '<b>' + p.key + '</b><label id="l-' + p.key + '">' + p.label + '</label><span class="sino" role="group" aria-labelledby="l-' + p.key + '">' + p.opciones.map(([n, v]) => '<button type="button" data-opcion="' + v + '">' + n + "</button>").join("") + '</span><input id="v-' + p.key + '" type="number" hidden value="' + INICIAL[p.key] + '"><input id="r-' + p.key + '" type="range" hidden tabindex="-1" aria-hidden="true" min="0" max="1000" step="1" value="500">';
+    caja.appendChild(row);
+    continue;
+  }
   row.innerHTML = '<b>' + p.key + '</b><label for="v-' + p.key + '">' + p.label + '</label><input id="v-' + p.key + '" type="number" inputmode="numeric" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + INICIAL[p.key] + '"><input id="r-' + p.key + '" type="range" aria-label="' + p.label + '" min="0" max="1000" step="1" value="500">';
   caja.appendChild(row);
 }
@@ -625,7 +635,7 @@ function render(source) {
     if (source === rng) num.value = deBarra(p, Number(rng.value)); else if (source === num) rng.value = aBarra(p, Number(num.value));
     const v = Number(num.value);
     // Todo en milímetros enteros cuando el paso es de 1 o más.
-    if (Number.isFinite(v) && v > 0) state[p.key] = Math.min(p.max, Math.max(p.min, p.step >= 1 ? Math.round(v) : v));
+    if (num.value !== "" && Number.isFinite(v) && (v > 0 || p.min <= 0)) state[p.key] = Math.min(p.max, Math.max(p.min, p.step >= 1 ? Math.round(v) : v));
   }
   // Variables que siguen a otras (DESIGN.enlazar).
   const key = source && source.id ? source.id.slice(2) : null;
@@ -650,6 +660,7 @@ function render(source) {
   });
   // La leyenda muestra sólo los tipos de línea que tiene el troquel.
   applyActive();
+  document.querySelectorAll(".opciones").forEach((row) => row.querySelectorAll("[data-opcion]").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.opcion) === model.P[row.dataset.key]))));
   if (DESIGN.atajos) document.querySelectorAll("[data-atajo]").forEach((b) => b.setAttribute("aria-pressed", String(Math.abs(Number(b.dataset.atajo) - model.P[DESIGN.atajos.key]) < 1e-9)));
   document.getElementById("facts").innerHTML = DESIGN.resumen(model).map(([k, v, hint]) => '<div class="row"><dt>' + k + "</dt><dd><strong>" + v + "</strong><span>" + hint + "</span></dd></div>").join("");
   clearTimeout(hotTimer);
@@ -698,6 +709,14 @@ form.addEventListener("input", (e) => render(e.target));
 // Flechas de los campos sobre el dibujo: suben o bajan un paso dentro del rango de la variable; lo que
 // dependa de otras medidas lo ajusta la página (por ejemplo, el ancho de la caja sigue a la cantidad).
 form.addEventListener("click", (e) => {
+  const o = e.target.closest("[data-opcion]");
+  if (o) {
+    const num = o.closest(".opciones").querySelector('input[type="number"]');
+    num.value = o.dataset.opcion;
+    num.dispatchEvent(new Event("input", { bubbles: true }));
+    num.dispatchEvent(new Event("change", { bubbles: true }));
+    return;
+  }
   const b = e.target.closest("[data-paso]");
   if (!b) return;
   const num = b.closest(".campo").querySelector('input[type="number"]');

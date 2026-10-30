@@ -40,7 +40,7 @@ La página sale encriptada (AES-GCM 256, clave derivada con PBKDF2-SHA256 de 600
 | Campo | Qué es |
 |---|---|
 | `titulo`, `bajada` | Título grande y la línea de arriba. |
-| `PARAMS` | `[{ key, group, label, min, max, step }]`, en el orden del panel; `group` arma los títulos. |
+| `PARAMS` | `[{ key, group, label, min, max, step }]`, en el orden del panel; `group` arma los títulos. Con `opciones: [[nombre, valor], ...]` la variable se elige con botones tipo pastilla (por ejemplo, No / Sí) en lugar del deslizador. |
 | `DEFAULTS` | Valor inicial de cada variable (el del troquel original). |
 | `generate(state)` | Devuelve el modelo: `{ P, entities, dims, info: { bounds } }` (ver abajo). |
 | `limits(P)` | Opcional. Rangos que dependen de otras medidas: `{ key: [min, max] }`. |
