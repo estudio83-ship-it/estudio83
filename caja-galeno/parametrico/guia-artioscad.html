@@ -1163,6 +1163,14 @@ function planSvg(prevDims) {
     seen.add(key);
     return true;
   });
+  const text = (d) => {
+    const entry = formulaOf(d), v = mm(d.value);
+    return entry && entry[0] !== v ? [entry[0] + " = " + v, '<tspan class="fx">' + entry[0] + '</tspan><tspan class="val"> = ' + v + "</tspan>"] : [v, '<tspan class="val">' + v + "</tspan>"];
+  };
+  const simpleText = (d) => {
+    const letter = DESIGN.simple[d.src + ":" + d.name], v = mm(d.value);
+    return letter ? [letter + " = " + v, '<tspan class="fx">' + letter + '</tspan><tspan class="val"> = ' + v + "</tspan>"] : [v, '<tspan class="val">' + v + "</tspan>"];
+  };
   // El marco abarca el troquel y las cotas visibles, con aire para los textos.
   let X0 = b.xMin, X1 = b.xMax, Y0 = b.yMin, Y1 = b.yMax;
   for (const [d] of shown) {
@@ -1170,6 +1178,14 @@ function planSvg(prevDims) {
     else { X0 = Math.min(X0, d.at); X1 = Math.max(X1, d.at); Y0 = Math.min(Y0, d.y0); Y1 = Math.max(Y1, d.y1); }
   }
   X0 -= 40; X1 += showFormulas ? 120 : 100; Y0 -= 30; Y1 += 20;
+  // Las cotas verticales cortas llevan el rótulo de costado: el marco se agranda para que no quede cortado.
+  for (const [d] of shown) {
+    if (d.dir !== "v") continue;
+    const plain = (showFormulas ? text(d) : simpleText(d))[0];
+    if (plain.length * 10.4 < Math.abs(d.y1 - d.y0) - 12) continue;
+    const w = plain.length * 9.2 + 24;
+    if (d.at < cx) X0 = Math.min(X0, d.at - w); else X1 = Math.max(X1, d.at + w);
+  }
   const Y = (y) => Y1 - y;
   const paths = { c: "", h: "", p: "" };
   for (const e of model.entities) {
@@ -1182,14 +1198,6 @@ function planSvg(prevDims) {
     }
   }
   const kraft = cartonRings(model).map((r) => "M" + r.map((p) => f1(p[0]) + " " + f1(Y(p[1]))).join("L") + "Z").join("");
-  const text = (d) => {
-    const entry = formulaOf(d), v = mm(d.value);
-    return entry && entry[0] !== v ? [entry[0] + " = " + v, '<tspan class="fx">' + entry[0] + '</tspan><tspan class="val"> = ' + v + "</tspan>"] : [v, '<tspan class="val">' + v + "</tspan>"];
-  };
-  const simpleText = (d) => {
-    const letter = DESIGN.simple[d.src + ":" + d.name], v = mm(d.value);
-    return letter ? [letter + " = " + v, '<tspan class="fx">' + letter + '</tspan><tspan class="val"> = ' + v + "</tspan>"] : [v, '<tspan class="val">' + v + "</tspan>"];
-  };
   let dims = "";
   for (const [d, i] of shown) {
     const hot = (prevDims && prevDims[i] !== undefined && Math.abs(prevDims[i] - d.value) > 0.005 ? " hot" : "") + '" data-vars="' + lettersOf(formulaOf(d) ? formulaOf(d)[0] : "");
