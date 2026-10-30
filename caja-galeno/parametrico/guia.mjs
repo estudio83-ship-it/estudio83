@@ -32,11 +32,11 @@ const page = `<title>Galeno 6463 para ArtiosCAD</title>
 <style>
 /* Ficha técnica viva: variables a la izquierda, plano con fórmulas a la derecha, tablas fórmula/valor debajo. */
 :root{
-  --paper:#f4f5f2;--sheet:#fcfcfa;--ink:#24282b;--soft:#6b7176;--rule:#c9ccc8;--crease:#8b9095;--accent:#1f6fd6;--accent-deep:#1558b0;--on-accent:#ffffff;--warn:#a4441b;--note:#6b7176;--field:#ffffff;--flash:#e3ecfa;
+  --paper:#f4f5f2;--sheet:#fcfcfa;--ink:#24282b;--soft:#6b7176;--rule:#c9ccc8;--crease:#8b9095;--accent:#1f6fd6;--accent-deep:#1558b0;--on-accent:#ffffff;--warn:#a4441b;--note:#6b7176;--orange:#e8630a;--orange-deep:#c25105;--on-orange:#ffffff;--field:#ffffff;--flash:#e3ecfa;
   --display:"Barlow Condensed","Arial Narrow",sans-serif;--body:"IBM Plex Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#4ba3ff;--accent-deep:#7dbcff;--on-accent:#06121f;--warn:#f0956b;--note:#8d959b;--field:#101214;--flash:#1d2a3d;color-scheme:dark}}
-:root[data-theme="dark"]{--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#4ba3ff;--accent-deep:#7dbcff;--on-accent:#06121f;--warn:#f0956b;--note:#8d959b;--field:#101214;--flash:#1d2a3d;color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#4ba3ff;--accent-deep:#7dbcff;--on-accent:#06121f;--warn:#f0956b;--note:#8d959b;--orange:#ff8a3d;--orange-deep:#ffa463;--on-orange:#1f0d00;--field:#101214;--flash:#1d2a3d;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#4ba3ff;--accent-deep:#7dbcff;--on-accent:#06121f;--warn:#f0956b;--note:#8d959b;--orange:#ff8a3d;--orange-deep:#ffa463;--on-orange:#1f0d00;--field:#101214;--flash:#1d2a3d;color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--paper);color:var(--ink);font:15px/1.55 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 main{max-width:1240px;margin:0 auto;padding-block:32px 64px;display:grid;gap:22px}
@@ -56,17 +56,19 @@ form{display:grid;gap:9px}
 .var{display:grid;grid-template-columns:30px minmax(0,1fr) 84px;gap:2px 10px;align-items:center}
 .var b{font:500 14px var(--mono);color:var(--accent)}
 .var label{font-size:13px;color:var(--soft);line-height:1.25}
-.var input[type=number]{width:100%;font:500 14px var(--mono);color:var(--ink);background:var(--field);border:1px solid var(--rule);padding:6px 8px;text-align:right;font-variant-numeric:tabular-nums}
+.var input[type=number]{width:100%;font:500 14px var(--mono);color:var(--ink);background:var(--field);border:1px solid var(--rule);border-radius:999px;padding:6px 12px;text-align:right;font-variant-numeric:tabular-nums}
 .var input[type=range]{grid-column:2 / 4;width:100%;accent-color:var(--accent);margin:0}
 input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .presets.onda .tag{margin-right:4px}
 button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--flash);font-weight:600}
-button{font:500 13px var(--body);color:var(--ink);background:transparent;border:1px solid var(--rule);padding:7px 10px;cursor:pointer}
+button{font:500 13px var(--body);color:var(--ink);background:transparent;border:1px solid var(--rule);border-radius:999px;padding:7px 14px;cursor:pointer}
 button:hover{border-color:var(--ink)}
 button.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
 button.primary:hover{background:var(--accent-deep);border-color:var(--accent-deep)}
 button.primary:disabled{opacity:.5;cursor:default}
+button.reset{justify-self:start;background:var(--orange);color:var(--on-orange);border-color:var(--orange);font-weight:600;padding:7px 22px}
+button.reset:hover{background:var(--orange-deep);border-color:var(--orange-deep)}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0;font-size:13px}
 .facts dt{color:var(--soft)}.facts dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums}
@@ -124,17 +126,12 @@ li b{font-weight:500}
         <button type="button" data-onda="B">B · 3</button>
         <button type="button" data-onda="C">C · 4</button>
       </div>
-      <div class="presets" aria-label="Medidas guardadas">
-        <button type="button" data-preset='{"L":320}'>6463 original</button>
-        <button type="button" data-preset='{"L":370}'>6463 +50</button>
-      </div>
+      <button type="button" class="reset" id="reset">Reset</button>
       <dl class="facts" id="facts"></dl>
       <ul class="warn" id="warn"></ul>
       <div class="actions">
         <button type="button" class="primary" id="dl-dxf">Descargar DXF</button>
         <button type="button" class="primary" id="dl-cf2">Descargar CF2</button>
-        <button type="button" id="cp-dxf">Copiar DXF</button>
-        <button type="button" id="cp-cf2">Copiar CF2</button>
       </div>
       <p class="status" id="status" role="status"></p>
     </section>
@@ -268,7 +265,7 @@ ${ARTIFACT ? `// En claude.ai el visor guarda archivos sólo con el permiso de d
 let downloads = null;
 window.claude?.use?.("downloads").then((d) => { downloads = d; }).catch(() => {});
 async function download(text, ext) {
-  if (!downloads) { say("Las descargas no están disponibles en esta vista. Usá Copiar y pegalo en un archivo ." + ext + "."); return; }
+  if (!downloads) { say("Las descargas no están disponibles en esta vista."); return; }
   const file = name() + "." + ext;
   try {
     await downloads.save({ filename: file, data: text });
@@ -278,10 +275,10 @@ async function download(text, ext) {
       try {
         await downloads.save({ filename: file + ".txt", data: text });
         say("claude.ai no deja guardar ." + ext + ": se guardó " + file + ".txt. Borrale el .txt del nombre y abrilo en ArtiosCAD.");
-      } catch (e2) { say(e2 && e2.code === "declined" ? "Descarga cancelada." : "No se pudo descargar. Usá Copiar."); }
+      } catch (e2) { say(e2 && e2.code === "declined" ? "Descarga cancelada." : "No se pudo descargar."); }
       return;
     }
-    say(e && e.code === "declined" ? "Descarga cancelada." : "No se pudo descargar (" + ((e && e.code) || "error") + "). Usá Copiar y pegalo en un archivo ." + ext + ".");
+    say(e && e.code === "declined" ? "Descarga cancelada." : "No se pudo descargar (" + ((e && e.code) || "error") + ").");
   }
 }` : `function download(text, ext) {
   try {
@@ -290,16 +287,10 @@ async function download(text, ext) {
     a.download = name() + "." + ext;
     document.body.appendChild(a); a.click(); a.remove();
     say("Descarga iniciada: " + a.download + ".");
-  } catch (e) { say("No se pudo descargar. Usá Copiar y pegalo en un archivo ." + ext + "."); }
+  } catch (e) { say("No se pudo descargar."); }
 }`}
 document.getElementById("dl-dxf").addEventListener("click", () => download(toDxf(model, { name: name() }), "dxf"));
 document.getElementById("dl-cf2").addEventListener("click", () => download(toCf2(model, { name: name() }), "cf2"));
-async function copy(text, ext) {
-  try { await navigator.clipboard.writeText(text); say("Copiado. Pegalo en un archivo de texto y guardalo como " + name() + "." + ext + "."); }
-  catch (e) { say("El navegador no dejó copiar."); }
-}
-document.getElementById("cp-dxf").addEventListener("click", () => copy(toDxf(model, { name: name() }), "dxf"));
-document.getElementById("cp-cf2").addEventListener("click", () => copy(toCf2(model, { name: name() }), "cf2"));
 form.addEventListener("input", (e) => render(e.target));
 form.addEventListener("change", () => render("commit"));
 document.querySelectorAll("[data-onda]").forEach((b) => b.addEventListener("click", () => {
@@ -307,11 +298,10 @@ document.querySelectorAll("[data-onda]").forEach((b) => b.addEventListener("clic
   document.getElementById("v-e").value = e; document.getElementById("r-e").value = e;
   render("commit"); say("Onda " + b.dataset.onda + ": espesor " + String(e).replace(".", ",") + " mm.");
 }));
-document.querySelectorAll("[data-preset]").forEach((b) => b.addEventListener("click", () => {
-  const p = { ...DEFAULTS, ...JSON.parse(b.dataset.preset) };
-  for (const k in p) { document.getElementById("v-" + k).value = p[k]; document.getElementById("r-" + k).value = p[k]; }
-  render(); say("Cargado: " + b.textContent + ".");
-}));
+document.getElementById("reset").addEventListener("click", () => {
+  for (const k in DEFAULTS) { document.getElementById("v-" + k).value = DEFAULTS[k]; document.getElementById("r-" + k).value = DEFAULTS[k]; }
+  render("commit"); say("Medidas del 6463 original, onda B.");
+});
 render();
 </script>
 `;
