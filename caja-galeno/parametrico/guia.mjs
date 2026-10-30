@@ -34,7 +34,7 @@ const page = `<title>Caja tipo Galeno</title>
    pasada a azul por pedido. Un solo tema claro. Descargas en azul vivo y Reset en naranja. */
 :root{
   --paper:#fbfbfd;--sheet:#ffffff;--mint:#eef3fa;--soft-bg:#f3f6fa;--tint:#e5edf8;
-  --ink:#0b1a2e;--soft:#3a4656;--rule:#cfdbea;--hairline:#d5dfeb;--crease:#7a5a36;--kraft:#e9cc9f;--kraft-seam:#d3a774;
+  --ink:#0b1a2e;--soft:#3a4656;--rule:#cfdbea;--hairline:#d5dfeb;--crease:#5e4c3b;--kraft:#c1ac97;
   --accent:#1d5fbf;--accent-deep:#174f9f;--eyebrow:#174f9f;--on-accent:#ffffff;--grid:rgba(29,95,191,0.09);
   --blue:#1f78e0;--blue-deep:#1662bd;--on-blue:#ffffff;
   --warn:#a3471f;--note:#3a4656;--orange:#e8630a;--orange-deep:#c25105;--on-orange:#ffffff;--orange-soft:#fdeee3;--orange-ring:rgba(232,99,10,0.18);--field:#ffffff;--flash:#e5edf8;
@@ -152,7 +152,7 @@ li b{font-weight:500}
 </style>
 <main>
   <header>
-    <span class="tag">Troquel 6463 — paramétrico para ArtiosCAD</span>
+    <span class="tag">Troquel paramétrico para ArtiosCAD</span>
     <h1>Caja tipo Galeno</h1>
   </header>
 
@@ -417,7 +417,7 @@ document.querySelectorAll("[data-onda]").forEach((b) => b.addEventListener("clic
 }));
 document.getElementById("reset").addEventListener("click", () => {
   for (const k in DEFAULTS) { document.getElementById("v-" + k).value = DEFAULTS[k]; document.getElementById("r-" + k).value = DEFAULTS[k]; }
-  render("commit"); say("Medidas del 6463 original, onda B.");
+  render("commit"); say("");
 });
 render();
 </script>
