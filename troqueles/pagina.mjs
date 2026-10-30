@@ -137,10 +137,18 @@ svg.plan{display:block;width:100%;height:100%}
 .legend [hidden]{display:none}
 .figura{margin:2px 0 4px;position:relative}
 .campo{position:absolute;transform:translate(-50%,-50%);display:block}
-.campo input[type=number]{width:62px;font:600 13px var(--mono);color:var(--ink);background:var(--field);border:1px solid var(--rule);border-radius:980px;padding:4px 8px;text-align:center;font-variant-numeric:tabular-nums;box-shadow:0 1px 3px rgba(11,26,46,.08);transition:border-color 1.5s ease,box-shadow 1.5s ease,color 1.5s ease}
-.campo input[type=number]{-moz-appearance:textfield;appearance:textfield}
+.campo .paso{display:inline-flex;align-items:center;gap:2px;background:var(--field);border:1px solid var(--rule);border-radius:980px;padding:2px 4px 2px 10px;box-shadow:0 1px 3px rgba(11,26,46,.08);transition:border-color 1.5s ease,box-shadow 1.5s ease}
+.campo input[type=number]{width:38px;font:600 13px var(--mono);color:var(--ink);background:none;border:0;padding:3px 0;text-align:right;font-variant-numeric:tabular-nums;-moz-appearance:textfield;appearance:textfield;transition:color 1.5s ease}
+.campo input[type=number]:focus-visible{outline:none}
 .campo input::-webkit-outer-spin-button,.campo input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-.campo.active input[type=number]{border-color:var(--orange);color:var(--orange-deep);box-shadow:0 0 0 3px var(--orange-ring);transition:none}
+.campo .flechas{display:grid}
+.campo .flechas button{display:grid;place-items:center;width:18px;height:11px;padding:0;border:0;border-radius:4px;background:none;color:var(--accent);cursor:pointer}
+.campo .flechas button:hover{background:var(--flash)}
+.campo .flechas svg{width:9px;height:6px;fill:currentColor}
+.campo:focus-within .paso{outline:2px solid var(--accent);outline-offset:1px}
+.campo.active .paso{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-ring);transition:none}
+.campo.active input[type=number]{color:var(--orange-deep);transition:none}
+.campo.active .flechas button{color:var(--orange-deep)}
 .figura svg{display:block;width:100%;height:auto;overflow:visible}
 .figura .tx{font:500 10.5px var(--mono);fill:var(--soft)}
 .figura .cota path{fill:none;stroke:var(--accent);stroke-width:.8}
@@ -224,7 +232,9 @@ for (const p of PARAMETROS) {
     const campo = document.createElement("label");
     campo.className = "campo";
     campo.dataset.key = p.key;
-    campo.innerHTML = '<input id="v-' + p.key + '" type="number" inputmode="numeric" aria-label="' + p.label + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + INICIAL[p.key] + '"><input id="r-' + p.key + '" type="range" hidden tabindex="-1" aria-hidden="true" min="0" max="1000" step="1" value="500">';
+    // Campo con flechas para subir y bajar de a un paso (también con las flechas del teclado).
+    const pico = (dir) => '<button type="button" data-paso="' + dir + '" tabindex="-1" aria-label="' + (dir > 0 ? "Subir " : "Bajar ") + p.label + '"><svg viewBox="0 0 10 6"><path d="' + (dir > 0 ? "M0 6L5 0L10 6Z" : "M0 0L10 0L5 6Z") + '"/></svg></button>';
+    campo.innerHTML = '<span class="paso"><input id="v-' + p.key + '" type="number" inputmode="numeric" aria-label="' + p.label + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + INICIAL[p.key] + '"><span class="flechas">' + pico(1) + pico(-1) + '</span></span><input id="r-' + p.key + '" type="range" hidden tabindex="-1" aria-hidden="true" min="0" max="1000" step="1" value="500">';
     fig.appendChild(campo);
     continue;
   }
@@ -410,6 +420,18 @@ async function download(text, ext) {
 document.getElementById("dl-dxf").addEventListener("click", () => download(DESIGN.dxf(model, name()), "dxf"));
 document.getElementById("dl-cf2").addEventListener("click", () => download(DESIGN.cf2(model, name()), "cf2"));
 form.addEventListener("input", (e) => render(e.target));
+// Flechas de los campos sobre el dibujo: suben o bajan un paso dentro del rango de la variable; lo que
+// dependa de otras medidas lo ajusta la página (por ejemplo, el ancho de la caja sigue a la cantidad).
+form.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-paso]");
+  if (!b) return;
+  const num = b.closest(".campo").querySelector('input[type="number"]');
+  const p = paramDe(b.closest(".campo").dataset.key);
+  const v = Math.min(p.max, Math.max(p.min, Number(num.value) + Number(b.dataset.paso) * p.step));
+  num.value = v;
+  num.dispatchEvent(new Event("input", { bubbles: true }));
+  num.dispatchEvent(new Event("change", { bubbles: true }));
+});
 // Variable activa: mientras se toca o tiene el foco, ella y sus cotas se marcan en naranja.
 const setActive = (key) => { if (activeVar !== key) { activeVar = key; applyActive(); } };
 // Al soltar (dejar de arrastrar, terminar de escribir o salir del campo) vuelve a la normalidad con
