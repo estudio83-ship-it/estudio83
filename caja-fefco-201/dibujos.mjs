@@ -30,7 +30,7 @@ export function caja201Svg(P) {
     '<path class="pieza lado" d="' + poly([[L, 0, 0], [L, A, 0], [L, A, H], [L, 0, H]]) + '"/>' +
     '<path class="pieza frente" d="' + poly([[0, A, 0], [L, A, 0], [L, A, H], [0, A, H]]) + '"/>';
   const borde = '<path class="filete" d="M' + P2(pt(L, A, H)) + "L" + P2(pt(L, A, 0)) + '"/>';
-  // Las solapas de afuera se tocan al centro de la tapa, a lo largo.
+  // Las solapas de afuera se tocan al centro de la tapa, a lo largo: es un borde de corte, negro y continuo.
   const union = '<path class="union" d="M' + P2(pt(0, A / 2, H)) + "L" + P2(pt(L, A / 2, H)) + '"/>';
   const off = (p, dx, dy) => [p[0] + dx, p[1] + dy];
   // Cotas paralelas a las aristas, separadas 14 px por fuera.
