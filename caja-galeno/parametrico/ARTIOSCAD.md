@@ -9,13 +9,15 @@ Generador paramétrico de la caja tipo galeno (troquel 6463) con su interior par
 | `galeno.mjs` | El modelo: `generate(params)` arma el troquel completo; `toDxf` y `toCf2` lo exportan. |
 | `plantilla-caja.json` | Las líneas y curvas del troquel 6463 original, que el modelo estira por zonas. |
 | `generar.mjs` | Línea de comandos: escribe `.dxf` y `.cf2` con los parámetros que le pases. |
-| `galeno-parametrico.html` | Página para abrir en el navegador: variables, plano acotado en vivo, descarga DXF/CF2. |
-| `check.mjs` | Verifica que con los valores por defecto sale el troquel original (32 paneles y solapas). |
+| `guia-artioscad.html` | Página para abrir en el navegador: variables, plano con fórmulas en vivo, descarga DXF/CF2. La escribe `guia.mjs`. |
+| `formulas.mjs` | Las fórmulas de cada cota; `guia.mjs` verifica que coincidan con la geometría. |
+| `check.mjs` | Verifica que con los valores por defecto sale el troquel original (32 paneles y solapas) y que ninguna combinación deje líneas sueltas, cruzadas o superpuestas. |
 
 ```bash
 node generar.mjs --L 370
 node generar.mjs --L 400 --A 110 --H 300 --n 4 --Dc 70 --Dn 28 --p 72 --nombre GALENO-4F
-node build.mjs
+node guia.mjs
+node check.mjs   # 410 combinaciones: sin líneas sueltas, cruces ni superposiciones
 ```
 
 ## Abrirlo en ArtiosCAD
@@ -35,13 +37,16 @@ Guardá esa tabla de conversión para reutilizarla con cada variante. Unidades: 
 
 ## Variables
 
+El troquel sale girado 90° a la derecha: el tubo vertical y el interior abajo.
+
+
 | Var | Qué es | Original |
 |---|---|---|
 | `L` | Largo interior: ancho del contrafrente, sentido del frasco | 320 |
 | `A` | Profundidad: ancho de los costados | 94 |
 | `H` | Alto del frente entre hendidos (largo del tubo) | 274 |
 | `n` | Cantidad de frascos | 3 |
-| `Dc` | ⌀ del agujero del cuerpo | 80 |
+| `Dc` | ⌀ del agujero del cuerpo (hasta 100, y hasta A − 10 y H − 12) | 80 |
 | `Dn` | Ancho de la ranura del cuello | 31 |
 | `p` | Paso entre frascos | 86,25 |
 | `t` | Puente de los tabiques | 28 |

@@ -1,13 +1,116 @@
-// Compara el generador con el troquel original (valores por defecto) y con la variante +50.
+// Verifica el generador en muchas combinaciones de medidas:
+//  · sin extremos sueltos: cada extremo de línea o arco toca otra línea;
+//  · sin cruces: ninguna línea atraviesa a otra;
+//  · sin líneas superpuestas;
+//  · con los valores por defecto, el troquel 6463 original (32 piezas).
+// node check.mjs [casos aleatorios = 400]
 import { readFileSync, writeFileSync, unlinkSync } from "node:fs";
-import { generate, toDxf } from "./galeno.mjs";
+import { DEFAULTS, PARAMS, generate, toDxf } from "./galeno.mjs";
 import { readDxf, facesOf } from "../troquel.mjs";
+
 const plantilla = JSON.parse(readFileSync(new URL("./plantilla-caja.json", import.meta.url)));
-for (const params of [{}, { L: 370 }, { L: 400, A: 110, H: 300, n: 4, Dc: 70, Dn: 28, p: 72 }]) {
-  const m = generate(params, plantilla);
-  const tmp = new URL("./_check.dxf", import.meta.url);
-  writeFileSync(tmp, toDxf(m, { dims: false }).replace(/CORTE/g, "Troquel").replace(/HENDIDO/g, "Troquel").replace(/PERFORADO/g, "Troquel"));
-  const f = facesOf(readDxf(tmp.pathname));
-  unlinkSync(tmp);
-  console.log(JSON.stringify(params), "caras", f.faces.length, "aviso", m.warnings, m.info);
+const TOL = 0.02;
+
+// Segmentos de cada entidad (los arcos, en tramos cortos).
+function piecesOf(e) {
+  if (e.t === "L") return [[e.a, e.b]];
+  let a1 = e.a1;
+  while (a1 <= e.a0) a1 += 360;
+  const n = Math.max(8, Math.ceil(((a1 - e.a0) * e.r) / 180));
+  const at = (a) => [e.c[0] + e.r * Math.cos((a * Math.PI) / 180), e.c[1] + e.r * Math.sin((a * Math.PI) / 180)];
+  return Array.from({ length: n }, (_, i) => [at(e.a0 + ((a1 - e.a0) * i) / n), at(e.a0 + ((a1 - e.a0) * (i + 1)) / n)]);
 }
+const ends = (e) => { const p = piecesOf(e); return [p[0][0], p[p.length - 1][1]]; };
+const near = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]) < TOL;
+function distToSeg(p, [a, b]) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], l2 = dx * dx + dy * dy;
+  const t = l2 ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l2)) : 0;
+  return Math.hypot(p[0] - (a[0] + dx * t), p[1] - (a[1] + dy * t));
+}
+// Un arco aproximado con cuerdas: para tocarlo alcanza con estar a menos que la flecha de la cuerda.
+const sagOf = (e) => (e.t === "A" ? e.r * (1 - Math.cos((Math.PI / 180) * (180 / Math.max(1, e.r)) / 2)) + TOL : TOL);
+
+export function inspect(model) {
+  const ents = model.entities;
+  const pcs = ents.map(piecesOf);
+  const problems = [];
+  // 1. Extremos sueltos.
+  ents.forEach((e, i) => {
+    for (const p of ends(e)) {
+      const ok = ents.some((o, j) => j !== i && (ends(o).some((q) => near(p, q)) || pcs[j].some((s) => distToSeg(p, s) < sagOf(o))));
+      if (!ok) problems.push(`extremo suelto en (${p[0].toFixed(2)}, ${p[1].toFixed(2)})`);
+    }
+  });
+  // 2. Cruces y 3. superposiciones entre entidades distintas.
+  const box = (list) => { let a = Infinity, b = Infinity, c = -Infinity, d = -Infinity; for (const [p, q] of list) { a = Math.min(a, p[0], q[0]); b = Math.min(b, p[1], q[1]); c = Math.max(c, p[0], q[0]); d = Math.max(d, p[1], q[1]); } return [a - 1, b - 1, c + 1, d + 1]; };
+  const boxes = pcs.map(box);
+  for (let i = 0; i < ents.length; i++) for (let j = i + 1; j < ents.length; j++) {
+    const A = boxes[i], B = boxes[j];
+    if (A[2] < B[0] || B[2] < A[0] || A[3] < B[1] || B[3] < A[1]) continue;
+    const endsIJ = [...ends(ents[i]), ...ends(ents[j])];
+    for (const [p, q] of pcs[i]) for (const [r, s] of pcs[j]) {
+      const d1 = (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
+      const d2 = (q[0] - p[0]) * (s[1] - p[1]) - (q[1] - p[1]) * (s[0] - p[0]);
+      const d3 = (s[0] - r[0]) * (p[1] - r[1]) - (s[1] - r[1]) * (p[0] - r[0]);
+      const d4 = (s[0] - r[0]) * (q[1] - r[1]) - (s[1] - r[1]) * (q[0] - r[0]);
+      const lpq = Math.hypot(q[0] - p[0], q[1] - p[1]), lrs = Math.hypot(s[0] - r[0], s[1] - r[1]);
+      if (Math.abs(d1) / lpq < 1e-6 && Math.abs(d2) / lpq < 1e-6) {
+        // Colineales: ¿se solapan?
+        const ux = (q[0] - p[0]) / lpq, uy = (q[1] - p[1]) / lpq;
+        const t = (z) => (z[0] - p[0]) * ux + (z[1] - p[1]) * uy;
+        const lo = Math.max(0, Math.min(t(r), t(s))), hi = Math.min(lpq, Math.max(t(r), t(s)));
+        if (hi - lo > TOL) problems.push(`líneas superpuestas cerca de (${p[0].toFixed(1)}, ${p[1].toFixed(1)})`);
+        continue;
+      }
+      const tolA = TOL * lrs, tolB = TOL * lpq;
+      if (((d1 > tolA && d2 < -tolA) || (d1 < -tolA && d2 > tolA)) && ((d3 > tolB && d4 < -tolB) || (d3 < -tolB && d4 > tolB))) {
+        const den = (q[0] - p[0]) * (s[1] - r[1]) - (q[1] - p[1]) * (s[0] - r[0]);
+        const u = ((r[0] - p[0]) * (s[1] - r[1]) - (r[1] - p[1]) * (s[0] - r[0])) / den;
+        const x = [p[0] + (q[0] - p[0]) * u, p[1] + (q[1] - p[1]) * u];
+        if (!endsIJ.some((z) => Math.hypot(z[0] - x[0], z[1] - x[1]) < 0.3)) problems.push(`cruce en (${x[0].toFixed(1)}, ${x[1].toFixed(1)})`);
+      }
+    }
+  }
+  return [...new Set(problems)];
+}
+
+function faces(model) {
+  const tmp = new URL("./_check.dxf", import.meta.url);
+  writeFileSync(tmp, toDxf(model, { dims: false }).replace(/CORTE|HENDIDO|PERFORADO/g, "Troquel"));
+  const n = facesOf(readDxf(tmp.pathname)).faces.length;
+  unlinkSync(tmp);
+  return n;
+}
+
+const cases = [
+  {},
+  { L: 370 },
+  { L: 400, A: 110, H: 300, t: 32, n: 4, Dc: 70, Dn: 28, p: 72 },
+  { Dc: 100, A: 110 },
+  { Dc: 100, A: 200, H: 600, n: 8, p: 20 },
+  { Dc: 100, A: 94 },
+  { ...Object.fromEntries(PARAMS.map((q) => [q.key, q.min])) },
+  { ...Object.fromEntries(PARAMS.map((q) => [q.key, q.max])) },
+  { Dc: 36, Dn: 30, A: 60, H: 120, n: 8, p: 20 },
+  { L: 210, A: 60, H: 120, t: 10 },
+];
+let seed = 6463;
+const rnd = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
+const random = Number(process.argv[2] ?? 400);
+for (let i = 0; i < random; i++) cases.push(Object.fromEntries(PARAMS.map((q) => [q.key, q.min + rnd() * (q.max - q.min)])));
+
+let bad = 0;
+cases.forEach((params, i) => {
+  const m = generate(params, plantilla);
+  const problems = inspect(m);
+  if (i === 0) {
+    const n = faces(m);
+    if (n !== 32) problems.push(`el 6463 por defecto da ${n} piezas, no 32`);
+  }
+  if (problems.length) {
+    bad++;
+    console.log("✗", JSON.stringify(m.P), "\n   ", problems.slice(0, 6).join("\n    "), problems.length > 6 ? `\n    … y ${problems.length - 6} más` : "");
+  }
+});
+console.log(`${cases.length} combinaciones · ${bad} con problemas`);
+process.exit(bad ? 1 : 0);

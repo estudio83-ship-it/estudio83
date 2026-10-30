@@ -16,7 +16,7 @@ const plantillaText = readFileSync(join(HERE, "plantilla-caja.json"), "utf8");
 for (const params of [{}, { L: 370 }, { L: 400, A: 110, H: 300, t: 32, n: 4, Dc: 70, Dn: 28, p: 72 }, { L: 250, A: 70, H: 200, n: 2, Dc: 56, Dn: 22, p: 64 }]) {
   const m = generate(params, JSON.parse(plantillaText));
   for (const d of m.dims) {
-    const entry = DIM_FORMULAS[d.dir][d.name];
+    const entry = DIM_FORMULAS[d.src][d.name];
     if (!entry) continue;
     const want = entry[1](m.P);
     if (Math.abs(want - d.value) > 0.05) throw new Error(`fórmula ${entry[0]} (${d.name}) da ${want} y el plano mide ${d.value.toFixed(2)} con ${JSON.stringify(params)}`);
@@ -32,11 +32,11 @@ const page = `<title>Galeno 6463 para ArtiosCAD</title>
 <style>
 /* Ficha técnica viva: variables a la izquierda, plano con fórmulas a la derecha, tablas fórmula/valor debajo. */
 :root{
-  --paper:#f4f5f2;--sheet:#fcfcfa;--ink:#24282b;--soft:#6b7176;--rule:#c9ccc8;--crease:#8b9095;--accent:#1f5fbf;--warn:#a4441b;--field:#ffffff;--flash:#e3ecfa;
+  --paper:#f4f5f2;--sheet:#fcfcfa;--ink:#24282b;--soft:#6b7176;--rule:#c9ccc8;--crease:#8b9095;--accent:#1f6fd6;--accent-deep:#1558b0;--on-accent:#ffffff;--warn:#a4441b;--note:#6b7176;--field:#ffffff;--flash:#e3ecfa;
   --display:"Barlow Condensed","Arial Narrow",sans-serif;--body:"IBM Plex Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#7fb0ff;--warn:#f0956b;--field:#101214;--flash:#1d2a3d;color-scheme:dark}}
-:root[data-theme="dark"]{--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#7fb0ff;--warn:#f0956b;--field:#101214;--flash:#1d2a3d;color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#4ba3ff;--accent-deep:#7dbcff;--on-accent:#06121f;--warn:#f0956b;--note:#8d959b;--field:#101214;--flash:#1d2a3d;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#4ba3ff;--accent-deep:#7dbcff;--on-accent:#06121f;--warn:#f0956b;--note:#8d959b;--field:#101214;--flash:#1d2a3d;color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--paper);color:var(--ink);font:15px/1.55 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 main{max-width:1240px;margin:0 auto;padding-block:32px 64px;display:grid;gap:22px}
@@ -62,11 +62,14 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline
 .presets{display:flex;flex-wrap:wrap;gap:6px}
 button{font:500 13px var(--body);color:var(--ink);background:transparent;border:1px solid var(--rule);padding:7px 10px;cursor:pointer}
 button:hover{border-color:var(--ink)}
-button.primary{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+button.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
+button.primary:hover{background:var(--accent-deep);border-color:var(--accent-deep)}
+button.primary:disabled{opacity:.5;cursor:default}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0;font-size:13px}
 .facts dt{color:var(--soft)}.facts dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums}
 .warn{margin:0;padding:0;list-style:none;display:grid;gap:6px;color:var(--warn);font-size:13px}
+.warn li.note{color:var(--note)}
 .status{font:13px var(--mono);color:var(--soft);min-height:1.4em;margin:0}
 .scroll{overflow-x:auto}
 svg.plan{display:block;width:100%;min-width:680px;height:auto}
@@ -77,6 +80,7 @@ svg.plan{display:block;width:100%;min-width:680px;height:auto}
 .dim .ar{fill:var(--accent);stroke:none}
 .dim text{font:500 17px var(--mono);text-anchor:middle}
 .dim text.side{text-anchor:start;font-size:15px}
+.dim text.side-l,.dim text.down{text-anchor:end;font-size:15px}
 .dim .fx{fill:var(--accent);font-weight:600}.dim .val{fill:var(--soft)}
 .dim.hot .val{fill:var(--accent);font-weight:600}
 .call{font:500 14px var(--mono);fill:var(--soft);text-anchor:middle}
@@ -105,7 +109,7 @@ li b{font-weight:500}
   <header>
     <span class="tag">Troquel 6463 · caja tipo galeno · guía de diseño paramétrico</span>
     <h1>Galeno 6463 para ArtiosCAD</h1>
-    <p class="lede">Mové las variables y el troquel se rearma con cada cota escrita en su fórmula y su valor. Las tablas de abajo muestran la misma fórmula con el valor de la medida actual; lo que cambió se marca en azul.</p>
+    <p class="lede">Mové las variables y el troquel se rearma con cada cota escrita en su fórmula y su valor; lo que cambió se marca en azul. Descargá el DXF o el CF2 para ArtiosCAD.</p>
   </header>
 
   <div class="desk">
@@ -119,8 +123,9 @@ li b{font-weight:500}
       <dl class="facts" id="facts"></dl>
       <ul class="warn" id="warn"></ul>
       <div class="actions">
-        ${ARTIFACT ? "" : `<button type="button" class="primary" id="dl-dxf">Descargar DXF</button><button type="button" id="dl-cf2">Descargar CF2</button>`}
-        <button type="button"${ARTIFACT ? ' class="primary"' : ""} id="cp-dxf">Copiar DXF</button>
+        <button type="button" class="primary" id="dl-dxf">Descargar DXF</button>
+        <button type="button" class="primary" id="dl-cf2">Descargar CF2</button>
+        <button type="button" id="cp-dxf">Copiar DXF</button>
         <button type="button" id="cp-cf2">Copiar CF2</button>
       </div>
       <p class="status" id="status" role="status"></p>
@@ -137,37 +142,6 @@ li b{font-weight:500}
     </section>
   </div>
 
-  <div class="cols">
-    <section class="sheet" aria-labelledby="t-tubo"><h2 id="t-tubo">Tubo</h2><div id="tb-tubo"></div>
-      <p class="note">Los corrimientos de los hendidos de cierre (3; 4,5; 7; 11 mm desde el contrafrente) son las compensaciones de espesor del 6463, cartón de alrededor de 1,5 mm.</p></section>
-    <section class="sheet" aria-labelledby="t-cierre"><h2 id="t-cierre">Cierres, iguales en ambos extremos</h2><div id="tb-cierres"></div></section>
-    <section class="sheet wide" aria-labelledby="t-int"><h2 id="t-int">Interior</h2><div id="tb-interior"></div>
-      <ul class="note">
-        <li>Los frascos van alternados: los pares apoyan el cuerpo en el tabique A y el cuello en el B.</li>
-        <li>Agujero del cuerpo con lengüeta de apoyo de 33 hasta 13 antes del centro y muesca de 25 hasta el hendido.</li>
-        <li>Ranura del cuello con lados rectos hasta 23,8 del hendido y boca de 40 abierta por todo el puente; muesca de borde 35 × 4.</li>
-      </ul></section>
-  </div>
-
-  <div class="two">
-    <section class="sheet" aria-labelledby="t-abrir">
-      <h2 id="t-abrir">Abrir en ArtiosCAD</h2>
-      <ol>
-        <li><b>DXF, recomendado.</b> Al importar, asigná <code>CORTE</code> a corte 2 pt, <code>HENDIDO</code> a hendido 2 pt, <code>PERFORADO</code> al perforado intermitente 5×5 y <code>COTAS</code> a anotación. Guardá la asignación para las próximas variantes. Unidades en mm; se troquela de dorso.</li>
-        <li><b>CF2.</b> Cada línea trae su tipo (1 corte, 2 hendido, 3 perforado) con pointage 2 pt. No pude validar el formato en ArtiosCAD: probá primero el DXF y revisá que el perforado tome tu 5×5.</li>
-        <li><b>Paramétrico nativo.</b> Creá las variables <span class="vv">L</span>, <span class="vv">A</span>, <span class="vv">H</span> y <span class="vv">t</span> en ArtiosCAD y acotá cada línea con las fórmulas de esta ficha. El <code>.ARD</code> es un formato cerrado: el paramétrico nativo se arma dentro de ArtiosCAD.</li>
-      </ol>
-    </section>
-    <section class="sheet" aria-labelledby="t-gen">
-      <h2 id="t-gen">Desde la línea de comandos</h2>
-      <p>En <code>caja-galeno/parametrico</code> del repositorio:</p>
-      <ul>
-        <li><code>node generar.mjs --L 370</code> escribe el +50 en DXF y CF2.</li>
-        <li><code>node generar.mjs --L 400 --A 110 --n 4 --Dc 70</code> cambia caja y frascos.</li>
-        <li><code>node guia.mjs</code> vuelve a escribir esta guía.</li>
-      </ul>
-    </section>
-  </div>
 </main>
 <script>
 ${strip("galeno.mjs")}
@@ -191,8 +165,8 @@ function arrow(x0, y0, x1, y1) {
 }
 function planSvg(prevDims) {
   const b = model.info.bounds;
-  for (const d of model.dims) if (d.dir === "v" && d.at > b.xMax + 60) d.at += 100;
-  const X0 = b.xMin - 40, X1 = b.xMax + 330, Y0 = b.yMin - 175, Y1 = b.yMax + 30;
+  const X0 = b.xMin - 270, X1 = b.xMax + 90, Y0 = b.yMin - 300, Y1 = b.yMax + 30;
+  const cx = (b.xMin + b.xMax) / 2;
   const Y = (y) => Y1 - y;
   const paths = { c: "", h: "", p: "" };
   for (const e of model.entities) {
@@ -205,25 +179,31 @@ function planSvg(prevDims) {
     }
   }
   const text = (d) => {
-    const entry = DIM_FORMULAS[d.dir][d.name], v = fmt(d.value).replace(".", ",");
+    const entry = DIM_FORMULAS[d.src][d.name], v = fmt(d.value).replace(".", ",");
     return entry && entry[0] !== v ? [entry[0] + " = " + v, '<tspan class="fx">' + entry[0] + '</tspan><tspan class="val"> = ' + v + "</tspan>"] : [v, '<tspan class="val">' + v + "</tspan>"];
   };
   let dims = "";
   model.dims.forEach((d, i) => {
     const hot = prevDims && prevDims[i] !== undefined && Math.abs(prevDims[i] - d.value) > 0.005 ? " hot" : "";
     const [plain, rich] = text(d);
+    const fits = plain.length * 10.4 < Math.abs(d.dir === "h" ? d.x1 - d.x0 : d.y1 - d.y0) - 12;
     if (d.dir === "h") {
-      const y = Y(d.at);
-      dims += '<g class="dim' + hot + '"><path d="M' + f1(d.x0) + " " + f1(y - 8) + "V" + f1(y + 8) + "M" + f1(d.x1) + " " + f1(y - 8) + "V" + f1(y + 8) + "M" + f1(d.x0) + " " + f1(y) + "H" + f1(d.x1) + '"/><path class="ar" d="' + arrow(d.x0, y, d.x1, y) + '"/><text x="' + f1((d.x0 + d.x1) / 2) + '" y="' + f1(y - 7) + '">' + rich + "</text></g>";
+      const y = Y(d.at), xm = (d.x0 + d.x1) / 2;
+      const base = '<g class="dim' + hot + '"><path d="M' + f1(d.x0) + " " + f1(y - 8) + "V" + f1(y + 8) + "M" + f1(d.x1) + " " + f1(y - 8) + "V" + f1(y + 8) + "M" + f1(d.x0) + " " + f1(y) + "H" + f1(d.x1) + '"/><path class="ar" d="' + arrow(d.x0, y, d.x1, y) + '"/>';
+      // Si no entra a lo largo, la etiqueta baja en vertical desde la cota.
+      dims += fits
+        ? base + '<text x="' + f1(xm) + '" y="' + f1(y - 7) + '">' + rich + "</text></g>"
+        : base + '<text class="down" x="' + f1(xm + 5) + '" y="' + f1(y + 12) + '" transform="rotate(-90 ' + f1(xm + 5) + " " + f1(y + 12) + ')">' + rich + "</text></g>";
     } else {
       const x = d.at, ym = Y((d.y0 + d.y1) / 2);
       const base = '<g class="dim' + hot + '"><path d="M' + f1(x - 8) + " " + f1(Y(d.y0)) + "H" + f1(x + 8) + "M" + f1(x - 8) + " " + f1(Y(d.y1)) + "H" + f1(x + 8) + "M" + f1(x) + " " + f1(Y(d.y0)) + "V" + f1(Y(d.y1)) + '"/><path class="ar" d="' + arrow(x, Y(d.y0), x, Y(d.y1)) + '"/>';
-      dims += plain.length * 10.4 < Math.abs(d.y1 - d.y0) - 12
+      const left = x < cx;
+      dims += fits
         ? base + '<text x="' + f1(x - 7) + '" y="' + f1(ym) + '" transform="rotate(-90 ' + f1(x - 7) + " " + f1(ym) + ')">' + rich + "</text></g>"
-        : base + '<text class="side" x="' + f1(x + 10) + '" y="' + f1(ym + 6) + '">' + rich + "</text></g>";
+        : base + '<text class="' + (left ? "side-l" : "side") + '" x="' + f1(left ? x - 10 : x + 10) + '" y="' + f1(ym + 6) + '">' + rich + "</text></g>";
     }
   });
-  const map = model.anchors.map, ins = model.anchors.insert, r = ins.rows;
+  const map = (p) => model.anchors.rot(model.anchors.map(p)), ins = model.anchors.insert, r = ins.rows, rot = model.anchors.rot;
   const calls = [
     [map([530, 1090]), "guardapolvo A + 26"],
     [map([944, 1090]), "A + 28,5"],
@@ -231,10 +211,10 @@ function planSvg(prevDims) {
     [map([326, 1068]), "contratapa A − 6"],
     [map([741.5, 1000]), "traba 86,5 × 10"],
     [map([741.5, 1228]), "diente 85 × 5"],
-    [[ins.x0 + ins.centres[0], ins.y0 + (r.p2 + r.c3) / 2], "⌀Dc"],
+    [rot([ins.x0 + ins.centres[0], ins.y0 + (r.p2 + r.c3) / 2]), "⌀Dc"],
   ];
-  if (ins.centres.length > 1) calls.push([[ins.x0 + ins.centres[1], ins.y0 + (r.p2 + r.c3) / 2 + 9], "Dn"]);
-  calls.push([[ins.x0 + ins.centres[ins.centres.length > 1 ? 1 : 0], ins.y0 + r.c1 / 2], "muesca 35 × 4"]);
+  if (ins.centres.length > 1) calls.push([rot([ins.x0 + ins.centres[1], ins.y0 + (r.p2 + r.c3) / 2 + 9]), "Dn"]);
+  calls.push([rot([ins.x0 + ins.centres[ins.centres.length > 1 ? 1 : 0], ins.y0 + r.c1 / 2]), "muesca 35 × 4"]);
   const callSvg = calls.map(([p, t]) => '<text class="call" x="' + f1(p[0]) + '" y="' + f1(Y(p[1])) + '">' + t + "</text>").join("");
   return '<svg class="plan" viewBox="' + f1(X0) + " 0 " + f1(X1 - X0) + " " + f1(Y1 - Y0) + '" role="img" aria-label="Troquel galeno ' + model.info.caja + ' mm con cada cota expresada en sus variables"><path class="c" d="' + paths.c + '"/><path class="h" d="' + paths.h + '"/><path class="p" d="' + paths.p + '"/>' + dims + callSvg + "</svg>";
 }
@@ -255,18 +235,52 @@ function render(source) {
   }
   const prevDims = model ? model.dims.map((d) => d.value) : null;
   model = generate(state, PLANTILLA);
+  // Rangos que dependen de las otras medidas: el deslizador no deja pasarlos.
+  const lim = limits(model.P);
+  for (const p of PARAMS) {
+    const [a, b2] = lim[p.key], rng = document.getElementById("r-" + p.key), num = document.getElementById("v-" + p.key);
+    rng.min = num.min = Math.round(a * 100) / 100; rng.max = num.max = Math.round(b2 * 100) / 100;
+    rng.value = model.P[p.key];
+    if (source === "commit") num.value = Math.round(model.P[p.key] * 100) / 100;
+  }
   document.getElementById("plan").innerHTML = planSvg(prevDims);
-  for (const key of ["tubo", "cierres", "interior"]) document.getElementById("tb-" + key).innerHTML = tableHtml(key);
   document.getElementById("caption").textContent = "L " + fmtMm(state.L) + " · A " + fmtMm(state.A) + " · H " + fmtMm(state.H) + " · t " + fmtMm(state.t) + " · plancha " + model.info.plancha;
   const facts = [["Caja", model.info.caja + " mm"], ["Plancha", model.info.plancha + " mm"], ["Frasco", model.info.frasco], ["Interior", model.info.interior]];
   document.getElementById("facts").innerHTML = facts.map(([k, v]) => "<dt>" + k + "</dt><dd>" + v + "</dd>").join("");
-  document.getElementById("warn").innerHTML = model.warnings.map((w) => "<li>" + w + "</li>").join("");
+  document.getElementById("warn").innerHTML = model.notes.map((w) => '<li class="note">' + w + "</li>").join("") + model.warnings.map((w) => "<li>" + w + "</li>").join("");
   clearTimeout(hotTimer);
   hotTimer = setTimeout(() => document.querySelectorAll(".hot").forEach((e) => e.classList.remove("hot")), 1400);
 }
 const name = () => "GALENO-" + fmtMm(state.L) + "x" + fmtMm(state.A) + "x" + fmtMm(state.H);
 const say = (t) => (document.getElementById("status").textContent = t);
-${ARTIFACT ? "" : `function download(text, ext) {
+${ARTIFACT ? `// En claude.ai el visor guarda archivos sólo con el permiso de descargas y no acepta .dxf ni .cf2:
+// se entregan dentro de un .zip, que adentro tiene el archivo con su extensión real.
+const CRC = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+function zipOne(filename, text) {
+  const data = new TextEncoder().encode(text), nameBytes = new TextEncoder().encode(filename);
+  let crc = 0xffffffff; for (const b of data) crc = CRC[(crc ^ b) & 255] ^ (crc >>> 8); crc = (crc ^ 0xffffffff) >>> 0;
+  const local = new DataView(new ArrayBuffer(30)), central = new DataView(new ArrayBuffer(46)), end = new DataView(new ArrayBuffer(22));
+  const now = new Date(), time = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1), date = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  local.setUint32(0, 0x04034b50, true); local.setUint16(4, 20, true); local.setUint16(6, 0x0800, true); local.setUint16(10, time, true); local.setUint16(12, date, true);
+  local.setUint32(14, crc, true); local.setUint32(18, data.length, true); local.setUint32(22, data.length, true); local.setUint16(26, nameBytes.length, true);
+  central.setUint32(0, 0x02014b50, true); central.setUint16(4, 20, true); central.setUint16(6, 20, true); central.setUint16(8, 0x0800, true); central.setUint16(12, time, true); central.setUint16(14, date, true);
+  central.setUint32(16, crc, true); central.setUint32(20, data.length, true); central.setUint32(24, data.length, true); central.setUint16(28, nameBytes.length, true);
+  const offset = 30 + nameBytes.length + data.length;
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, 1, true); end.setUint16(10, 1, true); end.setUint32(12, 46 + nameBytes.length, true); end.setUint32(16, offset, true);
+  return new Blob([local, nameBytes, data, central, nameBytes, end]);
+}
+let downloads = null;
+window.claude?.use?.("downloads").then((d) => { downloads = d; }).catch(() => {});
+async function download(text, ext) {
+  if (!downloads) { say("Las descargas no están disponibles en esta vista. Usá Copiar y pegalo en un archivo ." + ext + "."); return; }
+  const file = name() + "." + ext;
+  try {
+    await downloads.save({ filename: name() + "-" + ext + ".zip", data: zipOne(file, text) });
+    say("Guardado " + name() + "-" + ext + ".zip: adentro está " + file + ".");
+  } catch (e) {
+    say(e && e.code === "declined" ? "Descarga cancelada." : "No se pudo descargar (" + ((e && e.code) || "error") + "). Usá Copiar y pegalo en un archivo ." + ext + ".");
+  }
+}` : `function download(text, ext) {
   try {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([text], { type: "application/octet-stream" }));
@@ -274,9 +288,9 @@ ${ARTIFACT ? "" : `function download(text, ext) {
     document.body.appendChild(a); a.click(); a.remove();
     say("Descarga iniciada: " + a.download + ".");
   } catch (e) { say("No se pudo descargar. Usá Copiar y pegalo en un archivo ." + ext + "."); }
-}
+}`}
 document.getElementById("dl-dxf").addEventListener("click", () => download(toDxf(model, { name: name() }), "dxf"));
-document.getElementById("dl-cf2").addEventListener("click", () => download(toCf2(model, { name: name() }), "cf2"));`}
+document.getElementById("dl-cf2").addEventListener("click", () => download(toCf2(model, { name: name() }), "cf2"));
 async function copy(text, ext) {
   try { await navigator.clipboard.writeText(text); say("Copiado. Pegalo en un archivo de texto y guardalo como " + name() + "." + ext + "."); }
   catch (e) { say("El navegador no dejó copiar."); }
@@ -284,6 +298,7 @@ async function copy(text, ext) {
 document.getElementById("cp-dxf").addEventListener("click", () => copy(toDxf(model, { name: name() }), "dxf"));
 document.getElementById("cp-cf2").addEventListener("click", () => copy(toCf2(model, { name: name() }), "cf2"));
 form.addEventListener("input", (e) => render(e.target));
+form.addEventListener("change", () => render("commit"));
 document.querySelectorAll("[data-preset]").forEach((b) => b.addEventListener("click", () => {
   const p = { ...DEFAULTS, ...JSON.parse(b.dataset.preset) };
   for (const k in p) { document.getElementById("v-" + k).value = p[k]; document.getElementById("r-" + k).value = p[k]; }

@@ -1,6 +1,7 @@
 // Caja tipo galeno (troquel 6463) paramétrica.
 // generate(params, plantilla) → { entities, dims, info, warnings }
-// Unidades: mm. Coordenadas como el plano original: x a la derecha, y hacia arriba.
+// Unidades: mm. El troquel se arma en las coordenadas del plano original (x a la derecha, y hacia
+// arriba) y al final se gira 90° a la derecha: el tubo queda vertical y el interior abajo.
 //
 // La caja se arma desde la plantilla del troquel 6463 (sus mismas curvas y compensaciones) moviendo
 // zonas rectas con L, A y H; las orejas curvas escalan con A. El interior se dibuja desde cero con
@@ -18,13 +19,13 @@ export const DEFAULTS = {
 };
 
 export const PARAMS = [
-  { key: "L", label: "Largo interior (contrafrente)", min: 150, max: 700, step: 1 },
-  { key: "A", label: "Profundidad (costados)", min: 50, max: 200, step: 1 },
+  { key: "L", label: "Largo interior (contrafrente)", min: 210, max: 700, step: 1 },
+  { key: "A", label: "Profundidad (costados)", min: 60, max: 200, step: 1 },
   { key: "H", label: "Alto del frente (tubo)", min: 120, max: 600, step: 1 },
   { key: "n", label: "Cantidad de frascos", min: 1, max: 8, step: 1 },
-  { key: "Dc", label: "⌀ agujero del cuerpo", min: 20, max: 190, step: 0.5 },
-  { key: "Dn", label: "Ancho ranura del cuello", min: 8, max: 120, step: 0.5 },
-  { key: "p", label: "Paso entre frascos", min: 20, max: 300, step: 0.25 },
+  { key: "Dc", label: "⌀ agujero del cuerpo", min: 36, max: 100, step: 0.5 },
+  { key: "Dn", label: "Ancho ranura del cuello", min: 8, max: 38, step: 0.5 },
+  { key: "p", label: "Paso entre frascos", min: 20, max: 500, step: 0.25 },
   { key: "t", label: "Puente de los tabiques", min: 10, max: 80, step: 1 },
 ];
 
@@ -34,6 +35,39 @@ const FIX = { tongueW: 33, tongueFromCentre: 13, notchW: 25, flareW: 40, flareLe
 export function derived(P) {
   const wall = P.A - 6, main = P.L - 65, Wi = P.H - 6;
   return { wall, main, Wi, bottle: P.L - 14, insertLen: 4 * wall + 2 * P.t + main, folded: main + 2 * P.t };
+}
+
+// Rango válido de cada variable dado el resto, para que el troquel no tenga líneas cruzadas ni sueltas.
+// El orden importa: Dc depende de A y H; Dn de Dc; n y p de Dc y H.
+export function limits(P) {
+  const st = Object.fromEntries(PARAMS.map((q) => [q.key, [q.min, q.max]]));
+  const lim = { L: st.L, A: st.A, H: st.H, t: st.t };
+  const cl = (v, [a, b]) => Math.min(b, Math.max(a, v));
+  const A = cl(P.A, lim.A), H = cl(P.H, lim.H);
+  lim.Dc = [st.Dc[0], Math.min(st.Dc[1], A - 10, H - 12)];
+  const Dc = cl(P.Dc, lim.Dc);
+  lim.Dn = [st.Dn[0], Math.min(st.Dn[1], Dc - 6)];
+  const room = H - 12 - 2 * Math.max(Dc / 2, FIX.flareW / 2); // de centro a centro de los frascos extremos
+  const pMin = Math.max(Dc + 2, Dc / 2 + FIX.flareW / 2 + 3);
+  lim.n = [1, Math.max(1, Math.min(st.n[1], 1 + Math.floor(room / pMin + 1e-9)))];
+  const n = cl(Math.round(P.n), lim.n);
+  lim.p = n > 1 ? [pMin, Math.max(pMin, Math.min(st.p[1], room / (n - 1)))] : [pMin, Math.max(pMin, st.p[1])];
+  return lim;
+}
+
+export function clampParams(params) {
+  const P = { ...DEFAULTS, ...params };
+  const notes = [];
+  const lim = limits(P);
+  for (const key of ["L", "A", "H", "t", "Dc", "Dn", "n", "p"]) {
+    const [a, b] = limits(P)[key];
+    let v = key === "n" ? Math.round(P[key]) : P[key];
+    if (!Number.isFinite(v)) v = DEFAULTS[key];
+    const c = Math.min(b, Math.max(a, v));
+    if (Math.abs(c - P[key]) > 1e-9) notes.push(`${key} ajustado a ${Math.round(c * 100) / 100} (rango ${Math.round(a * 100) / 100}–${Math.round(b * 100) / 100} con estas medidas).`);
+    P[key] = c;
+  }
+  return { P, notes, limits: lim };
 }
 
 export function validate(P) {
@@ -144,7 +178,8 @@ function insert(P, x0, y0, out) {
       const aT = deg(ht / R), aN = deg(hn2 / R);
       if (S.s > 0) { Arc("c", u, vm, R, 360 - aT, aN); Arc("c", u, vm, R, 180 - aN, 180 + aT); }
       else { Arc("c", u, vm, R, 180 - aT, 180 + aN); Arc("c", u, vm, R, 360 - aN, aT); }
-      const vt = vm - S.s * FIX.tongueFromCentre;
+      // La lengüeta termina dentro del agujero: 13 antes del centro, o menos si el agujero es chico.
+      const vt = vm - S.s * Math.min(FIX.tongueFromCentre, Math.sqrt(R * R - ht * ht) - 3);
       L("c", u - ht, S.vp, u - ht, vt); L("c", u + ht, S.vp, u + ht, vt); L("c", u - ht, vt, u + ht, vt);
       gaps[S.rowP].push([u - ht, u + ht]);
       const vn = vm + S.s * Math.sqrt(R * R - hn2 * hn2);
@@ -193,7 +228,7 @@ function arcPoints(e) {
 
 // ---------- Todo ----------
 export function generate(params, plantilla) {
-  const P = { ...DEFAULTS, ...params };
+  const { P, notes } = clampParams(params);
   const entities = [], problems = [];
   const map = box(P, plantilla, entities, problems);
   const right = map([989.1, 900])[0];
@@ -214,23 +249,32 @@ export function generate(params, plantilla) {
   const xMax = ins.x0 + d.Wi;
   cols.slice(1).forEach((x, i) => H_(cols[i], x, yMin - 40, names[i]));
   H_(ins.x0, xMax, yMin - 40, "interior");
-  H_(cols[0], cols[5], yMin - 90, "caja");
-  H_(xMin, xMax, yMin - 140, "plano total");
+  H_(cols[0], cols[5], yMin - 160, "caja");
+  H_(xMin, xMax, yMin - 210, "plano total");
   const lidX = (X(586.1) + X(698)) / 2;
   [530, 620, 630, 724, 1020, 1114, 1124, 1214].map(Yb).forEach((y, i, all) => i && V_(all[i - 1], y, lidX, ["lengüeta", "pestaña", "tapa", "contrafrente", "tapa", "pestaña", "lengüeta"][i - 1]));
   V_(Yf(735), Yf(1009), X(300), "frente");
   const r = ins.rows;
   [0, r.c1, r.c2, r.p1, r.p2, r.c3, r.c4, r.top].map((v) => ins.y0 + v).forEach((y, i, all) => i && V_(all[i - 1], y, xMax + 45, ["pared", "puente", "tabique", "panel", "tabique", "puente", "pared"][i - 1]));
-  V_(ins.y0, ins.y0 + r.top, xMax + 110, "interior");
-  V_(yMin, yMax, xMax + 175, "plano total");
+  V_(ins.y0, ins.y0 + r.top, xMax + 175, "interior");
+  V_(yMin, yMax, xMax + 230, "plano total");
+  // Giro de 90° a la derecha: (x, y) → (y, −x).
+  const rot = ([x, y]) => [y, -x];
+  for (const e of entities) {
+    if (e.t === "L") { e.a = rot(e.a); e.b = rot(e.b); }
+    else { e.c = rot(e.c); e.a0 -= 90; e.a1 -= 90; }
+  }
+  const turned = dims.map((q) => (q.dir === "h"
+    ? { dir: "v", src: "h", y0: -q.x1, y1: -q.x0, at: q.at, name: q.name, value: q.value }
+    : { dir: "h", src: "v", x0: q.y0, x1: q.y1, at: -q.at, name: q.name, value: q.value }));
   const info = {
     caja: `${P.L} × ${P.A} × ${P.H}`,
-    plancha: `${(xMax - xMin).toFixed(1)} × ${(yMax - yMin).toFixed(1)}`,
+    plancha: `${(yMax - yMin).toFixed(1)} × ${(xMax - xMin).toFixed(1)}`,
     frasco: `largo máx. ≈ ${d.bottle} · ⌀ cuerpo < ${P.Dc} · ⌀ cuello ≤ ${P.Dn}`,
     interior: `${d.Wi} × ${d.insertLen} (plegado ${d.folded} × ${d.Wi} × ${d.wall})`,
-    bounds: { xMin, xMax, yMin, yMax },
+    bounds: { xMin: yMin, xMax: yMax, yMin: -xMax, yMax: -xMin },
   };
-  return { P, entities, dims, info, anchors: { map, insert: ins }, warnings: [...validate(P), ...problems] };
+  return { P, entities, dims: turned, info, anchors: { map, insert: ins, rot }, notes, warnings: [...validate(P), ...problems] };
 }
 
 // ---------- Salidas ----------
