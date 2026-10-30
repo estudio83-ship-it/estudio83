@@ -62,9 +62,10 @@ h2{font:700 20px/1.15 var(--display);letter-spacing:-.02em;margin:0}
 .head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;align-items:baseline}
 .desk{display:grid;grid-template-columns:370px minmax(0,1fr);gap:22px;align-items:stretch}
 @media (max-width:860px){.desk{grid-template-columns:minmax(0,1fr)}.plan-sheet #plan{height:420px}}
-.plan-sheet{grid-template-rows:auto 1fr}
+.plan-sheet{grid-template-rows:auto minmax(0,1fr)}
 /* El plano ocupa todo el alto que deja el recuadro (que se estira al alto del panel de variables). */
-.plan-sheet #plan{display:block;height:100%;min-height:560px;overflow:hidden}
+.plan-sheet #plan{display:block;position:relative;min-height:560px;overflow:hidden}
+.plan-sheet #plan svg{position:absolute;inset:0}
 @media (max-width:860px){.plan-sheet #plan{height:420px;min-height:0}}
 form{display:grid;gap:9px}
 .var{display:grid;grid-template-columns:30px minmax(0,1fr) 84px;gap:2px 10px;align-items:center}
