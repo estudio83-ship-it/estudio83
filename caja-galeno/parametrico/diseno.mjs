@@ -33,7 +33,7 @@ export function crearDiseno(PLANTILLA) {
 .figura .filete{fill:none;stroke:var(--ink);stroke-width:.8}
 .figura .cota .fx{fill:var(--accent);font-weight:600}
 .figura .cota .val{fill:var(--soft);font-weight:500}
-.figura .rotulo{font:500 10.5px var(--mono);fill:var(--soft);paint-order:stroke;stroke:var(--soft-bg);stroke-width:5px;stroke-linejoin:round;transition:fill 1.5s ease}
+.figura .rotulo{font:500 12px var(--mono);fill:var(--soft);paint-order:stroke;stroke:var(--soft-bg);stroke-width:5px;stroke-linejoin:round;transition:fill 1.5s ease}
 .figura .rotulo.active{fill:var(--orange-deep);font-weight:700;transition:none}
 .figura .cota.active .fx,.figura .cota.active .val{fill:var(--orange-deep);font-weight:700}
 .figura .carton .sup{fill:var(--sheet)}

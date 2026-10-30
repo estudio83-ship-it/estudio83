@@ -44,6 +44,7 @@ y `caja-galeno/parametrico/` (completo, armado desde el DXF del troquel 6463).
   fundido de 1,5 s al soltar.
 - Resumen ordenado y sin texto de sobra; tarjetas de igual alto.
 - Tamaños fijos: Variables, Plano y Resumen no se mueven al cambiar valores. Nada entre Reset y las descargas.
+- En notebook (1536 × 730, una T14 con escala 125 %) todo entra en una pantalla, sin desplazarse.
 - Sin logos ni marcas de terceros en lo que se publica.
 - Si piden clave, generar con `--proteger` y la clave en `TROQUEL_CLAVE` (nunca en el repositorio).
 - Si una medida depende de otra (por ejemplo, el ancho de la cantidad de botellas), que se ajuste sola con

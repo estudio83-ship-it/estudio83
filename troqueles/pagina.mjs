@@ -49,7 +49,7 @@ export function armarPagina({ design, fuentes, prologo = "", crear }) {
   color-scheme:light;
 }
 *{box-sizing:border-box}
-body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 main{max-width:1480px;margin:0 auto;padding-block:40px 72px;display:grid;gap:22px}
 header{display:grid;gap:10px}
 .tag{font:500 12px/1.4 var(--mono);color:var(--soft);letter-spacing:.14em;text-transform:uppercase}
@@ -64,7 +64,7 @@ h2{font:700 20px/1.15 var(--display);letter-spacing:-.02em;margin:0}
 @media (max-width:860px){.desk{grid-template-columns:minmax(0,1fr)}.plan-sheet #plan{height:420px}}
 .plan-sheet{grid-template-rows:auto minmax(0,1fr)}
 /* El plano ocupa todo el alto que deja el recuadro (que se estira al alto del panel de variables). */
-.plan-sheet #plan{display:block;position:relative;min-height:560px;overflow:hidden}
+.plan-sheet #plan{display:block;position:relative;min-height:560px;overflow:hidden;margin-bottom:44px}
 .plan-sheet #plan svg{position:absolute;inset:0}
 @media (max-width:860px){.plan-sheet #plan{height:420px;min-height:0}}
 form{display:grid;gap:9px}
@@ -161,6 +161,39 @@ svg.plan{display:block;width:100%;height:100%}
 .figura .cota.active path{stroke:var(--orange);stroke-width:1.6}
 .figura .cota.active .ar,.figura .cota.active text{fill:var(--orange-deep)}
 @media (prefers-reduced-motion:reduce){.figura *{transition:none!important}}
+/* Pantallas de escritorio y notebook (de 1100 px de ancho para arriba): todo entra en una pantalla,
+   sin desplazarse. Título en una línea, secciones de variables en dos columnas, y el plano y el resumen
+   ocupan el alto que queda. Probado a 1536 × 730 (notebook de 14" con la escala de Windows al 125 %). */
+@media (min-width:1100px){
+  main{height:100vh;padding-block:14px 16px;gap:12px;grid-template-rows:auto minmax(0,1fr)}
+  header{display:flex;align-items:baseline;gap:18px}
+  header .tag{order:2}
+  h1{font-size:30px}
+  .desk{grid-template-columns:minmax(500px,560px) minmax(0,1fr);gap:16px;min-height:0}
+  .sheet{padding:14px 16px;gap:10px;border-radius:24px}
+  .side{overflow:auto;align-content:start}
+  form{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:start}
+  form .grupo:nth-child(2){grid-row:span 2}
+  .grupo{padding:10px 12px;gap:6px;border-radius:18px}
+  h3.group{font-size:17px}
+  .var{grid-template-columns:24px minmax(0,1fr) 64px;gap:0 6px}
+  .var input[type=number]{padding:4px 10px;font-size:13px}
+  .var label{font-size:13px}
+  .presets{gap:4px}
+  .presets button{padding:5px 12px}
+  .right{grid-template-rows:minmax(0,1fr) auto;gap:12px;min-height:0}
+  .plan-sheet #plan{min-height:0}
+  .descargas{right:16px;bottom:12px}
+  .plan-sheet #plan{margin-bottom:38px}
+  .campo .paso{padding:1px 18px}
+  .campo input[type=number]{width:34px;font-size:12px;padding:2px 0}
+  .campo .flechas{right:2px}
+  .campo .flechas button{height:9px}
+  .summary .head h2{font-size:17px}
+  .facts .row{padding:8px 10px;gap:3px;border-radius:16px}
+  .facts dd strong{font-size:14px}
+  .facts dd span{font-size:11px}
+}
 ${design.estilos || ""}
 </style>
 <main>
