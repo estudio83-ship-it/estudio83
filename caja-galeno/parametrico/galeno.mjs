@@ -1,3 +1,4 @@
+import { escribirDxf, escribirCf2, mmEntero } from "../../troqueles/cad.mjs";
 // Caja tipo galeno (troquel 6463) paramétrica.
 // generate(params, plantilla) → { entities, dims, info, warnings }
 // Unidades: mm. El troquel se arma en las coordenadas del plano original (x a la derecha, y hacia
@@ -367,56 +368,16 @@ export function generate(params, plantilla) {
 }
 
 // ---------- Salidas ----------
-const LAYERS = { c: ["CORTE", 1], h: ["HENDIDO", 2], p: ["PERFORADO", 6] };
-
 // Cotas que van al DXF: por defecto sólo H (alto del frente) y L (ancho del contrafrente).
 const HL = (d) => (d.src === "v" && d.name === "frente") || (d.src === "h" && d.name === "contrafrente");
 const HL_LABEL = (d) => (d.name === "frente" ? "H=" : "L=");
 
-export function toDxf(model, { dims = "HL", name = "GALENO" } = {}) {
-  const out = [];
-  const put = (c, v) => out.push(String(c).padStart(3), String(v));
-  const f = (v) => (Math.round(v * 1e4) / 1e4).toString();
-  put(0, "SECTION"); put(2, "HEADER"); put(9, "$ACADVER"); put(1, "AC1009"); put(9, "$INSUNITS"); put(70, 4); put(9, "$MEASUREMENT"); put(70, 1); put(0, "ENDSEC");
-  put(0, "SECTION"); put(2, "TABLES"); put(0, "TABLE"); put(2, "LAYER"); put(70, 4);
-  for (const [n, c] of [...Object.values(LAYERS), ["COTAS", 5]]) { put(0, "LAYER"); put(2, n); put(70, 0); put(62, c); put(6, "CONTINUOUS"); }
-  put(0, "ENDTAB"); put(0, "ENDSEC");
-  put(0, "SECTION"); put(2, "ENTITIES");
-  for (const e of model.entities) {
-    const [layer, color] = LAYERS[e.k];
-    if (e.t === "L") { put(0, "LINE"); put(8, layer); put(62, color); put(10, f(e.a[0])); put(20, f(e.a[1])); put(30, 0); put(11, f(e.b[0])); put(21, f(e.b[1])); put(31, 0); }
-    else { put(0, "ARC"); put(8, layer); put(62, color); put(10, f(e.c[0])); put(20, f(e.c[1])); put(30, 0); put(40, f(e.r)); put(50, f(((e.a0 % 360) + 360) % 360)); put(51, f(((e.a1 % 360) + 360) % 360)); }
-  }
-  if (dims) {
-    const line = (a, b) => { put(0, "LINE"); put(8, "COTAS"); put(62, 5); put(10, f(a[0])); put(20, f(a[1])); put(30, 0); put(11, f(b[0])); put(21, f(b[1])); put(31, 0); };
-    const text = (at, s, rot) => { put(0, "TEXT"); put(8, "COTAS"); put(62, 5); put(10, f(at[0])); put(20, f(at[1])); put(30, 0); put(40, 10); put(1, s); if (rot) put(50, rot); put(72, 1); put(11, f(at[0])); put(21, f(at[1])); put(31, 0); };
-    for (const d of model.dims.filter(dims === "HL" ? HL : () => true)) {
-      const v = (dims === "HL" ? HL_LABEL(d) : "") + fmt(d.value);
-      if (d.dir === "h") { line([d.x0, d.at], [d.x1, d.at]); line([d.x0, d.at - 7], [d.x0, d.at + 7]); line([d.x1, d.at - 7], [d.x1, d.at + 7]); text([(d.x0 + d.x1) / 2, d.at + 5], v); }
-      else { line([d.at, d.y0], [d.at, d.y1]); line([d.at - 7, d.y0], [d.at + 7, d.y0]); line([d.at - 7, d.y1], [d.at + 7, d.y1]); text([d.at - 5, (d.y0 + d.y1) / 2], v, 90); }
-    }
-  }
-  put(0, "ENDSEC"); put(0, "EOF");
-  return out.join("\r\n") + "\r\n";
+export function toDxf(model, { dims = "HL" } = {}) {
+  if (!dims) return escribirDxf(model);
+  if (dims === "HL") return escribirDxf(model, { cotas: model.dims.filter(HL), rotulo: (d) => HL_LABEL(d) + mmEntero(d.value) });
+  return escribirDxf(model, { cotas: model.dims });
 }
 
-// CF2 (Common Format 2): formato de intercambio de troquelería que ArtiosCAD importa.
-// Tipo de línea: 1 corte, 2 hendido, 3 perforado. Pointage 2 pt. Arcos: dirección 1 antihorario.
-export function toCf2(model, { name = "GALENO" } = {}) {
-  const b = model.info.bounds;
-  const f = (v) => (Math.round(v * 1e3) / 1e3).toFixed(3);
-  const type = { c: 1, h: 2, p: 3 };
-  const lines = ["$BOF", "V2", "ORDER", `MAIN,${name}`, "END", `MAIN,${name}`, "UM", `LL,${f(b.xMin)},${f(b.yMin)}`, `UR,${f(b.xMax)},${f(b.yMax)}`, "SCALE,1,1"];
-  for (const e of model.entities) {
-    if (e.t === "L") lines.push(`L,2,${type[e.k]},0,${f(e.a[0])},${f(e.a[1])},${f(e.b[0])},${f(e.b[1])},0,0`);
-    else {
-      const p = (a) => [e.c[0] + e.r * Math.cos((a * Math.PI) / 180), e.c[1] + e.r * Math.sin((a * Math.PI) / 180)];
-      const [s, t] = [p(e.a0), p(e.a1)];
-      lines.push(`A,2,${type[e.k]},0,${f(s[0])},${f(s[1])},${f(t[0])},${f(t[1])},${f(e.c[0])},${f(e.c[1])},1,0,0`);
-    }
-  }
-  lines.push("END", "$EOF");
-  return lines.join("\r\n") + "\r\n";
-}
+export const toCf2 = (model, { name = "GALENO" } = {}) => escribirCf2(model, { name });
 
 export const fmt = (v) => String(Math.round(v));

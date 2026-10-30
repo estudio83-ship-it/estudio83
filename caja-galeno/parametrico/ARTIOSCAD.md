@@ -9,9 +9,10 @@ Generador paramétrico de la caja tipo galeno (troquel 6463) con su interior par
 | `galeno.mjs` | El modelo: `generate(params)` arma el troquel completo; `toDxf` y `toCf2` lo exportan. |
 | `plantilla-caja.json` | Las líneas y curvas del troquel 6463 original, que el modelo estira por zonas. |
 | `generar.mjs` | Línea de comandos: escribe `.dxf` y `.cf2` con los parámetros que le pases. |
-| `guia-artioscad.html` | Página para abrir en el navegador: variables, plano con fórmulas en vivo, descarga DXF/CF2. La escribe `guia.mjs`. |
+| `guia-artioscad.html` | Página para abrir en el navegador: variables, plano con fórmulas en vivo, descarga DXF/CF2. La escribe `guia.mjs` con la plantilla de `../../troqueles/`. |
+| `diseno.mjs` | El galeno como diseño de la plantilla: textos, cotas de la vista simple, notas del plano, resumen y nombre de archivo. |
 | `formulas.mjs` | Las fórmulas de cada cota; `guia.mjs` verifica que coincidan con la geometría. |
-| `check.mjs` | Verifica que con los valores por defecto sale el troquel original (32 paneles y solapas) y que ninguna combinación deje líneas sueltas, cruzadas o superpuestas. |
+| `check.mjs` | Con la verificación común de `../../troqueles/verificar.mjs`, verifica que con los valores por defecto sale el troquel original (32 paneles y solapas) y que ninguna combinación deje líneas sueltas, cruzadas o superpuestas. |
 
 ```bash
 node generar.mjs --Lb 356

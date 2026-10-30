@@ -11,3 +11,6 @@ Para actualizarla, volver a copiarla desde la PC:
 
 Claude Code carga automáticamente toda skill que esté en .claude/skills/ del repositorio,
 tanto en la PC como en la nube.
+
+También está la skill del repositorio troquel-parametrico (.claude/skills/troquel-parametrico/SKILL.md):
+la receta para convertir un troquel en un diseño paramétrico con la plantilla de troqueles/.
