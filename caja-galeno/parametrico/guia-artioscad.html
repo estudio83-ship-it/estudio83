@@ -342,6 +342,12 @@ const lengthFor = (Lb, e) => Lb + 3 * e + BOTTLE_GAP;
 // El ancho sale de las botellas: n pasos más las paredes y el juego lateral del 6463 (274 = 3 × 86 + 2 × 3 + 10),
 // redondeado al milímetro.
 const SIDE_GAP = 10;
+// La profundidad sale del diámetro de la botella: el agujero en el tabique (A − 2e) con 4 mm por lado
+// (94 = 80 + 2 × 3 + 8).
+const DEPTH_GAP = 8;
+const depthFor = (Dc, e) => Math.round(Dc + 2 * e + DEPTH_GAP);
+// Paso mínimo para que los agujeros de ⌀Dc no se toquen.
+const pitchMin = (Dc) => Math.ceil(Math.max(Dc + 2, Dc / 2 + FIX.flareW / 2 + 3));
 const widthFor = (n, p, e) => Math.round(n * p + 2 * e + SIDE_GAP);
 
 // Espesores de referencia por onda (mm). Cada fabricante tiene los suyos: e se puede editar.
@@ -349,7 +355,7 @@ const ONDAS = { E: 2, B: 3, C: 4 };
 
 const PARAMS = [
   { key: "Lb", group: "Botella", label: "Largo de la botella", min: 180, max: 690, step: 1 },
-  { key: "Dc", group: "Botella", label: "⌀ cuerpo (agujero)", min: 36, max: 100, step: 1 },
+  { key: "Dc", group: "Botella", label: "⌀ cuerpo (agujero)", min: 36, max: 95, step: 1 },
   { key: "Dn", group: "Botella", label: "⌀ cuello (ranura)", min: 8, max: 38, step: 1 },
   { key: "n", group: "Botella", label: "Cantidad de botellas", min: 1, max: 6, step: 1 },
   { key: "p", group: "Botella", label: "Paso entre botellas", min: 20, max: 500, step: 1 },
@@ -782,14 +788,23 @@ function crearDiseno(PLANTILLA) {
     limits,
     // Botones rápidos para el espesor.
     atajos: { titulo: "Onda", key: "e", opciones: Object.entries(ONDAS) },
-    // Al cambiar la cantidad o el paso de las botellas, el ancho (H) se ajusta solo.
-    enlazar: (s, key) => (key === "n" || key === "p" ? { H: Math.max(120, widthFor(Math.min(6, s.n), s.p, s.e)) } : null),
+    // Las medidas de la caja acompañan a las botellas (después se pueden corregir a mano):
+    // la cantidad y el paso mueven el ancho H; el diámetro mueve la profundidad A y, si los agujeros
+    // ya no entran con el paso que hay, también el paso y el ancho.
+    enlazar(s, key) {
+      const ancho = (p) => Math.max(120, Math.min(600, widthFor(Math.min(6, s.n), p, s.e)));
+      if (key === "n" || key === "p") return { H: ancho(s.p) };
+      if (key !== "Dc") return null;
+      const out = { A: Math.max(60, Math.min(200, depthFor(s.Dc, s.e))) };
+      if (s.p < pitchMin(s.Dc)) Object.assign(out, { p: pitchMin(s.Dc), H: ancho(pitchMin(s.Dc)) });
+      return out;
+    },
     formulas: DIM_FORMULAS,
     // Vista simple: sólo las cotas de las variables que se cargan (con su letra) y los totales de la plancha.
     simple: { "h:costado": "A", "h:contrafrente": "L", "v:frente": "H", "v:puente": "t", "h:plano total": "", "v:plano total": "" },
     // Letras del plano y qué letras mueve cada variable del panel.
     letras: "Dc|Dn|(?<![A-Za-zÀ-ÿ])[LAHte](?![A-Za-zÀ-ÿ])",
-    toca: { Lb: ["L"], Dc: ["Dc"], Dn: ["Dn"], n: ["Dc", "Dn", "H"], p: ["Dc", "Dn", "H"], A: ["A"], H: ["H"], t: ["t"], e: ["e"] },
+    toca: { Lb: ["L"], Dc: ["Dc", "A"], Dn: ["Dn"], n: ["Dc", "Dn", "H"], p: ["Dc", "Dn", "H"], A: ["A"], H: ["H"], t: ["t"], e: ["e"] },
     // Notas sueltas sobre el plano: [punto, texto, visible en la vista simple].
     llamadas(model) {
       const map = (p) => model.anchors.rot(model.anchors.map(p)), ins = model.anchors.insert, r = ins.rows;
@@ -954,7 +969,7 @@ function render(source) {
     if (source === rng) num.value = rng.value; else if (source === num) rng.value = num.value;
     const v = Number(num.value);
     // Todo en milímetros enteros cuando el paso es de 1 o más.
-    if (Number.isFinite(v) && v > 0) state[p.key] = p.step >= 1 ? Math.round(v) : v;
+    if (Number.isFinite(v) && v > 0) state[p.key] = Math.min(p.max, Math.max(p.min, p.step >= 1 ? Math.round(v) : v));
   }
   // Variables que siguen a otras (DESIGN.enlazar).
   const key = source && source.id ? source.id.slice(2) : null;

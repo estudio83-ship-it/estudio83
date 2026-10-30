@@ -1,6 +1,6 @@
 // La caja tipo galeno como diseño de la plantilla de troqueles (../../troqueles/LEEME.md):
 // todo lo que la página necesita saber de este troquel en particular.
-import { DEFAULTS, PARAMS, ONDAS, generate, limits, widthFor, toDxf, toCf2 } from "./galeno.mjs";
+import { DEFAULTS, PARAMS, ONDAS, generate, limits, widthFor, depthFor, pitchMin, toDxf, toCf2 } from "./galeno.mjs";
 import { DIM_FORMULAS } from "./formulas.mjs";
 
 export function crearDiseno(PLANTILLA) {
@@ -13,14 +13,23 @@ export function crearDiseno(PLANTILLA) {
     limits,
     // Botones rápidos para el espesor.
     atajos: { titulo: "Onda", key: "e", opciones: Object.entries(ONDAS) },
-    // Al cambiar la cantidad o el paso de las botellas, el ancho (H) se ajusta solo.
-    enlazar: (s, key) => (key === "n" || key === "p" ? { H: Math.max(120, widthFor(Math.min(6, s.n), s.p, s.e)) } : null),
+    // Las medidas de la caja acompañan a las botellas (después se pueden corregir a mano):
+    // la cantidad y el paso mueven el ancho H; el diámetro mueve la profundidad A y, si los agujeros
+    // ya no entran con el paso que hay, también el paso y el ancho.
+    enlazar(s, key) {
+      const ancho = (p) => Math.max(120, Math.min(600, widthFor(Math.min(6, s.n), p, s.e)));
+      if (key === "n" || key === "p") return { H: ancho(s.p) };
+      if (key !== "Dc") return null;
+      const out = { A: Math.max(60, Math.min(200, depthFor(s.Dc, s.e))) };
+      if (s.p < pitchMin(s.Dc)) Object.assign(out, { p: pitchMin(s.Dc), H: ancho(pitchMin(s.Dc)) });
+      return out;
+    },
     formulas: DIM_FORMULAS,
     // Vista simple: sólo las cotas de las variables que se cargan (con su letra) y los totales de la plancha.
     simple: { "h:costado": "A", "h:contrafrente": "L", "v:frente": "H", "v:puente": "t", "h:plano total": "", "v:plano total": "" },
     // Letras del plano y qué letras mueve cada variable del panel.
     letras: "Dc|Dn|(?<![A-Za-zÀ-ÿ])[LAHte](?![A-Za-zÀ-ÿ])",
-    toca: { Lb: ["L"], Dc: ["Dc"], Dn: ["Dn"], n: ["Dc", "Dn", "H"], p: ["Dc", "Dn", "H"], A: ["A"], H: ["H"], t: ["t"], e: ["e"] },
+    toca: { Lb: ["L"], Dc: ["Dc", "A"], Dn: ["Dn"], n: ["Dc", "Dn", "H"], p: ["Dc", "Dn", "H"], A: ["A"], H: ["H"], t: ["t"], e: ["e"] },
     // Notas sueltas sobre el plano: [punto, texto, visible en la vista simple].
     llamadas(model) {
       const map = (p) => model.anchors.rot(model.anchors.map(p)), ins = model.anchors.insert, r = ins.rows;

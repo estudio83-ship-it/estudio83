@@ -26,6 +26,12 @@ export const lengthFor = (Lb, e) => Lb + 3 * e + BOTTLE_GAP;
 // El ancho sale de las botellas: n pasos más las paredes y el juego lateral del 6463 (274 = 3 × 86 + 2 × 3 + 10),
 // redondeado al milímetro.
 export const SIDE_GAP = 10;
+// La profundidad sale del diámetro de la botella: el agujero en el tabique (A − 2e) con 4 mm por lado
+// (94 = 80 + 2 × 3 + 8).
+export const DEPTH_GAP = 8;
+export const depthFor = (Dc, e) => Math.round(Dc + 2 * e + DEPTH_GAP);
+// Paso mínimo para que los agujeros de ⌀Dc no se toquen.
+export const pitchMin = (Dc) => Math.ceil(Math.max(Dc + 2, Dc / 2 + FIX.flareW / 2 + 3));
 export const widthFor = (n, p, e) => Math.round(n * p + 2 * e + SIDE_GAP);
 
 // Espesores de referencia por onda (mm). Cada fabricante tiene los suyos: e se puede editar.
@@ -33,7 +39,7 @@ export const ONDAS = { E: 2, B: 3, C: 4 };
 
 export const PARAMS = [
   { key: "Lb", group: "Botella", label: "Largo de la botella", min: 180, max: 690, step: 1 },
-  { key: "Dc", group: "Botella", label: "⌀ cuerpo (agujero)", min: 36, max: 100, step: 1 },
+  { key: "Dc", group: "Botella", label: "⌀ cuerpo (agujero)", min: 36, max: 95, step: 1 },
   { key: "Dn", group: "Botella", label: "⌀ cuello (ranura)", min: 8, max: 38, step: 1 },
   { key: "n", group: "Botella", label: "Cantidad de botellas", min: 1, max: 6, step: 1 },
   { key: "p", group: "Botella", label: "Paso entre botellas", min: 20, max: 500, step: 1 },

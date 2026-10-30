@@ -534,7 +534,7 @@ function render(source) {
     if (source === rng) num.value = rng.value; else if (source === num) rng.value = num.value;
     const v = Number(num.value);
     // Todo en milímetros enteros cuando el paso es de 1 o más.
-    if (Number.isFinite(v) && v > 0) state[p.key] = p.step >= 1 ? Math.round(v) : v;
+    if (Number.isFinite(v) && v > 0) state[p.key] = Math.min(p.max, Math.max(p.min, p.step >= 1 ? Math.round(v) : v));
   }
   // Variables que siguen a otras (DESIGN.enlazar).
   const key = source && source.id ? source.id.slice(2) : null;

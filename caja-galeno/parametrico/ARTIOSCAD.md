@@ -44,7 +44,7 @@ El troquel sale con la caja girada 90° a la derecha (tubo vertical) y el separa
 | Grupo | Var | Qué es | Original |
 |---|---|---|---|
 | Botella | `Lb` | Largo de la botella (va acostada a lo largo de la caja) | 306 |
-| Botella | `Dc` | ⌀ del cuerpo: agujero del tabique (hasta 100, y hasta A − 2e − 4 y H − 2e − 6) | 80 |
+| Botella | `Dc` | ⌀ del cuerpo: agujero del tabique (hasta 95, y hasta A − 2e − 4 y H − 2e − 6) | 80 |
 | Botella | `Dn` | ⌀ del cuello: ranura del tabique | 31 |
 | Botella | `n` | Cantidad de botellas (hasta 6) | 3 |
 | Botella | `p` | Paso entre ejes de botellas | 86 (el 6463 tiene 86,25) |
@@ -56,6 +56,8 @@ El troquel sale con la caja girada 90° a la derecha (tubo vertical) y el separa
 El largo de la caja sale de la botella: `L = Lb + 3e + 5` (entra en el separador plegado, `L − 3e`, con 5 mm de juego). Con la botella del 6463 y onda B, L = 320.
 
 El ancho también sale de las botellas: `H = n·p + 2e + 10`, redondeado al milímetro (10 es el juego lateral). Al cambiar `n` o `p` en la página, H se recalcula; después se puede ajustar a mano. En `generar.mjs`, si pasás `--n` o `--p` sin `--H`, H se calcula igual.
+
+La profundidad sale del diámetro: `A = Dc + 2e + 8` (el agujero con 4 mm por lado en el tabique de `A − 2e`). Al cambiar `Dc` en la página, A se recalcula; si los agujeros ya no entran con el paso que hay, el paso sube a `Dc + 2` y el ancho H lo acompaña.
 
 Derivadas: el separador plegado ocupa `L − 3e` de largo (si crece `t`, se achica el panel central `L − 3e − 2t`, la caja no cambia); frasco hasta `L − 3e − 5`; interior de `H − 2e` de ancho por `4A + L − 11e` de largo.
 

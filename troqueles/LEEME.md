@@ -7,6 +7,7 @@ Todo lo que tiene la página de la Caja tipo Galeno, listo para usar con cualqui
 | `pagina.mjs` | `armarPagina(...)`: arma el HTML interactivo de un diseño (variables, plano, resumen, descargas). |
 | `cad.mjs` | `escribirDxf` y `escribirCf2` (capas CORTE / HENDIDO / PERFORADO / COTAS), `limitesDe`, `mmEntero`. |
 | `carton.mjs` | Encuentra las superficies de cartón del troquel para pintarlas en el plano. |
+| `proteger.mjs` | `protegerPagina(html, clave)`: encripta la página; sin la clave no se puede abrir ni leer. |
 | `verificar.mjs` | `verificarDiseno(...)`: prueba cientos de combinaciones de medidas: sin líneas sueltas, cruzadas ni superpuestas. |
 | `ejemplo-caja-americana/` | Un diseño completo y chico (caja americana) para copiar como punto de partida. |
 
@@ -22,6 +23,14 @@ Diseños hechos con la plantilla: `ejemplo-caja-americana/` y `../caja-galeno/pa
 - Descargas DXF y CF2 en azul, sin zip. El DXF lleva sólo las líneas y las cotas que el diseño elija.
 - Tamaños fijos: Variables, Plano y Resumen no cambian de tamaño al mover nada; el dibujo se escala adentro.
 - Nada aparece entre Reset y las descargas.
+
+## Proteger una página con clave
+
+```bash
+TROQUEL_CLAVE='la-clave' node caja-galeno/parametrico/guia.mjs --artefacto --proteger --out caja-galeno.html
+```
+
+La página sale encriptada (AES-GCM 256, clave derivada con PBKDF2-SHA256 de 600 000 vueltas): muestra sólo el título y un campo para la clave, y sin ella el diseño, el generador y las fórmulas son ilegibles. Para cambiar la clave se vuelve a generar con la nueva y se reemplaza el archivo publicado: la versión nueva no abre con la clave vieja. Las copias que alguien ya tenga guardadas siguen abriendo con la clave vieja (un archivo que ya se entregó no se puede revocar). La clave nunca va al repositorio.
 
 ## Hacer un diseño nuevo
 
