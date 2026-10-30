@@ -16,7 +16,11 @@ export const DEFAULTS = {
   Dn: 31, // ancho de la ranura del cuello
   p: 86.25, // paso entre frascos
   t: 28, // puente de los tabiques
+  e: 3, // espesor del cartón: onda B (el 6463 está compensado para B)
 };
+
+// Espesores de referencia por onda (mm). Cada fabricante tiene los suyos: e se puede editar.
+export const ONDAS = { E: 1.5, B: 3, C: 4 };
 
 export const PARAMS = [
   { key: "L", label: "Largo interior (contrafrente)", min: 210, max: 700, step: 1 },
@@ -27,27 +31,32 @@ export const PARAMS = [
   { key: "Dn", label: "Ancho ranura del cuello", min: 8, max: 38, step: 0.5 },
   { key: "p", label: "Paso entre frascos", min: 20, max: 500, step: 0.25 },
   { key: "t", label: "Puente de los tabiques", min: 10, max: 80, step: 1 },
+  { key: "e", label: "Espesor del cartón (onda)", min: 1, max: 6, step: 0.1 },
 ];
 
 // Medidas fijas del troquel original que no dependen de los parámetros.
 const FIX = { tongueW: 33, tongueFromCentre: 13, notchW: 25, flareW: 40, flareLen: 23.8, edgeNotchW: 35, edgeNotchD: 4, gap: 8 };
 
+// Medidas del separador. El plegado ocupa siempre L − 3e de largo: si crece el puente t,
+// se achica el panel central, así la caja no cambia.
 export function derived(P) {
-  const wall = P.A - 6, main = P.L - 65, Wi = P.H - 6;
-  return { wall, main, Wi, bottle: P.L - 14, insertLen: 4 * wall + 2 * P.t + main, folded: main + 2 * P.t };
+  const e = P.e, wall = P.A - 2 * e, folded = P.L - 3 * e, main = folded - 2 * P.t, Wi = P.H - 2 * e;
+  return { wall, main, Wi, folded, bottle: folded - 5, insertLen: 4 * wall + 2 * P.t + main };
 }
 
 // Rango válido de cada variable dado el resto, para que el troquel no tenga líneas cruzadas ni sueltas.
 // El orden importa: Dc depende de A y H; Dn de Dc; n y p de Dc y H.
 export function limits(P) {
   const st = Object.fromEntries(PARAMS.map((q) => [q.key, [q.min, q.max]]));
-  const lim = { L: st.L, A: st.A, H: st.H, t: st.t };
+  const lim = { e: st.e, L: st.L, A: st.A, H: st.H };
   const cl = (v, [a, b]) => Math.min(b, Math.max(a, v));
-  const A = cl(P.A, lim.A), H = cl(P.H, lim.H);
-  lim.Dc = [st.Dc[0], Math.min(st.Dc[1], A - 10, H - 12)];
+  const e = cl(P.e, lim.e), A = cl(P.A, lim.A), H = cl(P.H, lim.H), L = cl(P.L, lim.L);
+  // El panel central del separador (L − 3e − 2t) no baja de 40.
+  lim.t = [st.t[0], Math.max(st.t[0], Math.min(st.t[1], (L - 3 * e - 40) / 2))];
+  lim.Dc = [st.Dc[0], Math.min(st.Dc[1], A - 2 * e - 4, H - 2 * e - 6)];
   const Dc = cl(P.Dc, lim.Dc);
   lim.Dn = [st.Dn[0], Math.min(st.Dn[1], Dc - 6)];
-  const room = H - 12 - 2 * Math.max(Dc / 2, FIX.flareW / 2); // de centro a centro de los frascos extremos
+  const room = H - 2 * e - 6 - 2 * Math.max(Dc / 2, FIX.flareW / 2); // de centro a centro de los frascos extremos
   const pMin = Math.max(Dc + 2, Dc / 2 + FIX.flareW / 2 + 3);
   lim.n = [1, Math.max(1, Math.min(st.n[1], 1 + Math.floor(room / pMin + 1e-9)))];
   const n = cl(Math.round(P.n), lim.n);
@@ -59,7 +68,7 @@ export function clampParams(params) {
   const P = { ...DEFAULTS, ...params };
   const notes = [];
   const lim = limits(P);
-  for (const key of ["L", "A", "H", "t", "Dc", "Dn", "n", "p"]) {
+  for (const key of ["e", "L", "A", "H", "t", "Dc", "Dn", "n", "p"]) {
     const [a, b] = limits(P)[key];
     let v = key === "n" ? Math.round(P[key]) : P[key];
     if (!Number.isFinite(v)) v = DEFAULTS[key];
@@ -73,38 +82,69 @@ export function clampParams(params) {
 export function validate(P) {
   const d = derived(P), w = [];
   const R = P.Dc / 2;
-  if (P.Dc > d.wall - 4) w.push(`El agujero de ⌀${P.Dc} no entra en el tabique de ${d.wall} (A − 6): dejá al menos 2 mm por lado.`);
+  if (P.Dc > d.wall - 4) w.push(`El agujero de ⌀${P.Dc} no entra en el tabique de ${d.wall} (A − 2e): dejá al menos 2 mm por lado.`);
   if (P.Dn >= P.Dc) w.push(`La ranura del cuello (${P.Dn}) tiene que ser menor que el agujero del cuerpo (${P.Dc}).`);
   if (FIX.flareW <= P.Dn) w.push(`La ranura del cuello (${P.Dn}) es más ancha que la boca de 40 mm de la ranura.`);
   if (R < FIX.tongueW / 2 + 1) w.push(`Con ⌀${P.Dc} la lengüeta de apoyo de 33 mm no cabe en el agujero.`);
   const span = (P.n - 1) * P.p + P.Dc;
-  if (span > d.Wi - 6) w.push(`${P.n} frascos con paso ${P.p} ocupan ${span.toFixed(1)} mm y el interior mide ${d.Wi} (H − 6).`);
+  if (span > d.Wi - 6) w.push(`${P.n} frascos con paso ${P.p} ocupan ${span.toFixed(1)} mm y el interior mide ${d.Wi} (H − 2e).`);
   if (P.n > 1 && P.p < P.Dc + 2) w.push(`El paso (${P.p}) es menor que el agujero más 2 mm: los agujeros se tocan.`);
-  if (d.main < 40) w.push(`El panel entre tabiques queda en ${d.main} mm (L − 65).`);
+  if (d.main < 40) w.push(`El panel entre tabiques queda en ${d.main} mm (L − 3e − 2t).`);
   return w;
 }
 
 // ---------- Caja: mapa por zonas sobre la plantilla ----------
+// Compensaciones de espesor del 6463, que está hecho para onda B (e = 3): corrimiento de los hendidos
+// de cierre de cada panel respecto del contrafrente. Con otro espesor se escalan por e / 3.
+const PANELS = [
+  { name: "costado exterior", to: 161.1, off: 3 },
+  { name: "frente", to: 484.1, off: 11 },
+  { name: "costado", to: 578.1, off: 4.5 },
+  { name: "contrafrente", to: 898.1, off: 0 },
+  { name: "solapa de pegado", to: Infinity, off: 7 },
+];
+const E_B = 3;
+
+// Panel al que pertenece un punto. Junto a un límite entre paneles, el punto es del panel cuyo
+// hendido de cierre le queda más cerca: así cada esquina se mueve con su panel.
+function panelOf([x, y]) {
+  let i = PANELS.findIndex((q) => x < q.to);
+  const k = PANELS.findIndex((q) => Math.abs(x - q.to) < 5);
+  if (k >= 0 && k < PANELS.length - 1) {
+    const creaseY = (j) => (y > 872 ? 1020 - PANELS[j].off : 724 + PANELS[j].off);
+    i = Math.abs(y - creaseY(k)) <= Math.abs(y - creaseY(k + 1)) ? k : k + 1;
+  }
+  return i;
+}
+
 function boxMap(P) {
   const dL = P.L - 320, dA = P.A - 94, dH = P.H - 274;
+  const de = P.e - E_B, s = P.e / E_B;
   const sA = P.A / 94;
   const base = ([x, y]) => {
     let sx = 0;
     if (x < 531) sx -= dA; // costado
-    if (x < 330) sx -= dL; // frente
+    if (x < 330) sx -= dL + de; // frente: L + e
     if (x < 114) sx -= dA; // costado exterior
     if (x > 640) sx += dL / 2; // contrafrente (dos franjas: la traba queda centrada)
     if (x > 840) sx += dL / 2;
-    if (x > 943) sx += dA; // solapa de pegado
-    let sy = y > 872 ? dH : 0;
+    if (x > 943) sx += dA - de; // solapa de pegado: A − e
+    // Hendidos de cierre: el contrafrente mide H + 22e/3 y cada panel se corre off·e/3 hacia adentro.
+    const off = PANELS[panelOf([x, y])].off;
+    let sy = y > 872 ? dH + 22 * (s - 1) - off * (s - 1) : off * (s - 1);
     if (x >= 165 && x <= 484.1) {
-      if (y > 1040) sy += dA; // contratapa
-      if (y < 704) sy -= dA;
+      if (y > 1040) sy += dA - 2 * de; // contratapa: A − 2e
+      if (y < 704) sy -= dA - 2 * de;
     } else if (x > 484.1) {
-      if (y > 1067) sy += dA; // tapa y guardapolvos
-      if (y > 1169) sy += dA; // lengüeta
+      if (y > 1067) sy += dA; // tapa (A) y guardapolvos
+      if (y > 1119 && x > 570 && x < 905) sy += (10 / 3) * de; // pestaña de pared doble: 10e/3
+      if (y > 1169) sy += dA - (4 / 3) * de; // lengüeta: A − 4e/3
       if (y < 677) sy -= dA;
-      if (y < 575) sy -= dA;
+      if (y < 625 && x > 570 && x < 905) sy -= (10 / 3) * de;
+      if (y < 575) sy -= dA - (4 / 3) * de;
+      // Ranura de traba: alto 10e/3, pegada al hendido de la tapa.
+      if (x > 690 && x < 795 && y > 1005 && y < 1015) sy -= (10 / 3) * de;
+      if (x > 690 && x < 795 && y > 729 && y < 739) sy += (10 / 3) * de;
     }
     return [x + sx, y + sy];
   };

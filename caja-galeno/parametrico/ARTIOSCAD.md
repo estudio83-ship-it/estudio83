@@ -50,59 +50,60 @@ El troquel sale con la caja girada 90° a la derecha (tubo vertical) y el separa
 | `Dn` | Ancho de la ranura del cuello | 31 |
 | `p` | Paso entre frascos | 86,25 |
 | `t` | Puente de los tabiques | 28 |
+| `e` | Espesor del cartón: onda E 1,5 · B 3 · C 4 (el 6463 es onda B) | 3 |
 
-Derivadas: frasco hasta `L − 14` de largo; interior de `H − 6` de ancho por `4(A − 6) + 2t + (L − 65)` de largo.
+Derivadas: el separador plegado ocupa `L − 3e` de largo (si crece `t`, se achica el panel central `L − 3e − 2t`, la caja no cambia); frasco hasta `L − 3e − 5`; interior de `H − 2e` de ancho por `4A + L − 11e` de largo.
 
 ## Fórmulas para rearmarlo como paramétrico nativo
 
-Si querés el diseño paramétrico dentro de ArtiosCAD (que el operador cambie L, A, H desde el catálogo de estándares), dibujalo en un diseño con variables `L`, `A`, `H` y acotá cada línea con estas fórmulas. Las compensaciones de espesor son las del troquel 6463 original (cartón de ~1,5 mm); si cambia el material, revisalas.
+Si querés el diseño paramétrico dentro de ArtiosCAD (que el operador cambie L, A, H desde el catálogo de estándares), dibujalo en un diseño con variables `L`, `A`, `H` y acotá cada línea con estas fórmulas. Las compensaciones de espesor son las del 6463 (onda B, `e` = 3) escaladas por `e/3`: con onda E o C se recalculan solas.
 
 ### Tubo (de izquierda a derecha)
 
 | Panel | Ancho |
 |---|---|
 | Costado exterior | `A` |
-| Frente | `L + 3` |
+| Frente | `L + e` |
 | Costado | `A` |
 | Contrafrente | `L` |
-| Solapa de pegado | `A − 3` |
+| Solapa de pegado | `A − e` |
 
 Alto de cada panel entre hendidos de cierre, referido al hendido inferior del contrafrente (0):
 
 | Panel | Hendido inferior | Hendido superior | Alto |
 |---|---|---|---|
-| Contrafrente | 0 | `H + 22` | `H + 22` |
-| Frente | `11` | `H + 11` | `H` |
-| Costado exterior | `3` | `H + 19` | `H + 16` |
-| Costado | `4,5` | `H + 17,5` | `H + 13` |
-| Solapa de pegado | `7` | `H + 15` | `H + 8` |
+| Contrafrente | 0 | `H + 22e/3` | `H + 22e/3` |
+| Frente | `11e/3` | `H + 11e/3` | `H` |
+| Costado exterior | `e` | `H + 19e/3` | `H + 16e/3` |
+| Costado | `1,5e` | `H + 17,5e/3` | `H + 13e/3` |
+| Solapa de pegado | `7e/3` | `H + 15e/3` | `H + 8e/3` |
 
 ### Cierres (iguales arriba y abajo)
 
 | Pieza | Medida |
 |---|---|
 | Tapa (sobre el contrafrente) | `A` de profundo, ancho `L` |
-| Pestaña de pared doble | 10 de profundo |
-| Lengüeta | `A − 4` de profundo, ancho `L − 17`, diente central de 85 × 5 |
-| Ranura de traba en el contrafrente | 86,5 × 10, centrada, pegada al hendido de la tapa |
-| Contratapa (sobre el frente) | `A − 6` de profundo; tramo recto `L − 135,3`; esquinas R30 y lados inclinados hasta el hendido |
+| Pestaña de pared doble | `10e/3` de profundo |
+| Lengüeta | `A − 4e/3` de profundo, ancho `L − 17`, diente central de 85 × 5 |
+| Ranura de traba en el contrafrente | 86,5 × `10e/3`, centrada, pegada al hendido de la tapa |
+| Contratapa (sobre el frente) | `A − 2e` de profundo; tramo recto `L − 135,3`; esquinas R30 y lados inclinados hasta el hendido |
 | Guardapolvo del costado | `A + 26` de largo |
 | Guardapolvo de la solapa de pegado | `A + 28,5` de largo |
 | Oreja del costado exterior | la curva del 6463 escalada por `A / 94` (radios 134,8 · 101,04 · 16,78 × `A/94`) |
 
 ### Interior (pieza aparte, a 8 mm del tubo)
 
-Ancho `Wi = H − 6`. Filas desde el borde inferior:
+Ancho `Wi = H − 2e`. Filas desde el borde inferior:
 
 | Fila | Alto | Línea superior |
 |---|---|---|
-| Pared exterior B | `A − 6` | hendido |
+| Pared exterior B | `A − 2e` | hendido |
 | Puente B | `t` | hendido |
-| Tabique B | `A − 6` | intermitente 5×5 |
-| Panel central | `L − 65` | intermitente 5×5 |
-| Tabique A | `A − 6` | hendido |
+| Tabique B | `A − 2e` | intermitente 5×5 |
+| Panel central | `L − 3e − 2t` | intermitente 5×5 |
+| Tabique A | `A − 2e` | hendido |
 | Puente A | `t` | hendido |
-| Pared exterior A | `A − 6` | borde |
+| Pared exterior A | `A − 2e` | borde |
 
 Frascos en `Wi/2 + (i − (n−1)/2)·p`, alternados: los pares apoyan el cuerpo en el tabique A y el cuello en el B; los impares al revés.
 
@@ -113,5 +114,5 @@ Frascos en `Wi/2 + (i − (n−1)/2)·p`, alternados: los pares apoyan el cuerpo
 ## Límites
 
 - El `.ARD` de ArtiosCAD es un formato cerrado: no se puede generar un paramétrico nativo desde afuera. El DXF/CF2 trae la geometría exacta para cada juego de variables; las fórmulas de arriba son para rearmarlo como paramétrico dentro de ArtiosCAD.
-- Las compensaciones de espesor (3, 4,5, 7, 11, 22, 10) son fijas, tomadas del 6463.
+- Las compensaciones de espesor salen del 6463 (onda B) escaladas por `e/3`. Los espesores por onda (E 1,5 · B 3 · C 4) son de referencia: usá los de tu cartonera.
 - La variante +50 que hizo `estirar.mjs` corría la ranura de traba y el diente 50 mm juntos (quedaban alineados pero 28,5 mm fuera del centro del contrafrente). Este generador reparte el estiramiento a ambos lados de la traba, así que con `--L 370` queda centrada.

@@ -13,7 +13,7 @@ const outAt = process.argv.indexOf("--out");
 const plantillaText = readFileSync(join(HERE, "plantilla-caja.json"), "utf8");
 
 // Cada fórmula del plano tiene que dar lo que mide la geometría generada.
-for (const params of [{}, { L: 370 }, { L: 400, A: 110, H: 300, t: 32, n: 4, Dc: 70, Dn: 28, p: 72 }, { L: 250, A: 70, H: 200, n: 2, Dc: 56, Dn: 22, p: 64 }]) {
+for (const params of [{}, { L: 370 }, { L: 400, A: 110, H: 300, t: 32, n: 4, Dc: 70, Dn: 28, p: 72 }, { L: 250, A: 70, H: 200, n: 2, Dc: 56, Dn: 22, p: 64 }, { e: 1.5 }, { e: 4 }, { e: 4, L: 370, t: 40 }, { e: 1.5, A: 120, H: 300, t: 15 }]) {
   const m = generate(params, JSON.parse(plantillaText));
   for (const d of m.dims) {
     const entry = DIM_FORMULAS[d.src][d.name];
@@ -59,7 +59,9 @@ form{display:grid;gap:9px}
 .var input[type=number]{width:100%;font:500 14px var(--mono);color:var(--ink);background:var(--field);border:1px solid var(--rule);padding:6px 8px;text-align:right;font-variant-numeric:tabular-nums}
 .var input[type=range]{grid-column:2 / 4;width:100%;accent-color:var(--accent);margin:0}
 input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.presets.onda .tag{margin-right:4px}
+button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--flash);font-weight:600}
 button{font:500 13px var(--body);color:var(--ink);background:transparent;border:1px solid var(--rule);padding:7px 10px;cursor:pointer}
 button:hover{border-color:var(--ink)}
 button.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
@@ -116,6 +118,12 @@ li b{font-weight:500}
     <section class="sheet side" aria-labelledby="t-vars">
       <h2 id="t-vars">Variables · mm</h2>
       <form id="form" autocomplete="off"></form>
+      <div class="presets onda" role="group" aria-label="Onda del cartón">
+        <span class="tag">Onda</span>
+        <button type="button" data-onda="E">E · 1,5</button>
+        <button type="button" data-onda="B">B · 3</button>
+        <button type="button" data-onda="C">C · 4</button>
+      </div>
       <div class="presets" aria-label="Medidas guardadas">
         <button type="button" data-preset='{"L":320}'>6463 original</button>
         <button type="button" data-preset='{"L":370}'>6463 +50</button>
@@ -208,8 +216,8 @@ function planSvg(prevDims) {
     [map([530, 1090]), "guardapolvo A + 26"],
     [map([944, 1090]), "A + 28,5"],
     [map([112, 1050]), "oreja × A/94"],
-    [map([326, 1068]), "contratapa A − 6"],
-    [map([741.5, 1000]), "traba 86,5 × 10"],
+    [map([326, 1068]), "contratapa A − 2e"],
+    [map([741.5, 1000]), "traba 86,5 × 10e/3"],
     [map([741.5, 1228]), "diente 85 × 5"],
     [ins.T([ins.x0 + ins.centres[0], ins.y0 + (r.p2 + r.c3) / 2]), "⌀Dc"],
   ];
@@ -244,14 +252,16 @@ function render(source) {
     if (source === "commit") num.value = Math.round(model.P[p.key] * 100) / 100;
   }
   document.getElementById("plan").innerHTML = planSvg(prevDims);
-  document.getElementById("caption").textContent = "L " + fmtMm(state.L) + " · A " + fmtMm(state.A) + " · H " + fmtMm(state.H) + " · t " + fmtMm(state.t) + " · plancha " + model.info.plancha;
-  const facts = [["Caja", model.info.caja + " mm"], ["Plancha", model.info.plancha + " mm"], ["Frasco", model.info.frasco], ["Interior", model.info.interior]];
+  document.getElementById("caption").textContent = "L " + fmtMm(model.P.L) + " · A " + fmtMm(model.P.A) + " · H " + fmtMm(model.P.H) + " · t " + fmtMm(model.P.t) + " · e " + fmtMm(model.P.e) + " · plancha " + model.info.plancha;
+  document.querySelectorAll("[data-onda]").forEach((b) => b.setAttribute("aria-pressed", String(Math.abs(ONDAS[b.dataset.onda] - model.P.e) < 1e-9)));
+  const onda = Object.keys(ONDAS).find((k) => Math.abs(ONDAS[k] - model.P.e) < 1e-9);
+  const facts = [["Cartón", (onda ? "onda " + onda + " · " : "") + "e = " + fmtMm(model.P.e) + " mm"], ["Caja", model.info.caja + " mm"], ["Plancha", model.info.plancha + " mm"], ["Frasco", model.info.frasco], ["Interior", model.info.interior]];
   document.getElementById("facts").innerHTML = facts.map(([k, v]) => "<dt>" + k + "</dt><dd>" + v + "</dd>").join("");
   document.getElementById("warn").innerHTML = model.notes.map((w) => '<li class="note">' + w + "</li>").join("") + model.warnings.map((w) => "<li>" + w + "</li>").join("");
   clearTimeout(hotTimer);
   hotTimer = setTimeout(() => document.querySelectorAll(".hot").forEach((e) => e.classList.remove("hot")), 1400);
 }
-const name = () => "GALENO-" + fmtMm(state.L) + "x" + fmtMm(state.A) + "x" + fmtMm(state.H);
+const name = () => { const o = Object.keys(ONDAS).find((k) => Math.abs(ONDAS[k] - model.P.e) < 1e-9); return "GALENO-" + fmtMm(model.P.L) + "x" + fmtMm(model.P.A) + "x" + fmtMm(model.P.H) + "-" + (o ? "onda" + o : "e" + fmtMm(model.P.e)); };
 const say = (t) => (document.getElementById("status").textContent = t);
 ${ARTIFACT ? `// En claude.ai el visor guarda archivos sólo con el permiso de descargas. Se intenta el .dxf o .cf2
 // directo; si el visor no acepta esa extensión, se guarda con .txt al final para renombrar.
@@ -292,6 +302,11 @@ document.getElementById("cp-dxf").addEventListener("click", () => copy(toDxf(mod
 document.getElementById("cp-cf2").addEventListener("click", () => copy(toCf2(model, { name: name() }), "cf2"));
 form.addEventListener("input", (e) => render(e.target));
 form.addEventListener("change", () => render("commit"));
+document.querySelectorAll("[data-onda]").forEach((b) => b.addEventListener("click", () => {
+  const e = ONDAS[b.dataset.onda];
+  document.getElementById("v-e").value = e; document.getElementById("r-e").value = e;
+  render("commit"); say("Onda " + b.dataset.onda + ": espesor " + String(e).replace(".", ",") + " mm.");
+}));
 document.querySelectorAll("[data-preset]").forEach((b) => b.addEventListener("click", () => {
   const p = { ...DEFAULTS, ...JSON.parse(b.dataset.preset) };
   for (const k in p) { document.getElementById("v-" + k).value = p[k]; document.getElementById("r-" + k).value = p[k]; }

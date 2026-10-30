@@ -32,7 +32,9 @@ form{display:grid;gap:9px}
 .var input[type=number]{width:100%;font:500 14px var(--mono);color:var(--ink);background:var(--field);border:1px solid var(--rule);padding:6px 8px;text-align:right;font-variant-numeric:tabular-nums}
 .var input[type=range]{grid-column:2 / 4;width:100%;accent-color:var(--accent);margin:0}
 input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.presets.onda .tag{margin-right:4px}
+button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--flash);font-weight:600}
 button{font:500 13px var(--body);color:var(--ink);background:transparent;border:1px solid var(--rule);padding:7px 10px;cursor:pointer}
 button:hover{border-color:var(--ink)}
 button.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
@@ -89,6 +91,12 @@ li b{font-weight:500}
     <section class="sheet side" aria-labelledby="t-vars">
       <h2 id="t-vars">Variables · mm</h2>
       <form id="form" autocomplete="off"></form>
+      <div class="presets onda" role="group" aria-label="Onda del cartón">
+        <span class="tag">Onda</span>
+        <button type="button" data-onda="E">E · 1,5</button>
+        <button type="button" data-onda="B">B · 3</button>
+        <button type="button" data-onda="C">C · 4</button>
+      </div>
       <div class="presets" aria-label="Medidas guardadas">
         <button type="button" data-preset='{"L":320}'>6463 original</button>
         <button type="button" data-preset='{"L":370}'>6463 +50</button>
@@ -135,7 +143,11 @@ const DEFAULTS = {
   Dn: 31, // ancho de la ranura del cuello
   p: 86.25, // paso entre frascos
   t: 28, // puente de los tabiques
+  e: 3, // espesor del cartón: onda B (el 6463 está compensado para B)
 };
+
+// Espesores de referencia por onda (mm). Cada fabricante tiene los suyos: e se puede editar.
+const ONDAS = { E: 1.5, B: 3, C: 4 };
 
 const PARAMS = [
   { key: "L", label: "Largo interior (contrafrente)", min: 210, max: 700, step: 1 },
@@ -146,27 +158,32 @@ const PARAMS = [
   { key: "Dn", label: "Ancho ranura del cuello", min: 8, max: 38, step: 0.5 },
   { key: "p", label: "Paso entre frascos", min: 20, max: 500, step: 0.25 },
   { key: "t", label: "Puente de los tabiques", min: 10, max: 80, step: 1 },
+  { key: "e", label: "Espesor del cartón (onda)", min: 1, max: 6, step: 0.1 },
 ];
 
 // Medidas fijas del troquel original que no dependen de los parámetros.
 const FIX = { tongueW: 33, tongueFromCentre: 13, notchW: 25, flareW: 40, flareLen: 23.8, edgeNotchW: 35, edgeNotchD: 4, gap: 8 };
 
+// Medidas del separador. El plegado ocupa siempre L − 3e de largo: si crece el puente t,
+// se achica el panel central, así la caja no cambia.
 function derived(P) {
-  const wall = P.A - 6, main = P.L - 65, Wi = P.H - 6;
-  return { wall, main, Wi, bottle: P.L - 14, insertLen: 4 * wall + 2 * P.t + main, folded: main + 2 * P.t };
+  const e = P.e, wall = P.A - 2 * e, folded = P.L - 3 * e, main = folded - 2 * P.t, Wi = P.H - 2 * e;
+  return { wall, main, Wi, folded, bottle: folded - 5, insertLen: 4 * wall + 2 * P.t + main };
 }
 
 // Rango válido de cada variable dado el resto, para que el troquel no tenga líneas cruzadas ni sueltas.
 // El orden importa: Dc depende de A y H; Dn de Dc; n y p de Dc y H.
 function limits(P) {
   const st = Object.fromEntries(PARAMS.map((q) => [q.key, [q.min, q.max]]));
-  const lim = { L: st.L, A: st.A, H: st.H, t: st.t };
+  const lim = { e: st.e, L: st.L, A: st.A, H: st.H };
   const cl = (v, [a, b]) => Math.min(b, Math.max(a, v));
-  const A = cl(P.A, lim.A), H = cl(P.H, lim.H);
-  lim.Dc = [st.Dc[0], Math.min(st.Dc[1], A - 10, H - 12)];
+  const e = cl(P.e, lim.e), A = cl(P.A, lim.A), H = cl(P.H, lim.H), L = cl(P.L, lim.L);
+  // El panel central del separador (L − 3e − 2t) no baja de 40.
+  lim.t = [st.t[0], Math.max(st.t[0], Math.min(st.t[1], (L - 3 * e - 40) / 2))];
+  lim.Dc = [st.Dc[0], Math.min(st.Dc[1], A - 2 * e - 4, H - 2 * e - 6)];
   const Dc = cl(P.Dc, lim.Dc);
   lim.Dn = [st.Dn[0], Math.min(st.Dn[1], Dc - 6)];
-  const room = H - 12 - 2 * Math.max(Dc / 2, FIX.flareW / 2); // de centro a centro de los frascos extremos
+  const room = H - 2 * e - 6 - 2 * Math.max(Dc / 2, FIX.flareW / 2); // de centro a centro de los frascos extremos
   const pMin = Math.max(Dc + 2, Dc / 2 + FIX.flareW / 2 + 3);
   lim.n = [1, Math.max(1, Math.min(st.n[1], 1 + Math.floor(room / pMin + 1e-9)))];
   const n = cl(Math.round(P.n), lim.n);
@@ -178,7 +195,7 @@ function clampParams(params) {
   const P = { ...DEFAULTS, ...params };
   const notes = [];
   const lim = limits(P);
-  for (const key of ["L", "A", "H", "t", "Dc", "Dn", "n", "p"]) {
+  for (const key of ["e", "L", "A", "H", "t", "Dc", "Dn", "n", "p"]) {
     const [a, b] = limits(P)[key];
     let v = key === "n" ? Math.round(P[key]) : P[key];
     if (!Number.isFinite(v)) v = DEFAULTS[key];
@@ -192,38 +209,69 @@ function clampParams(params) {
 function validate(P) {
   const d = derived(P), w = [];
   const R = P.Dc / 2;
-  if (P.Dc > d.wall - 4) w.push(`El agujero de ⌀${P.Dc} no entra en el tabique de ${d.wall} (A − 6): dejá al menos 2 mm por lado.`);
+  if (P.Dc > d.wall - 4) w.push(`El agujero de ⌀${P.Dc} no entra en el tabique de ${d.wall} (A − 2e): dejá al menos 2 mm por lado.`);
   if (P.Dn >= P.Dc) w.push(`La ranura del cuello (${P.Dn}) tiene que ser menor que el agujero del cuerpo (${P.Dc}).`);
   if (FIX.flareW <= P.Dn) w.push(`La ranura del cuello (${P.Dn}) es más ancha que la boca de 40 mm de la ranura.`);
   if (R < FIX.tongueW / 2 + 1) w.push(`Con ⌀${P.Dc} la lengüeta de apoyo de 33 mm no cabe en el agujero.`);
   const span = (P.n - 1) * P.p + P.Dc;
-  if (span > d.Wi - 6) w.push(`${P.n} frascos con paso ${P.p} ocupan ${span.toFixed(1)} mm y el interior mide ${d.Wi} (H − 6).`);
+  if (span > d.Wi - 6) w.push(`${P.n} frascos con paso ${P.p} ocupan ${span.toFixed(1)} mm y el interior mide ${d.Wi} (H − 2e).`);
   if (P.n > 1 && P.p < P.Dc + 2) w.push(`El paso (${P.p}) es menor que el agujero más 2 mm: los agujeros se tocan.`);
-  if (d.main < 40) w.push(`El panel entre tabiques queda en ${d.main} mm (L − 65).`);
+  if (d.main < 40) w.push(`El panel entre tabiques queda en ${d.main} mm (L − 3e − 2t).`);
   return w;
 }
 
 // ---------- Caja: mapa por zonas sobre la plantilla ----------
+// Compensaciones de espesor del 6463, que está hecho para onda B (e = 3): corrimiento de los hendidos
+// de cierre de cada panel respecto del contrafrente. Con otro espesor se escalan por e / 3.
+const PANELS = [
+  { name: "costado exterior", to: 161.1, off: 3 },
+  { name: "frente", to: 484.1, off: 11 },
+  { name: "costado", to: 578.1, off: 4.5 },
+  { name: "contrafrente", to: 898.1, off: 0 },
+  { name: "solapa de pegado", to: Infinity, off: 7 },
+];
+const E_B = 3;
+
+// Panel al que pertenece un punto. Junto a un límite entre paneles, el punto es del panel cuyo
+// hendido de cierre le queda más cerca: así cada esquina se mueve con su panel.
+function panelOf([x, y]) {
+  let i = PANELS.findIndex((q) => x < q.to);
+  const k = PANELS.findIndex((q) => Math.abs(x - q.to) < 5);
+  if (k >= 0 && k < PANELS.length - 1) {
+    const creaseY = (j) => (y > 872 ? 1020 - PANELS[j].off : 724 + PANELS[j].off);
+    i = Math.abs(y - creaseY(k)) <= Math.abs(y - creaseY(k + 1)) ? k : k + 1;
+  }
+  return i;
+}
+
 function boxMap(P) {
   const dL = P.L - 320, dA = P.A - 94, dH = P.H - 274;
+  const de = P.e - E_B, s = P.e / E_B;
   const sA = P.A / 94;
   const base = ([x, y]) => {
     let sx = 0;
     if (x < 531) sx -= dA; // costado
-    if (x < 330) sx -= dL; // frente
+    if (x < 330) sx -= dL + de; // frente: L + e
     if (x < 114) sx -= dA; // costado exterior
     if (x > 640) sx += dL / 2; // contrafrente (dos franjas: la traba queda centrada)
     if (x > 840) sx += dL / 2;
-    if (x > 943) sx += dA; // solapa de pegado
-    let sy = y > 872 ? dH : 0;
+    if (x > 943) sx += dA - de; // solapa de pegado: A − e
+    // Hendidos de cierre: el contrafrente mide H + 22e/3 y cada panel se corre off·e/3 hacia adentro.
+    const off = PANELS[panelOf([x, y])].off;
+    let sy = y > 872 ? dH + 22 * (s - 1) - off * (s - 1) : off * (s - 1);
     if (x >= 165 && x <= 484.1) {
-      if (y > 1040) sy += dA; // contratapa
-      if (y < 704) sy -= dA;
+      if (y > 1040) sy += dA - 2 * de; // contratapa: A − 2e
+      if (y < 704) sy -= dA - 2 * de;
     } else if (x > 484.1) {
-      if (y > 1067) sy += dA; // tapa y guardapolvos
-      if (y > 1169) sy += dA; // lengüeta
+      if (y > 1067) sy += dA; // tapa (A) y guardapolvos
+      if (y > 1119 && x > 570 && x < 905) sy += (10 / 3) * de; // pestaña de pared doble: 10e/3
+      if (y > 1169) sy += dA - (4 / 3) * de; // lengüeta: A − 4e/3
       if (y < 677) sy -= dA;
-      if (y < 575) sy -= dA;
+      if (y < 625 && x > 570 && x < 905) sy -= (10 / 3) * de;
+      if (y < 575) sy -= dA - (4 / 3) * de;
+      // Ranura de traba: alto 10e/3, pegada al hendido de la tapa.
+      if (x > 690 && x < 795 && y > 1005 && y < 1015) sy -= (10 / 3) * de;
+      if (x > 690 && x < 795 && y > 729 && y < 739) sy += (10 / 3) * de;
     }
     return [x + sx, y + sy];
   };
@@ -482,23 +530,23 @@ const fmt = (v) => (Math.abs(v - Math.round(v)) < 0.05 ? String(Math.round(v)) :
 const DIM_FORMULAS = {
   h: {
     costado: ["A", (P) => P.A],
-    frente: ["L + 3", (P) => P.L + 3],
+    frente: ["L + e", (P) => P.L + P.e],
     contrafrente: ["L", (P) => P.L],
-    pegado: ["A − 3", (P) => P.A - 3],
-    interior: ["H − 6", (P) => P.H - 6],
+    pegado: ["A − e", (P) => P.A - P.e],
+    interior: ["H − 2e", (P) => P.H - 2 * P.e],
     caja: ["3A + 2L", (P) => 3 * P.A + 2 * P.L],
   },
   v: {
-    lengüeta: ["A − 4", (P) => P.A - 4],
-    pestaña: ["10", () => 10],
+    lengüeta: ["A − 4e/3", (P) => P.A - (4 / 3) * P.e],
+    pestaña: ["10e/3", (P) => (10 / 3) * P.e],
     tapa: ["A", (P) => P.A],
-    contrafrente: ["H + 22", (P) => P.H + 22],
+    contrafrente: ["H + 22e/3", (P) => P.H + (22 / 3) * P.e],
     frente: ["H", (P) => P.H],
-    pared: ["A − 6", (P) => P.A - 6],
+    pared: ["A − 2e", (P) => P.A - 2 * P.e],
     puente: ["t", (P) => P.t],
-    tabique: ["A − 6", (P) => P.A - 6],
-    panel: ["L − 65", (P) => P.L - 65],
-    interior: ["4A + 2t + L − 89", (P) => 4 * P.A + 2 * P.t + P.L - 89],
+    tabique: ["A − 2e", (P) => P.A - 2 * P.e],
+    panel: ["L − 3e − 2t", (P) => P.L - 3 * P.e - 2 * P.t],
+    interior: ["4A + L − 11e", (P) => 4 * P.A + P.L - 11 * P.e],
   },
 };
 
@@ -509,41 +557,41 @@ const fmtMm = (v) => (Math.abs(v - Math.round(v)) < 0.005 ? String(Math.round(v)
 const TABLES = {
   tubo: [
     ["Costado exterior · ancho", "A", (P) => P.A],
-    ["Frente · ancho", "L + 3", (P) => P.L + 3],
+    ["Frente · ancho", "L + e", (P) => P.L + P.e],
     ["Costado · ancho", "A", (P) => P.A],
     ["Contrafrente · ancho", "L", (P) => P.L],
-    ["Solapa de pegado · ancho", "A − 3", (P) => P.A - 3],
-    ["Contrafrente · alto", "H + 22", (P) => P.H + 22],
+    ["Solapa de pegado · ancho", "A − e", (P) => P.A - P.e],
+    ["Contrafrente · alto", "H + 22e/3", (P) => P.H + (22 / 3) * P.e],
     ["Frente · alto", "H", (P) => P.H],
-    ["Costado exterior · alto", "H + 16", (P) => P.H + 16],
-    ["Costado · alto", "H + 13", (P) => P.H + 13],
-    ["Solapa de pegado · alto", "H + 8", (P) => P.H + 8],
+    ["Costado exterior · alto", "H + 16e/3", (P) => P.H + (16 / 3) * P.e],
+    ["Costado · alto", "H + 13e/3", (P) => P.H + (13 / 3) * P.e],
+    ["Solapa de pegado · alto", "H + 8e/3", (P) => P.H + (8 / 3) * P.e],
     ["Tubo abierto · ancho", "3A + 2L", (P) => 3 * P.A + 2 * P.L],
   ],
   cierres: [
     ["Tapa", "A × L", (P) => x(P.A, P.L)],
-    ["Pestaña de pared doble", "10", () => 10],
-    ["Lengüeta", "(A − 4) × (L − 17)", (P) => x(P.A - 4, P.L - 17)],
+    ["Pestaña de pared doble", "10e/3", (P) => (10 / 3) * P.e],
+    ["Lengüeta", "(A − 4e/3) × (L − 17)", (P) => x(P.A - (4 / 3) * P.e, P.L - 17)],
     ["Diente de la lengüeta", "85 × 5", () => x(85, 5)],
-    ["Ranura de traba", "86,5 × 10", () => x(86.5, 10)],
-    ["Contratapa · profundidad", "A − 6", (P) => P.A - 6],
+    ["Ranura de traba", "86,5 × 10e/3", (P) => x(86.5, (10 / 3) * P.e)],
+    ["Contratapa · profundidad", "A − 2e", (P) => P.A - 2 * P.e],
     ["Contratapa · tramo recto", "L − 135,3", (P) => P.L - 135.3],
     ["Guardapolvo del costado", "A + 26", (P) => P.A + 26],
     ["Guardapolvo de la solapa", "A + 28,5", (P) => P.A + 28.5],
     ["Oreja · escala", "A / 94", (P) => P.A / 94],
   ],
   interior: [
-    ["Ancho", "H − 6", (P) => P.H - 6],
-    ["Pared exterior", "A − 6", (P) => P.A - 6],
+    ["Ancho", "H − 2e", (P) => P.H - 2 * P.e],
+    ["Pared exterior", "A − 2e", (P) => P.A - 2 * P.e],
     ["Puente", "t", (P) => P.t],
-    ["Tabique", "A − 6", (P) => P.A - 6],
-    ["Panel central", "L − 65", (P) => P.L - 65],
-    ["Largo total", "4A + 2t + L − 89", (P) => 4 * P.A + 2 * P.t + P.L - 89],
-    ["Plegado", "(L − 65 + 2t) × (H − 6) × (A − 6)", (P) => `${fmtMm(P.L - 65 + 2 * P.t)} × ${fmtMm(P.H - 6)} × ${fmtMm(P.A - 6)}`],
-    ["Frasco · largo máximo", "L − 14", (P) => P.L - 14],
+    ["Tabique", "A − 2e", (P) => P.A - 2 * P.e],
+    ["Panel central", "L − 3e − 2t", (P) => P.L - 3 * P.e - 2 * P.t],
+    ["Largo total", "4A + L − 11e", (P) => 4 * P.A + P.L - 11 * P.e],
+    ["Plegado", "(L − 3e) × (H − 2e) × (A − 2e)", (P) => `${fmtMm(P.L - 3 * P.e)} × ${fmtMm(P.H - 2 * P.e)} × ${fmtMm(P.A - 2 * P.e)}`],
+    ["Frasco · largo máximo", "L − 3e − 5", (P) => P.L - 3 * P.e - 5],
     ["Agujero del cuerpo", "⌀ Dc", (P) => P.Dc],
     ["Ranura del cuello", "Dn", (P) => P.Dn],
-    ["Centros de los frascos", "Wi/2 + (i − (n − 1)/2)·p", (P) => Array.from({ length: P.n }, (_, i) => fmtMm((P.H - 6) / 2 + (i - (P.n - 1) / 2) * P.p)).join(" · ")],
+    ["Centros de los frascos", "Wi/2 + (i − (n − 1)/2)·p", (P) => Array.from({ length: P.n }, (_, i) => fmtMm((P.H - 2 * P.e) / 2 + (i - (P.n - 1) / 2) * P.p)).join(" · ")],
   ],
 };
 
@@ -609,8 +657,8 @@ function planSvg(prevDims) {
     [map([530, 1090]), "guardapolvo A + 26"],
     [map([944, 1090]), "A + 28,5"],
     [map([112, 1050]), "oreja × A/94"],
-    [map([326, 1068]), "contratapa A − 6"],
-    [map([741.5, 1000]), "traba 86,5 × 10"],
+    [map([326, 1068]), "contratapa A − 2e"],
+    [map([741.5, 1000]), "traba 86,5 × 10e/3"],
     [map([741.5, 1228]), "diente 85 × 5"],
     [ins.T([ins.x0 + ins.centres[0], ins.y0 + (r.p2 + r.c3) / 2]), "⌀Dc"],
   ];
@@ -645,14 +693,16 @@ function render(source) {
     if (source === "commit") num.value = Math.round(model.P[p.key] * 100) / 100;
   }
   document.getElementById("plan").innerHTML = planSvg(prevDims);
-  document.getElementById("caption").textContent = "L " + fmtMm(state.L) + " · A " + fmtMm(state.A) + " · H " + fmtMm(state.H) + " · t " + fmtMm(state.t) + " · plancha " + model.info.plancha;
-  const facts = [["Caja", model.info.caja + " mm"], ["Plancha", model.info.plancha + " mm"], ["Frasco", model.info.frasco], ["Interior", model.info.interior]];
+  document.getElementById("caption").textContent = "L " + fmtMm(model.P.L) + " · A " + fmtMm(model.P.A) + " · H " + fmtMm(model.P.H) + " · t " + fmtMm(model.P.t) + " · e " + fmtMm(model.P.e) + " · plancha " + model.info.plancha;
+  document.querySelectorAll("[data-onda]").forEach((b) => b.setAttribute("aria-pressed", String(Math.abs(ONDAS[b.dataset.onda] - model.P.e) < 1e-9)));
+  const onda = Object.keys(ONDAS).find((k) => Math.abs(ONDAS[k] - model.P.e) < 1e-9);
+  const facts = [["Cartón", (onda ? "onda " + onda + " · " : "") + "e = " + fmtMm(model.P.e) + " mm"], ["Caja", model.info.caja + " mm"], ["Plancha", model.info.plancha + " mm"], ["Frasco", model.info.frasco], ["Interior", model.info.interior]];
   document.getElementById("facts").innerHTML = facts.map(([k, v]) => "<dt>" + k + "</dt><dd>" + v + "</dd>").join("");
   document.getElementById("warn").innerHTML = model.notes.map((w) => '<li class="note">' + w + "</li>").join("") + model.warnings.map((w) => "<li>" + w + "</li>").join("");
   clearTimeout(hotTimer);
   hotTimer = setTimeout(() => document.querySelectorAll(".hot").forEach((e) => e.classList.remove("hot")), 1400);
 }
-const name = () => "GALENO-" + fmtMm(state.L) + "x" + fmtMm(state.A) + "x" + fmtMm(state.H);
+const name = () => { const o = Object.keys(ONDAS).find((k) => Math.abs(ONDAS[k] - model.P.e) < 1e-9); return "GALENO-" + fmtMm(model.P.L) + "x" + fmtMm(model.P.A) + "x" + fmtMm(model.P.H) + "-" + (o ? "onda" + o : "e" + fmtMm(model.P.e)); };
 const say = (t) => (document.getElementById("status").textContent = t);
 function download(text, ext) {
   try {
@@ -673,6 +723,11 @@ document.getElementById("cp-dxf").addEventListener("click", () => copy(toDxf(mod
 document.getElementById("cp-cf2").addEventListener("click", () => copy(toCf2(model, { name: name() }), "cf2"));
 form.addEventListener("input", (e) => render(e.target));
 form.addEventListener("change", () => render("commit"));
+document.querySelectorAll("[data-onda]").forEach((b) => b.addEventListener("click", () => {
+  const e = ONDAS[b.dataset.onda];
+  document.getElementById("v-e").value = e; document.getElementById("r-e").value = e;
+  render("commit"); say("Onda " + b.dataset.onda + ": espesor " + String(e).replace(".", ",") + " mm.");
+}));
 document.querySelectorAll("[data-preset]").forEach((b) => b.addEventListener("click", () => {
   const p = { ...DEFAULTS, ...JSON.parse(b.dataset.preset) };
   for (const k in p) { document.getElementById("v-" + k).value = p[k]; document.getElementById("r-" + k).value = p[k]; }
