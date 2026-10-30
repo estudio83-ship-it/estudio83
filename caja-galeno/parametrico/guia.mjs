@@ -108,10 +108,10 @@ svg.plan{display:block;width:100%;min-width:680px;height:auto}
 .plan.simple .dim text{font-size:22px}
 .plan.simple .call{font-size:18px;fill:var(--accent);font-weight:600}
 .head h2{margin-right:auto}
-.var,.var b,.var label,.var input[type=number],.var input[type=range]{transition:background-color 2s ease,color 2s ease,border-color 2s ease,box-shadow 2s ease,accent-color 2s ease}
+.var,.var b,.var label,.var input[type=number],.var input[type=range]{transition:background-color 1.5s ease,color 1.5s ease,border-color 1.5s ease,box-shadow 1.5s ease,accent-color 1.5s ease}
 .var.active,.var.active b,.var.active label,.var.active input{transition:none}
 .var{border-radius:16px;margin:0 -8px;padding:4px 8px}
-#plan .dim path,#plan .dim .ar,#plan .dim text,#plan .dim tspan,#plan .call{transition:stroke 2s ease,stroke-width 2s ease,fill 2s ease,font-size 2s ease}
+#plan .dim path,#plan .dim .ar,#plan .dim text,#plan .dim tspan,#plan .call{transition:stroke 1.5s ease,stroke-width 1.5s ease,fill 1.5s ease,font-size 1.5s ease}
 #plan .active path,#plan .active .ar,#plan .active text,#plan .active tspan,#plan .call.active{transition:none}
 @media (prefers-reduced-motion:reduce){.var,.var *,#plan *{transition:none!important}}
 .var.active{background:var(--orange-soft)}
@@ -385,7 +385,7 @@ form.addEventListener("input", (e) => render(e.target));
 // Variable activa: mientras se toca o tiene el foco, ella y sus cotas se marcan en naranja.
 const setActive = (key) => { if (activeVar !== key) { activeVar = key; applyActive(); } };
 // Al soltar (dejar de arrastrar, terminar de escribir o salir del campo) vuelve a la normalidad con
-// un fundido de 2 s; al tocar de nuevo, el naranja aparece al instante.
+// un fundido de 1,5 s; al tocar de nuevo, el naranja aparece al instante.
 let releaseTimer = 0;
 const hold = (key) => { clearTimeout(releaseTimer); setActive(key); };
 const release = (delay = 0) => { clearTimeout(releaseTimer); releaseTimer = setTimeout(() => setActive(null), delay); };
