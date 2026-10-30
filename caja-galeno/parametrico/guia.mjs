@@ -34,7 +34,7 @@ const page = `<title>Caja tipo Galeno</title>
    pasada a azul por pedido. Un solo tema claro. Descargas en azul vivo y Reset en naranja. */
 :root{
   --paper:#fbfbfd;--sheet:#ffffff;--mint:#eef3fa;--soft-bg:#f3f6fa;--tint:#e5edf8;
-  --ink:#0b1a2e;--soft:#3a4656;--rule:#cfdbea;--hairline:#d5dfeb;--crease:#5e4c3b;--kraft:#c1ac97;
+  --ink:#0b1a2e;--soft:#3a4656;--rule:#cfdbea;--hairline:#d5dfeb;--crease:#6f7f92;--kraft:#ffffff;
   --accent:#1d5fbf;--accent-deep:#174f9f;--eyebrow:#174f9f;--on-accent:#ffffff;--grid:rgba(29,95,191,0.09);
   --blue:#1f78e0;--blue-deep:#1662bd;--on-blue:#ffffff;
   --warn:#a3471f;--note:#3a4656;--orange:#e8630a;--orange-deep:#c25105;--on-orange:#ffffff;--orange-soft:#fdeee3;--orange-ring:rgba(232,99,10,0.18);--field:#ffffff;--flash:#e5edf8;
@@ -178,7 +178,7 @@ li b{font-weight:500}
     <section class="sheet plan-sheet" aria-labelledby="t-plano">
       <div class="head"><h2 id="t-plano">Plano</h2><button type="button" id="formulas" aria-pressed="false">Ver fórmulas</button></div>
       <div class="legend" aria-hidden="true">
-        <span><svg viewBox="0 0 28 8"><rect width="28" height="8" rx="2" fill="var(--kraft)"/></svg>Cartón</span>
+        <span><svg viewBox="0 0 28 8"><rect x=".5" y=".5" width="27" height="7" rx="2" fill="var(--kraft)" stroke="var(--ink)" stroke-width="1"/></svg>Cartón</span>
         <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--ink)" stroke-width="1.4"/></svg>Corte</span>
         <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--crease)" stroke-width="1.2" stroke-dasharray="6 4"/></svg>Hendido</span>
         <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--crease)" stroke-width="1.2" stroke-dasharray="2 3"/></svg>Intermitente 5×5</span>
@@ -230,7 +230,7 @@ function arrow(x0, y0, x1, y1) {
 // Letras de variables que aparecen en una fórmula o llamada ("A − 4e/3" → A e).
 const lettersOf = (txt) => (txt.match(/Dc|Dn|(?<![A-Za-zÀ-ÿ])[LAHte](?![A-Za-zÀ-ÿ])/g) || []).join(" ");
 // Qué letras del plano mueve cada variable del panel.
-const TOUCHES = { Lb: ["L"], Dc: ["Dc"], Dn: ["Dn"], n: ["Dc", "Dn"], p: ["Dc", "Dn"], A: ["A"], H: ["H"], t: ["t"], e: ["e"] };
+const TOUCHES = { Lb: ["L"], Dc: ["Dc"], Dn: ["Dn"], n: ["Dc", "Dn", "H"], p: ["Dc", "Dn", "H"], A: ["A"], H: ["H"], t: ["t"], e: ["e"] };
 let activeVar = null;
 function applyActive() {
   document.querySelectorAll(".var").forEach((row) => row.classList.toggle("active", row.dataset.key === activeVar));
@@ -324,6 +324,12 @@ function render(source) {
     if (source === rng) num.value = rng.value; else if (source === num) rng.value = num.value;
     const v = Number(num.value);
     if (Number.isFinite(v) && v > 0) state[p.key] = p.key === "n" ? Math.max(1, Math.round(v)) : v;
+  }
+  // Al cambiar la cantidad o el paso de las botellas, el ancho (H) se ajusta solo.
+  if (source && /^[vr]-[np]$/.test(source.id || "")) {
+    state.H = Math.max(120, Math.round(widthFor(Math.min(6, state.n), state.p, state.e) * 100) / 100);
+    document.getElementById("v-H").value = state.H;
+    document.getElementById("r-H").value = state.H;
   }
   const prevDims = model ? model.dims.map((d) => d.value) : null;
   model = generate(state, PLANTILLA);

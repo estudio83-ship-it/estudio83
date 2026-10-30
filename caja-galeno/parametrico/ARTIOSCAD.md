@@ -45,14 +45,16 @@ El troquel sale con la caja girada 90° a la derecha (tubo vertical) y el separa
 | Botella | `Lb` | Largo de la botella (va acostada a lo largo de la caja) | 306 |
 | Botella | `Dc` | ⌀ del cuerpo: agujero del tabique (hasta 100, y hasta A − 2e − 4 y H − 2e − 6) | 80 |
 | Botella | `Dn` | ⌀ del cuello: ranura del tabique | 31 |
-| Botella | `n` | Cantidad de botellas | 3 |
+| Botella | `n` | Cantidad de botellas (hasta 6) | 3 |
 | Botella | `p` | Paso entre ejes de botellas | 86,25 |
 | Caja | `A` | Profundidad: ancho de los costados | 94 |
-| Caja | `H` | Alto del frente entre hendidos (largo del tubo) | 274 |
+| Caja | `H` | Alto del frente entre hendidos (largo del tubo); sale de las botellas, se puede corregir | 274 |
 | Caja | `t` | Puente de los tabiques | 28 |
 | Cartón | `e` | Espesor: onda E 2 · B 3 · C 4 (el 6463 es onda B) | 3 |
 
 El largo de la caja sale de la botella: `L = Lb + 3e + 5` (entra en el separador plegado, `L − 3e`, con 5 mm de juego). Con la botella del 6463 y onda B, L = 320.
+
+El ancho también sale de las botellas: `H = n·p + 2e + 9,25` (9,25 es el juego lateral del 6463). Al cambiar `n` o `p` en la página, H se recalcula; después se puede ajustar a mano. En `generar.mjs`, si pasás `--n` o `--p` sin `--H`, H se calcula igual.
 
 Derivadas: el separador plegado ocupa `L − 3e` de largo (si crece `t`, se achica el panel central `L − 3e − 2t`, la caja no cambia); frasco hasta `L − 3e − 5`; interior de `H − 2e` de ancho por `4A + L − 11e` de largo.
 

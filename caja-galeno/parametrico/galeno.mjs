@@ -22,6 +22,9 @@ export const DEFAULTS = {
   e: 3, // espesor del cartón: onda B (el 6463 está compensado para B)
 };
 export const lengthFor = (Lb, e) => Lb + 3 * e + BOTTLE_GAP;
+// El ancho sale de las botellas: n pasos más las paredes y el juego lateral del 6463 (274 = 3 × 86,25 + 2 × 3 + 9,25).
+export const SIDE_GAP = 9.25;
+export const widthFor = (n, p, e) => n * p + 2 * e + SIDE_GAP;
 
 // Espesores de referencia por onda (mm). Cada fabricante tiene los suyos: e se puede editar.
 export const ONDAS = { E: 2, B: 3, C: 4 };
@@ -30,7 +33,7 @@ export const PARAMS = [
   { key: "Lb", group: "Botella", label: "Largo de la botella", min: 180, max: 690, step: 1 },
   { key: "Dc", group: "Botella", label: "⌀ cuerpo (agujero)", min: 36, max: 100, step: 0.5 },
   { key: "Dn", group: "Botella", label: "⌀ cuello (ranura)", min: 8, max: 38, step: 0.5 },
-  { key: "n", group: "Botella", label: "Cantidad de botellas", min: 1, max: 8, step: 1 },
+  { key: "n", group: "Botella", label: "Cantidad de botellas", min: 1, max: 6, step: 1 },
   { key: "p", group: "Botella", label: "Paso entre botellas", min: 20, max: 500, step: 0.25 },
   { key: "A", group: "Caja", label: "Profundidad (costados)", min: 60, max: 200, step: 1 },
   { key: "H", group: "Caja", label: "Alto del frente (tubo)", min: 120, max: 600, step: 1 },
@@ -77,6 +80,8 @@ export function clampParams(params) {
   const P = { ...DEFAULTS, ...params };
   // Compatibilidad: si viene L (largo de caja) y no Lb, se deduce la botella.
   if (params && params.L !== undefined && params.Lb === undefined) P.Lb = params.L - 3 * P.e - BOTTLE_GAP;
+  // Si cambian las botellas y no viene H, el ancho las acompaña.
+  if (params && params.H === undefined && (params.n !== undefined || params.p !== undefined)) P.H = Math.max(120, widthFor(Math.round(P.n), P.p, P.e));
   const notes = [];
   const lim = limits(P);
   for (const key of ["e", "Lb", "A", "H", "t", "Dc", "Dn", "n", "p"]) {
