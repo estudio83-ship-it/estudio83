@@ -406,7 +406,7 @@ const DEFAULTS = {
   H: 274, // alto del frente entre hendidos (largo del tubo)
   t: 28, // puente de los tabiques
   e: 3, // espesor del cartón: onda B (el 6463 está compensado para B)
-  sep: 0, // separador: 0 tabiques con agujeros (el del 6463), 1 acordeón
+  sep: 0, // separador: 0 cuna (el del 6463, con agujeros), 1 acordeón
 };
 const lengthFor = (Lb, e) => Lb + 3 * e + BOTTLE_GAP;
 // El ancho sale de las botellas: n pasos más las paredes y el juego lateral del 6463 (274 = 3 × 86 + 2 × 3 + 10),
@@ -434,7 +434,7 @@ const PARAMS = [
   { key: "A", group: "Caja", label: "Alto", min: 60, max: 200, step: 1 },
   { key: "H", group: "Caja", label: "Ancho", min: 120, max: 600, step: 1 },
   { key: "t", group: "Caja", label: "Puente separador", min: 10, max: 50, step: 1 },
-  // Tipo de separador: se elige con los botones Tabiques / Acordeón, sin fila propia.
+  // Tipo de separador: se elige con los botones Cuna / Acordeón, sin fila propia.
   { key: "sep", group: "Caja", label: "Separador", min: 0, max: 1, step: 1, oculto: true },
   { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 7, step: 1 },
 ];
@@ -486,7 +486,7 @@ function limits(P) {
   const p = cl(P.p, lim.p);
   lim.sep = [0, 1];
   lim.A = [Math.max(st.A[0], Dc + 2 * e + 2 * WALL_MIN), st.A[1]];
-  // Con tabiques, el ancho deja el material mínimo alrededor de los agujeros; con acordeón, cada
+  // Con cuna, el ancho deja el material mínimo alrededor de los agujeros; con acordeón, cada
   // compartimento tiene que ser al menos 2 mm más ancho que la botella.
   const hMin = Math.round(P.sep) === 1 ? n * (Dc + 2) + (n - 1) * LOMO * e + 2 * e : (n - 1) * p + 2 * half + 2 * EDGE_MIN + 2 * e;
   lim.H = [Math.max(st.H[0], hMin), st.H[1]];
@@ -1055,9 +1055,9 @@ function crearDiseno(PLANTILLA) {
     // Botones rápidos: la onda del cartón y el tipo de separador (uno u otro).
     atajos: [
       { titulo: "Onda", key: "e", opciones: Object.entries(ONDAS), unidad: "mm" },
-      { titulo: "Separador", key: "sep", opciones: [["Tabiques", 0], ["Acordeón", 1]] },
+      { titulo: "Separador", key: "sep", opciones: [["Cuna", 0], ["Acordeón", 1]] },
     ],
-    // El puente es de los tabiques: con acordeón no se usa.
+    // El puente es de la cuna: con acordeón no se usa.
     inactiva: (P, key) => key === "t" && P.sep === 1,
     // Las medidas de la caja acompañan a las botellas (después se pueden corregir a mano):
     // la cantidad mueve el ancho H; el diámetro mueve el alto A y el ancho H (el paso es Dc + 6).
@@ -1108,12 +1108,7 @@ function crearDiseno(PLANTILLA) {
       ];
       if (ins.tipo === "acordeon") return caja;
       const out = [
-        [map([530, 1090]), "guardapolvo A + 26"],
-        [map([944, 1090]), "A + 29"],
-        [map([112, 1050]), "oreja × A/94"],
-        [map([326, 1068]), "contratapa A − 2e"],
-        [map([741.5, 1000]), "traba 87 × 10e/3"],
-        [map([741.5, 1228]), "diente 85 × 5"],
+        ...caja,
         [ins.T([ins.x0 + ins.centres[0], ins.y0 + (r.p2 + r.c3) / 2]), "⌀Dc", true],
       ];
       if (ins.centres.length > 1) out.push([ins.T([ins.x0 + ins.centres[1], ins.y0 + (r.p2 + r.c3) / 2 + 9]), "Dn", true]);
@@ -1129,7 +1124,7 @@ function crearDiseno(PLANTILLA) {
         ["Botella", mm(P.Lb) + " × ⌀" + mm(P.Dc), P.n + (P.n > 1 ? " botellas" : " botella") + " · cuello ⌀" + mm(P.Dn)],
         ["Medidas internas", x3([P.L, P.A, P.H]), "L × A × H"],
         ["Medidas externas", x3(model.info.externa), "con paredes y cierres"],
-        ["Plancha total", x3([b.xMax - b.xMin, b.yMax - b.yMin]), "separador " + (P.sep === 1 ? "acordeón" : "de tabiques")],
+        ["Plancha total", x3([b.xMax - b.xMin, b.yMax - b.yMin]), "separador " + (P.sep === 1 ? "acordeón" : "cuna")],
       ];
     },
     archivo(model) {

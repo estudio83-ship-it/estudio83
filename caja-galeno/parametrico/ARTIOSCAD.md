@@ -68,7 +68,7 @@ Todas las variables y medidas se manejan en milímetros enteros; las cotas del p
 
 ## Separador acordeón (opción)
 
-En la página, en Caja → Separador, se elige entre los **tabiques** con agujeros (el del 6463) y un **acordeón**: una sola tira con hendidos paralelos al largo de la botella, que apoya en el piso y se pliega en zigzag formando un tabique doble entre botella y botella.
+En la página, en Caja → Separador, se elige entre la **cuna** con agujeros (el separador del 6463) y un **acordeón**: una sola tira con hendidos paralelos al largo de la botella, que apoya en el piso y se pliega en zigzag formando un tabique doble entre botella y botella.
 
 | Tramo de la tira | Medida |
 |---|---|

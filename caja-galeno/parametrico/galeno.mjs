@@ -20,7 +20,7 @@ export const DEFAULTS = {
   H: 274, // alto del frente entre hendidos (largo del tubo)
   t: 28, // puente de los tabiques
   e: 3, // espesor del cartón: onda B (el 6463 está compensado para B)
-  sep: 0, // separador: 0 tabiques con agujeros (el del 6463), 1 acordeón
+  sep: 0, // separador: 0 cuna (el del 6463, con agujeros), 1 acordeón
 };
 export const lengthFor = (Lb, e) => Lb + 3 * e + BOTTLE_GAP;
 // El ancho sale de las botellas: n pasos más las paredes y el juego lateral del 6463 (274 = 3 × 86 + 2 × 3 + 10),
@@ -48,7 +48,7 @@ export const PARAMS = [
   { key: "A", group: "Caja", label: "Alto", min: 60, max: 200, step: 1 },
   { key: "H", group: "Caja", label: "Ancho", min: 120, max: 600, step: 1 },
   { key: "t", group: "Caja", label: "Puente separador", min: 10, max: 50, step: 1 },
-  // Tipo de separador: se elige con los botones Tabiques / Acordeón, sin fila propia.
+  // Tipo de separador: se elige con los botones Cuna / Acordeón, sin fila propia.
   { key: "sep", group: "Caja", label: "Separador", min: 0, max: 1, step: 1, oculto: true },
   { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 7, step: 1 },
 ];
@@ -100,7 +100,7 @@ export function limits(P) {
   const p = cl(P.p, lim.p);
   lim.sep = [0, 1];
   lim.A = [Math.max(st.A[0], Dc + 2 * e + 2 * WALL_MIN), st.A[1]];
-  // Con tabiques, el ancho deja el material mínimo alrededor de los agujeros; con acordeón, cada
+  // Con cuna, el ancho deja el material mínimo alrededor de los agujeros; con acordeón, cada
   // compartimento tiene que ser al menos 2 mm más ancho que la botella.
   const hMin = Math.round(P.sep) === 1 ? n * (Dc + 2) + (n - 1) * LOMO * e + 2 * e : (n - 1) * p + 2 * half + 2 * EDGE_MIN + 2 * e;
   lim.H = [Math.max(st.H[0], hMin), st.H[1]];
