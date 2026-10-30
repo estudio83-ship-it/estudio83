@@ -39,7 +39,6 @@ export function crearDiseno(PLANTILLA) {
 .figura .carton .sup{fill:var(--sheet)}
 .figura .carton .lado{fill:var(--soft-bg)}
 .figura .carton .corte{fill:var(--tint)}
-.figura .carton .canal{fill:none;stroke:var(--rule);stroke-width:.8}
 .figura .carton .liner{fill:none;stroke:var(--soft);stroke-width:.7}
 .figura .carton .onda{fill:none;stroke:var(--accent);stroke-width:1.4;stroke-linejoin:round}
 .figura .carton .borde{fill:none;stroke:var(--ink);stroke-width:1;stroke-linejoin:round}

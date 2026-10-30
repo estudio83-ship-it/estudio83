@@ -106,14 +106,10 @@ export function ondaSvg(P, ondas) {
   // Onda en la cara del corte (y = D), de x = 0 a W.
   let onda = "";
   for (let i = 0; i <= 60; i++) { const x = (W * i) / 60; onda += (i ? "L" : "M") + pt(x, D, mid + amp * Math.sin((2 * Math.PI * x) / pitch)); }
-  // Líneas de pegado de la onda sobre la cara de arriba, a lo largo de las canaletas.
-  let canal = "";
-  for (let x = pitch / 4; x < W - 1; x += pitch) canal += "M" + pt(x, 0, T) + "L" + pt(x, D, T);
   const onda0 = Object.keys(ondas).find((k) => ondas[k] === e);
   return '<svg viewBox="0 0 326 ' + r1(Hv) + '" role="img" aria-label="Cartón corrugado ' + (onda0 ? "onda " + onda0 : "") + ", " + e + ' mm">' +
     '<g data-var="e" class="carton">' +
     '<path class="sup" d="' + poly([[0, 0, T], [W, 0, T], [W, D, T], [0, D, T]]) + '"/>' +
-    '<path class="canal" d="' + canal + '"/>' +
     '<path class="lado" d="' + poly([[W, 0, 0], [W, D, 0], [W, D, T], [W, 0, T]]) + '"/>' +
     '<path class="corte" d="' + poly([[0, D, 0], [W, D, 0], [W, D, T], [0, D, T]]) + '"/>' +
     '<path class="liner" d="M' + pt(0, D, liner) + "L" + pt(W, D, liner) + "L" + pt(W, 0, liner) + "M" + pt(0, D, T - liner) + "L" + pt(W, D, T - liner) + "L" + pt(W, 0, T - liner) + '"/>' +
