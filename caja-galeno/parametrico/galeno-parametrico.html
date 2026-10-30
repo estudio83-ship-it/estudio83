@@ -282,6 +282,8 @@ function arcPoints(e) {
   let a1 = e.a1;
   while (a1 <= e.a0) a1 += 360;
   const out = [];
+  // Extremos exactos: los ángulos cardinales que el arco recorre.
+  for (let q = Math.ceil(e.a0 / 90) * 90; q < a1; q += 90) out.push([e.c[0] + e.r * Math.cos((q * Math.PI) / 180), e.c[1] + e.r * Math.sin((q * Math.PI) / 180)]);
   for (let a = e.a0; a < a1; a += 1) out.push([e.c[0] + e.r * Math.cos((a * Math.PI) / 180), e.c[1] + e.r * Math.sin((a * Math.PI) / 180)]);
   out.push([e.c[0] + e.r * Math.cos((a1 * Math.PI) / 180), e.c[1] + e.r * Math.sin((a1 * Math.PI) / 180)]);
   return out;
@@ -326,7 +328,7 @@ function generate(params, plantilla) {
     interior: `${d.Wi} × ${d.insertLen} (plegado ${d.folded} × ${d.Wi} × ${d.wall})`,
     bounds: { xMin, xMax, yMin, yMax },
   };
-  return { P, entities, dims, info, warnings: [...validate(P), ...problems] };
+  return { P, entities, dims, info, anchors: { map, insert: ins }, warnings: [...validate(P), ...problems] };
 }
 
 // ---------- Salidas ----------

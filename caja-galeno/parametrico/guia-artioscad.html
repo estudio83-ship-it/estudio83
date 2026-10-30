@@ -3,25 +3,44 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
 <style>
-/* Ficha técnica de troquel: plano anotado arriba, tablas de fórmulas debajo, en dos columnas. */
+/* Ficha técnica viva: variables a la izquierda, plano con fórmulas a la derecha, tablas fórmula/valor debajo. */
 :root{
-  --paper:#f4f5f2;--sheet:#fcfcfa;--ink:#24282b;--soft:#6b7176;--rule:#c9ccc8;--crease:#8b9095;--accent:#1f5fbf;
+  --paper:#f4f5f2;--sheet:#fcfcfa;--ink:#24282b;--soft:#6b7176;--rule:#c9ccc8;--crease:#8b9095;--accent:#1f5fbf;--warn:#a4441b;--field:#ffffff;--flash:#e3ecfa;
   --display:"Barlow Condensed","Arial Narrow",sans-serif;--body:"IBM Plex Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#7fb0ff;color-scheme:dark}}
-:root[data-theme="dark"]{--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#7fb0ff;color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#7fb0ff;--warn:#f0956b;--field:#101214;--flash:#1d2a3d;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#7fb0ff;--warn:#f0956b;--field:#101214;--flash:#1d2a3d;color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--paper);color:var(--ink);font:15px/1.55 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-main{max-width:1180px;margin:0 auto;padding-block:32px 64px;display:grid;gap:24px}
+main{max-width:1240px;margin:0 auto;padding-block:32px 64px;display:grid;gap:22px}
 header{display:grid;gap:6px}
 .tag{font:500 12px/1.3 var(--mono);color:var(--soft);letter-spacing:.06em;text-transform:uppercase}
 h1{font:600 clamp(28px,4vw,42px)/1.05 var(--display);margin:0;text-wrap:balance}
-h2{font:600 19px/1.2 var(--display);letter-spacing:.05em;text-transform:uppercase;margin:0}
-h3{font:600 15px/1.3 var(--body);margin:0}
+h2{font:600 18px/1.2 var(--display);letter-spacing:.05em;text-transform:uppercase;margin:0}
 p{margin:0;max-width:70ch}
 .lede{color:var(--soft)}
-.sheet{background:var(--sheet);border:1px solid var(--rule);padding:18px;display:grid;gap:14px;min-width:0}
+.sheet{background:var(--sheet);border:1px solid var(--rule);padding:16px;display:grid;gap:12px;min-width:0;align-content:start}
 .head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;align-items:baseline}
+.desk{display:grid;grid-template-columns:300px minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:860px){.desk{grid-template-columns:minmax(0,1fr)}}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+@media (max-width:860px){.side{position:static}}
+form{display:grid;gap:9px}
+.var{display:grid;grid-template-columns:30px minmax(0,1fr) 84px;gap:2px 10px;align-items:center}
+.var b{font:500 14px var(--mono);color:var(--accent)}
+.var label{font-size:13px;color:var(--soft);line-height:1.25}
+.var input[type=number]{width:100%;font:500 14px var(--mono);color:var(--ink);background:var(--field);border:1px solid var(--rule);padding:6px 8px;text-align:right;font-variant-numeric:tabular-nums}
+.var input[type=range]{grid-column:2 / 4;width:100%;accent-color:var(--accent);margin:0}
+input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+button{font:500 13px var(--body);color:var(--ink);background:transparent;border:1px solid var(--rule);padding:7px 10px;cursor:pointer}
+button:hover{border-color:var(--ink)}
+button.primary{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0;font-size:13px}
+.facts dt{color:var(--soft)}.facts dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.warn{margin:0;padding:0;list-style:none;display:grid;gap:6px;color:var(--warn);font-size:13px}
+.status{font:13px var(--mono);color:var(--soft);min-height:1.4em;margin:0}
 .scroll{overflow-x:auto}
 svg.plan{display:block;width:100%;min-width:680px;height:auto}
 .plan .c{fill:none;stroke:var(--ink);stroke-width:1.1;vector-effect:non-scaling-stroke}
@@ -32,85 +51,574 @@ svg.plan{display:block;width:100%;min-width:680px;height:auto}
 .dim text{font:500 17px var(--mono);text-anchor:middle}
 .dim text.side{text-anchor:start;font-size:15px}
 .dim .fx{fill:var(--accent);font-weight:600}.dim .val{fill:var(--soft)}
+.dim.hot .val{fill:var(--accent);font-weight:600}
 .call{font:500 14px var(--mono);fill:var(--soft);text-anchor:middle}
 .legend{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:13px;color:var(--soft)}
 .legend span{display:inline-flex;align-items:center;gap:8px}.legend svg{width:28px;height:8px}
-.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}
-@media (max-width:820px){.cols{grid-template-columns:minmax(0,1fr)}}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th{font:500 11.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--soft);text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule)}
-td{padding:6px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
-td:not(.k){font-family:var(--mono);font-variant-numeric:tabular-nums}
-td.k{color:var(--ink)}
-code,.v{font:500 13.5px var(--mono);color:var(--accent)}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;align-items:start}
+.cols .wide{grid-column:1 / -1}
+.cols .wide .scroll{columns:2 360px;column-gap:28px}
+@media (max-width:720px){.cols{grid-template-columns:minmax(0,1fr)}}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;align-items:start}
+@media (max-width:820px){.two{grid-template-columns:minmax(0,1fr)}}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--soft);text-align:left;padding:5px 6px;border-bottom:1px solid var(--rule)}
+th:last-child,td:last-child{text-align:right}
+td{padding:5px 6px;border-bottom:1px solid var(--rule);vertical-align:top}
+td.f{font:500 12.5px var(--mono);color:var(--accent)}
+td.v{font:500 13px var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.hot td.v{background:var(--flash)}
+@media (prefers-reduced-motion:no-preference){td.v{transition:background-color .6s}}
+code,.vv{font:500 13px var(--mono);color:var(--accent)}
 ol,ul{margin:0;padding-left:1.2em;display:grid;gap:8px;max-width:72ch}
 li b{font-weight:500}
-.note{color:var(--soft);font-size:14px}
+.note{color:var(--soft);font-size:13.5px}
 </style>
 <main>
   <header>
     <span class="tag">Troquel 6463 · caja tipo galeno · guía de diseño paramétrico</span>
     <h1>Galeno 6463 para ArtiosCAD</h1>
-    <p class="lede">Cada medida del troquel escrita en función de sus variables, para generarlo con el script o rearmarlo como diseño paramétrico dentro de ArtiosCAD. El plano muestra los valores del 6463 original.</p>
+    <p class="lede">Mové las variables y el troquel se rearma con cada cota escrita en su fórmula y su valor. Las tablas de abajo muestran la misma fórmula con el valor de la medida actual; lo que cambió se marca en azul.</p>
   </header>
 
-  <section class="sheet" aria-labelledby="t-plano">
-    <div class="head"><h2 id="t-plano">Plano con fórmulas</h2><span class="tag">L 320 · A 94 · H 274 · t 28 · mm</span></div>
-    <div class="legend" aria-hidden="true">
-      <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--ink)" stroke-width="1.4"/></svg>Corte</span>
-      <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--crease)" stroke-width="1.2" stroke-dasharray="6 4"/></svg>Hendido</span>
-      <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--crease)" stroke-width="1.2" stroke-dasharray="2 3"/></svg>Intermitente 5×5</span>
-      <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--accent)" stroke-width="1.2"/></svg>Fórmula = valor</span>
-    </div>
-    <div class="scroll"><svg class="plan" viewBox="27.1 0 1568 899" role="img" aria-label="Troquel galeno 6463 con cada cota expresada en las variables L, A, H y t">
-<path class="c" d="M898.1 518L898.1 619M889.1 719L784.3 719M699.3 719L586.1 719M484.9 520.5L484.9 515.2M989.1 233.5L989.1 520.5M578.1 520.5L577.1 525M577.1 525L577.1 619M161.1 522A101 101 0 0 0 157.4 576.5M69.1 524L67.1 522M69.1 524A134.8 134.8 0 0 0 130.8 592.5M130.8 592.5A16.8 16.8 0 0 0 157.4 576.5M67.1 232L67.1 522M170.2 514L207 585.7M481.5 514.9L445 585.7M418.3 602A30 30 0 0 0 445 585.7M484.9 515.2A2 2 0 0 0 481.5 514.9M898.1 236L898.1 135M888.1 35L784.3 35M699.3 35L586.1 35M578.1 233.5L577.1 229M577.1 229L577.1 134M69.1 230L67.1 232M170.1 240L207 168.3M481.5 239.1L445 168.3M445 168.3A30 30 0 0 0 418.3 152M481.5 239.1A2 2 0 0 0 484.9 238.8M484.9 233.5L484.9 238.8M157.4 177.5A101 101 0 0 0 161.1 232M130.8 161.5A134.8 134.8 0 0 0 69.1 230M157.4 177.5A16.8 16.8 0 0 0 130.8 161.5M699.3 724L784.3 724M699.3 724L699.3 719M784.3 724L784.3 719M698.3 525L784.8 525M698.3 525L698.3 515M784.8 525L784.8 515M698.3 515L784.8 515M569.1 640.5L487.9 640.5M233.7 602L418.3 602M207 585.7A30 30 0 0 0 233.7 602M699.3 30L784.3 30M699.3 30L699.3 35M784.3 30L784.3 35M698.3 229L784.8 229M698.3 229L698.3 239M784.8 229L784.8 239M698.3 239L784.8 239M233.6 152L418.3 152M233.6 152A30 30 0 0 0 207 168.3M577.1 619L569.1 640.5M569.1 113.5L487.9 113.5M577.1 135L569.1 113.5M989.1 233.5L989.1 113.5M989.1 113.5L906.1 113.5M898.1 135L906.1 113.5M989.1 520.5L989.1 640.5M989.1 640.5L906.1 640.5M898.1 619L906.1 640.5M487.9 230.5L484.9 233.5M487.9 230.5L487.9 113.5M487.9 523.5L484.9 520.5M487.9 523.5L487.9 640.5M577.1 134L586.1 125M586.1 125L586.1 35M898.1 134L889.1 125M577.1 620L586.1 629M586.1 629L586.1 719M898.1 620L889.1 629M889.1 629L889.1 719M161.1 232L162.1 232M162.1 232L170.1 240M161.2 522L162.2 522M162.2 522L170.2 514M898.1 135L898.1 134M889.1 125L888.1 35M577.1 620L577.1 619M898.1 620L898.1 619M1061.4 226.5A40 40 0 0 0 1057.4 152M1032.4 152A40 40 0 0 0 1028.4 226.5M1028.4 234L1028.4 203M1061.4 234L1061.4 203M1028.4 203L1061.4 203M1032.4 152L1032.4 146M1057.4 152L1057.4 146M1032.4 146L1057.4 146M1027.4 30L1027.4 34M1027.4 34L1062.4 34M1062.4 34L1062.4 30M1060.4 533A15.5 15.5 0 0 0 1029.4 533M1029.4 533L1029.4 553.2M1060.4 533L1060.4 553.2M1029.4 553.2L1024.9 577M1060.4 553.2L1064.9 577M1024.9 577L1024.9 605M1064.9 577L1064.9 605M1024.9 605L1064.9 605M1114.6 496.6A40 40 0 0 0 1118.6 571M1143.6 571A40 40 0 0 0 1147.6 496.6M1114.6 489L1114.6 520M1147.6 489L1147.6 520M1114.6 520L1147.6 520M1118.6 571L1118.6 577M1143.6 571L1143.6 577M1118.6 577L1143.6 577M1113.6 693L1113.6 689M1113.6 689L1148.6 689M1148.6 689L1148.6 693M1115.6 190A15.5 15.5 0 0 0 1146.6 190M1115.6 190L1115.6 169.8M1146.6 190L1146.6 169.8M1115.6 169.8L1111.1 146M1146.6 169.8L1151.1 146M1111.1 146L1111.1 118M1151.1 146L1151.1 118M1111.1 118L1151.1 118M1233.9 226.5A40 40 0 0 0 1229.9 152M1204.9 152A40 40 0 0 0 1200.9 226.5M1200.9 234L1200.9 203M1233.9 234L1233.9 203M1200.9 203L1233.9 203M1204.9 152L1204.9 146M1229.9 152L1229.9 146M1204.9 146L1229.9 146M1199.9 30L1199.9 34M1199.9 34L1234.9 34M1234.9 34L1234.9 30M1232.9 533A15.5 15.5 0 0 0 1201.9 533M1201.9 533L1201.9 553.2M1232.9 533L1232.9 553.2M1201.9 553.2L1197.4 577M1232.9 553.2L1237.4 577M1197.4 577L1197.4 605M1237.4 577L1237.4 605M1197.4 605L1237.4 605M997.1 693L1113.6 693M1148.6 693L1265.1 693M997.1 30L1027.4 30M1062.4 30L1199.9 30M1234.9 30L1265.1 30M997.1 693L997.1 30M1265.1 693L1265.1 30"/><path class="h" d="M484.1 514.3L484.1 239.7M161.1 232L161.1 522M578.1 233.5L578.1 520.5M898.1 236L898.1 518M170.2 514L483.1 514M161.1 522L67.1 522M577.1 525L698.3 525M784.8 525L898.1 525M989.1 518L898.1 518M898.1 619L577.1 619M484.9 520.5L578.1 520.5M586.1 629L889.1 629M170.1 240L483.1 240M161.1 232L67.1 232M577.1 229L698.3 229M784.8 229L898.1 229M989.1 236L898.1 236M898.1 135L577.1 135M484.9 233.5L578.1 233.5M586.1 125L889.1 125M997.1 605L1024.9 605M1064.9 605L1197.4 605M1237.4 605L1265.1 605M997.1 577L1024.9 577M1064.9 577L1118.6 577M1143.6 577L1197.4 577M1237.4 577L1265.1 577M997.1 146L1032.4 146M1057.4 146L1111.1 146M1151.1 146L1204.9 146M1229.9 146L1265.1 146M997.1 118L1111.1 118M1151.1 118L1265.1 118"/><path class="p" d="M997.1 489L1114.6 489M1147.6 489L1265.1 489M997.1 234L1028.4 234M1061.4 234L1200.9 234M1233.9 234L1265.1 234"/><g class="dim"><path d="M67.1 756V772M161.1 756V772M67.1 764H161.1"/><path class="ar" d="M67.1 764L76.1 767.2L76.1 760.9ZM161.1 764L152.1 760.9L152.1 767.2Z"/><text x="114.1" y="757"><tspan class="fx">A</tspan><tspan class="val"> = 94</tspan></text></g><g class="dim"><path d="M161.1 756V772M484.1 756V772M161.1 764H484.1"/><path class="ar" d="M161.1 764L170.1 767.2L170.1 760.9ZM484.1 764L475.1 760.9L475.1 767.2Z"/><text x="322.6" y="757"><tspan class="fx">L + 3</tspan><tspan class="val"> = 323</tspan></text></g><g class="dim"><path d="M484.1 756V772M578.1 756V772M484.1 764H578.1"/><path class="ar" d="M484.1 764L493.1 767.2L493.1 760.9ZM578.1 764L569.1 760.9L569.1 767.2Z"/><text x="531.1" y="757"><tspan class="fx">A</tspan><tspan class="val"> = 94</tspan></text></g><g class="dim"><path d="M578.1 756V772M898.1 756V772M578.1 764H898.1"/><path class="ar" d="M578.1 764L587.1 767.2L587.1 760.9ZM898.1 764L889.1 760.9L889.1 767.2Z"/><text x="738.1" y="757"><tspan class="fx">L</tspan><tspan class="val"> = 320</tspan></text></g><g class="dim"><path d="M898.1 756V772M989.1 756V772M898.1 764H989.1"/><path class="ar" d="M898.1 764L907.1 767.2L907.1 760.9ZM989.1 764L980.1 760.9L980.1 767.2Z"/><text x="943.6" y="757"><tspan class="fx">A − 3</tspan><tspan class="val"> = 91</tspan></text></g><g class="dim"><path d="M997.1 756V772M1265.1 756V772M997.1 764H1265.1"/><path class="ar" d="M997.1 764L1006.1 767.2L1006.1 760.9ZM1265.1 764L1256.1 760.9L1256.1 767.2Z"/><text x="1131.1" y="757"><tspan class="fx">H − 6</tspan><tspan class="val"> = 268</tspan></text></g><g class="dim"><path d="M67.1 806V822M989.1 806V822M67.1 814H989.1"/><path class="ar" d="M67.1 814L76.1 817.2L76.1 810.9ZM989.1 814L980.1 810.9L980.1 817.2Z"/><text x="528.1" y="807"><tspan class="fx">3A + 2L</tspan><tspan class="val"> = 922</tspan></text></g><g class="dim"><path d="M67.1 856V872M1265.1 856V872M67.1 864H1265.1"/><path class="ar" d="M67.1 864L76.1 867.2L76.1 860.9ZM1265.1 864L1256.1 860.9L1256.1 867.2Z"/><text x="666.1" y="857"><tspan class="val">1198</tspan></text></g><g class="dim"><path d="M634.1 719H650.1M634.1 629H650.1M642.1 719V629"/><path class="ar" d="M642.1 719L645.2 710L638.9 710ZM642.1 629L638.9 638L645.2 638Z"/><text class="side" x="652.1" y="680"><tspan class="fx">A − 4</tspan><tspan class="val"> = 90</tspan></text></g><g class="dim"><path d="M634.1 629H650.1M634.1 619H650.1M642.1 629V619"/><path class="ar" d="M642.1 629L642.9 626.5L641.2 626.5ZM642.1 619L641.2 621.5L642.9 621.5Z"/><text class="side" x="652.1" y="630"><tspan class="val">10</tspan></text></g><g class="dim"><path d="M634.1 619H650.1M634.1 525H650.1M642.1 619V525"/><path class="ar" d="M642.1 619L645.2 610L638.9 610ZM642.1 525L638.9 534L645.2 534Z"/><text x="635.1" y="572" transform="rotate(-90 635.1 572)"><tspan class="fx">A</tspan><tspan class="val"> = 94</tspan></text></g><g class="dim"><path d="M634.1 525H650.1M634.1 229H650.1M642.1 525V229"/><path class="ar" d="M642.1 525L645.2 516L638.9 516ZM642.1 229L638.9 238L645.2 238Z"/><text x="635.1" y="377" transform="rotate(-90 635.1 377)"><tspan class="fx">H + 22</tspan><tspan class="val"> = 296</tspan></text></g><g class="dim"><path d="M634.1 229H650.1M634.1 135H650.1M642.1 229V135"/><path class="ar" d="M642.1 229L645.2 220L638.9 220ZM642.1 135L638.9 144L645.2 144Z"/><text x="635.1" y="182" transform="rotate(-90 635.1 182)"><tspan class="fx">A</tspan><tspan class="val"> = 94</tspan></text></g><g class="dim"><path d="M634.1 135H650.1M634.1 125H650.1M642.1 135V125"/><path class="ar" d="M642.1 135L642.9 132.5L641.2 132.5ZM642.1 125L641.2 127.5L642.9 127.5Z"/><text class="side" x="652.1" y="136"><tspan class="val">10</tspan></text></g><g class="dim"><path d="M634.1 125H650.1M634.1 35H650.1M642.1 125V35"/><path class="ar" d="M642.1 125L645.2 116L638.9 116ZM642.1 35L638.9 44L645.2 44Z"/><text class="side" x="652.1" y="86"><tspan class="fx">A − 4</tspan><tspan class="val"> = 90</tspan></text></g><g class="dim"><path d="M292 514H308M292 240H308M300 514V240"/><path class="ar" d="M300 514L303.2 505L296.9 505ZM300 240L296.9 249L303.2 249Z"/><text x="293" y="377" transform="rotate(-90 293 377)"><tspan class="fx">H</tspan><tspan class="val"> = 274</tspan></text></g><g class="dim"><path d="M1302.1 693H1318.1M1302.1 605H1318.1M1310.1 693V605"/><path class="ar" d="M1310.1 693L1313.3 684L1306.9 684ZM1310.1 605L1306.9 614L1313.3 614Z"/><text class="side" x="1320.1" y="655"><tspan class="fx">A − 6</tspan><tspan class="val"> = 88</tspan></text></g><g class="dim"><path d="M1302.1 605H1318.1M1302.1 577H1318.1M1310.1 605V577"/><path class="ar" d="M1310.1 605L1312.6 598L1307.6 598ZM1310.1 577L1307.6 584L1312.6 584Z"/><text class="side" x="1320.1" y="597"><tspan class="fx">t</tspan><tspan class="val"> = 28</tspan></text></g><g class="dim"><path d="M1302.1 577H1318.1M1302.1 489H1318.1M1310.1 577V489"/><path class="ar" d="M1310.1 577L1313.3 568L1306.9 568ZM1310.1 489L1306.9 498L1313.3 498Z"/><text class="side" x="1320.1" y="539"><tspan class="fx">A − 6</tspan><tspan class="val"> = 88</tspan></text></g><g class="dim"><path d="M1302.1 489H1318.1M1302.1 234H1318.1M1310.1 489V234"/><path class="ar" d="M1310.1 489L1313.3 480L1306.9 480ZM1310.1 234L1306.9 243L1313.3 243Z"/><text x="1303.1" y="361.5" transform="rotate(-90 1303.1 361.5)"><tspan class="fx">L − 65</tspan><tspan class="val"> = 255</tspan></text></g><g class="dim"><path d="M1302.1 234H1318.1M1302.1 146H1318.1M1310.1 234V146"/><path class="ar" d="M1310.1 234L1313.3 225L1306.9 225ZM1310.1 146L1306.9 155L1313.3 155Z"/><text class="side" x="1320.1" y="196"><tspan class="fx">A − 6</tspan><tspan class="val"> = 88</tspan></text></g><g class="dim"><path d="M1302.1 146H1318.1M1302.1 118H1318.1M1310.1 146V118"/><path class="ar" d="M1310.1 146L1312.6 139L1307.6 139ZM1310.1 118L1307.6 125L1312.6 125Z"/><text class="side" x="1320.1" y="138"><tspan class="fx">t</tspan><tspan class="val"> = 28</tspan></text></g><g class="dim"><path d="M1302.1 118H1318.1M1302.1 30H1318.1M1310.1 118V30"/><path class="ar" d="M1310.1 118L1313.3 109L1306.9 109ZM1310.1 30L1306.9 39L1313.3 39Z"/><text class="side" x="1320.1" y="80"><tspan class="fx">A − 6</tspan><tspan class="val"> = 88</tspan></text></g><g class="dim"><path d="M1467.1 693H1483.1M1467.1 30H1483.1M1475.1 693V30"/><path class="ar" d="M1475.1 693L1478.3 684L1471.9 684ZM1475.1 30L1471.9 39L1478.3 39Z"/><text x="1468.1" y="361.5" transform="rotate(-90 1468.1 361.5)"><tspan class="fx">4A + 2t + L − 89</tspan><tspan class="val"> = 663</tspan></text></g><g class="dim"><path d="M1532.1 724H1548.1M1532.1 30H1548.1M1540.1 724V30"/><path class="ar" d="M1540.1 724L1543.3 715L1536.9 715ZM1540.1 30L1536.9 39L1543.3 39Z"/><text x="1533.1" y="377" transform="rotate(-90 1533.1 377)"><tspan class="val">694</tspan></text></g><text class="call" x="530" y="159">guardapolvo A + 26</text><text class="call" x="944" y="159">A + 28,5</text><text class="call" x="112" y="199">oreja × A/94</text><text class="call" x="326" y="181">contratapa A − 6</text><text class="call" x="741.5" y="249">traba 86,5 × 10</text><text class="call" x="741.5" y="21">diente 85 × 5</text><text class="call" x="1218.1" y="190">⌀Dc</text><text class="call" x="1131.1" y="181">Dn</text><text class="call" x="1131.1" y="649">muesca 35 × 4</text></svg></div>
-  </section>
-
-  <div class="cols">
-    <section class="sheet" aria-labelledby="t-vars">
-      <h2 id="t-vars">Variables</h2>
-      <div class="scroll"><table><thead><tr><th>Var</th><th>Qué es</th><th>6463</th></tr></thead><tbody><tr><td class="k"><span class="v">L</span></td><td>Largo interior (contrafrente)</td><td>320</td></tr><tr><td class="k"><span class="v">A</span></td><td>Profundidad (costados)</td><td>94</td></tr><tr><td class="k"><span class="v">H</span></td><td>Alto del frente (tubo)</td><td>274</td></tr><tr><td class="k"><span class="v">n</span></td><td>Cantidad de frascos</td><td>3</td></tr><tr><td class="k"><span class="v">Dc</span></td><td>⌀ agujero del cuerpo</td><td>80</td></tr><tr><td class="k"><span class="v">Dn</span></td><td>Ancho ranura del cuello</td><td>31</td></tr><tr><td class="k"><span class="v">p</span></td><td>Paso entre frascos</td><td>86,25</td></tr><tr><td class="k"><span class="v">t</span></td><td>Puente de los tabiques</td><td>28</td></tr></tbody></table></div>
-      <p class="note">El frasco entra hasta <span class="v">L − 14</span> de largo. El interior mide <span class="v">H − 6</span> de ancho y <span class="v">4A + 2t + L − 89</span> de largo; plegado ocupa <span class="v">L − 65 + 2t</span> × <span class="v">H − 6</span> × <span class="v">A − 6</span>.</p>
+  <div class="desk">
+    <section class="sheet side" aria-labelledby="t-vars">
+      <h2 id="t-vars">Variables · mm</h2>
+      <form id="form" autocomplete="off"></form>
+      <div class="presets" aria-label="Medidas guardadas">
+        <button type="button" data-preset='{"L":320}'>6463 original</button>
+        <button type="button" data-preset='{"L":370}'>6463 +50</button>
+      </div>
+      <dl class="facts" id="facts"></dl>
+      <ul class="warn" id="warn"></ul>
+      <div class="actions">
+        <button type="button" class="primary" id="dl-dxf">Descargar DXF</button><button type="button" id="dl-cf2">Descargar CF2</button>
+        <button type="button" id="cp-dxf">Copiar DXF</button>
+        <button type="button" id="cp-cf2">Copiar CF2</button>
+      </div>
+      <p class="status" id="status" role="status"></p>
     </section>
-    <section class="sheet" aria-labelledby="t-tubo">
-      <h2 id="t-tubo">Tubo</h2>
-      <div class="scroll"><table><thead><tr><th>Panel</th><th>Ancho</th><th>Alto entre hendidos</th><th>Desde el hendido del contrafrente</th></tr></thead><tbody><tr><td class="k">Costado exterior</td><td>A</td><td>H + 16</td><td>3</td></tr><tr><td class="k">Frente</td><td>L + 3</td><td>H</td><td>11</td></tr><tr><td class="k">Costado</td><td>A</td><td>H + 13</td><td>4,5</td></tr><tr><td class="k">Contrafrente</td><td>L</td><td>H + 22</td><td>0</td></tr><tr><td class="k">Solapa de pegado</td><td>A − 3</td><td>H + 8</td><td>7</td></tr></tbody></table></div>
-      <p class="note">Los corrimientos (3; 4,5; 7; 11) son las compensaciones de espesor del 6463, cartón de alrededor de 1,5 mm.</p>
-    </section>
-    <section class="sheet" aria-labelledby="t-cierre">
-      <h2 id="t-cierre">Cierres, iguales en ambos extremos</h2>
-      <div class="scroll"><table><thead><tr><th>Pieza</th><th>Medida</th></tr></thead><tbody><tr><td class="k">Tapa, sobre el contrafrente</td><td>A × L</td></tr><tr><td class="k">Pestaña de pared doble</td><td>10</td></tr><tr><td class="k">Lengüeta</td><td>(A − 4) × (L − 17)</td></tr><tr><td class="k">Diente de la lengüeta</td><td>85 × 5, centrado</td></tr><tr><td class="k">Ranura de traba</td><td>86,5 × 10, centrada, junto al hendido de la tapa</td></tr><tr><td class="k">Contratapa, sobre el frente</td><td>A − 6; tramo recto L − 135,3; R30</td></tr><tr><td class="k">Guardapolvo del costado</td><td>A + 26</td></tr><tr><td class="k">Guardapolvo de la solapa</td><td>A + 28,5</td></tr><tr><td class="k">Oreja del costado exterior</td><td>curva del 6463 × A/94 (R 134,8 · 101,04 · 16,78)</td></tr></tbody></table></div>
-    </section>
-    <section class="sheet" aria-labelledby="t-int">
-      <h2 id="t-int">Interior</h2>
-      <div class="scroll"><table><thead><tr><th>Fila, desde abajo</th><th>Alto</th><th>Línea superior</th></tr></thead><tbody><tr><td class="k">Pared exterior B</td><td>A − 6</td><td>hendido</td></tr><tr><td class="k">Puente B</td><td>t</td><td>hendido</td></tr><tr><td class="k">Tabique B</td><td>A − 6</td><td>intermitente 5×5</td></tr><tr><td class="k">Panel central</td><td>L − 65</td><td>intermitente 5×5</td></tr><tr><td class="k">Tabique A</td><td>A − 6</td><td>hendido</td></tr><tr><td class="k">Puente A</td><td>t</td><td>hendido</td></tr><tr><td class="k">Pared exterior A</td><td>A − 6</td><td>borde</td></tr></tbody></table></div>
-      <ul>
-        <li><b>Frascos</b> en <span class="v">Wi/2 + (i − (n − 1)/2)·p</span>, alternados: los pares apoyan el cuerpo en el tabique A y el cuello en el B.</li>
-        <li><b>Agujero del cuerpo:</b> círculo <span class="v">Dc</span> en el centro del tabique, lengüeta de apoyo de 33 unida al panel hasta 13 antes del centro, y muesca de 25 hasta el hendido.</li>
-        <li><b>Ranura del cuello:</b> fondo semicircular <span class="v">Dn/2</span>, lados rectos hasta 23,8 del hendido, boca de 40 abierta por todo el puente.</li>
-        <li><b>Muesca de borde:</b> 35 × 4 en la pared exterior, del lado del cuerpo.</li>
-      </ul>
+    <section class="sheet" aria-labelledby="t-plano">
+      <div class="head"><h2 id="t-plano">Plano con fórmulas</h2><span class="tag" id="caption"></span></div>
+      <div class="legend" aria-hidden="true">
+        <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--ink)" stroke-width="1.4"/></svg>Corte</span>
+        <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--crease)" stroke-width="1.2" stroke-dasharray="6 4"/></svg>Hendido</span>
+        <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--crease)" stroke-width="1.2" stroke-dasharray="2 3"/></svg>Intermitente 5×5</span>
+        <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--accent)" stroke-width="1.2"/></svg>Fórmula = valor</span>
+      </div>
+      <div class="scroll" id="plan"></div>
     </section>
   </div>
 
   <div class="cols">
+    <section class="sheet" aria-labelledby="t-tubo"><h2 id="t-tubo">Tubo</h2><div id="tb-tubo"></div>
+      <p class="note">Los corrimientos de los hendidos de cierre (3; 4,5; 7; 11 mm desde el contrafrente) son las compensaciones de espesor del 6463, cartón de alrededor de 1,5 mm.</p></section>
+    <section class="sheet" aria-labelledby="t-cierre"><h2 id="t-cierre">Cierres, iguales en ambos extremos</h2><div id="tb-cierres"></div></section>
+    <section class="sheet wide" aria-labelledby="t-int"><h2 id="t-int">Interior</h2><div id="tb-interior"></div>
+      <ul class="note">
+        <li>Los frascos van alternados: los pares apoyan el cuerpo en el tabique A y el cuello en el B.</li>
+        <li>Agujero del cuerpo con lengüeta de apoyo de 33 hasta 13 antes del centro y muesca de 25 hasta el hendido.</li>
+        <li>Ranura del cuello con lados rectos hasta 23,8 del hendido y boca de 40 abierta por todo el puente; muesca de borde 35 × 4.</li>
+      </ul></section>
+  </div>
+
+  <div class="two">
     <section class="sheet" aria-labelledby="t-abrir">
       <h2 id="t-abrir">Abrir en ArtiosCAD</h2>
       <ol>
         <li><b>DXF, recomendado.</b> Al importar, asigná <code>CORTE</code> a corte 2 pt, <code>HENDIDO</code> a hendido 2 pt, <code>PERFORADO</code> al perforado intermitente 5×5 y <code>COTAS</code> a anotación. Guardá la asignación para las próximas variantes. Unidades en mm; se troquela de dorso.</li>
         <li><b>CF2.</b> Cada línea trae su tipo (1 corte, 2 hendido, 3 perforado) con pointage 2 pt. No pude validar el formato en ArtiosCAD: probá primero el DXF y revisá que el perforado tome tu 5×5.</li>
-        <li><b>Paramétrico nativo.</b> Creá las variables <span class="v">L</span>, <span class="v">A</span>, <span class="v">H</span> y <span class="v">t</span> en ArtiosCAD y acotá cada línea con las fórmulas de esta ficha.</li>
+        <li><b>Paramétrico nativo.</b> Creá las variables <span class="vv">L</span>, <span class="vv">A</span>, <span class="vv">H</span> y <span class="vv">t</span> en ArtiosCAD y acotá cada línea con las fórmulas de esta ficha. El <code>.ARD</code> es un formato cerrado: el paramétrico nativo se arma dentro de ArtiosCAD.</li>
       </ol>
     </section>
     <section class="sheet" aria-labelledby="t-gen">
-      <h2 id="t-gen">Generar otras medidas</h2>
-      <p>Desde <code>caja-galeno/parametrico</code> en el repositorio:</p>
+      <h2 id="t-gen">Desde la línea de comandos</h2>
+      <p>En <code>caja-galeno/parametrico</code> del repositorio:</p>
       <ul>
         <li><code>node generar.mjs --L 370</code> escribe el +50 en DXF y CF2.</li>
         <li><code>node generar.mjs --L 400 --A 110 --n 4 --Dc 70</code> cambia caja y frascos.</li>
-        <li><code>galeno-parametrico.html</code> hace lo mismo en el navegador, con vista previa.</li>
+        <li><code>node guia.mjs</code> vuelve a escribir esta guía.</li>
       </ul>
-      <p class="note">El <code>.ARD</code> de ArtiosCAD es un formato cerrado: el paramétrico nativo se arma dentro de ArtiosCAD con estas fórmulas.</p>
     </section>
   </div>
 </main>
+<script>
+// Caja tipo galeno (troquel 6463) paramétrica.
+// generate(params, plantilla) → { entities, dims, info, warnings }
+// Unidades: mm. Coordenadas como el plano original: x a la derecha, y hacia arriba.
+//
+// La caja se arma desde la plantilla del troquel 6463 (sus mismas curvas y compensaciones) moviendo
+// zonas rectas con L, A y H; las orejas curvas escalan con A. El interior se dibuja desde cero con
+// las medidas de los frascos.
+
+const DEFAULTS = {
+  L: 320, // largo interior (contrafrente), sentido del frasco
+  A: 94, // profundidad (costados)
+  H: 274, // alto del frente entre hendidos (largo del tubo)
+  n: 3, // frascos
+  Dc: 80, // ⌀ agujero del cuerpo
+  Dn: 31, // ancho de la ranura del cuello
+  p: 86.25, // paso entre frascos
+  t: 28, // puente de los tabiques
+};
+
+const PARAMS = [
+  { key: "L", label: "Largo interior (contrafrente)", min: 150, max: 700, step: 1 },
+  { key: "A", label: "Profundidad (costados)", min: 50, max: 200, step: 1 },
+  { key: "H", label: "Alto del frente (tubo)", min: 120, max: 600, step: 1 },
+  { key: "n", label: "Cantidad de frascos", min: 1, max: 8, step: 1 },
+  { key: "Dc", label: "⌀ agujero del cuerpo", min: 20, max: 190, step: 0.5 },
+  { key: "Dn", label: "Ancho ranura del cuello", min: 8, max: 120, step: 0.5 },
+  { key: "p", label: "Paso entre frascos", min: 20, max: 300, step: 0.25 },
+  { key: "t", label: "Puente de los tabiques", min: 10, max: 80, step: 1 },
+];
+
+// Medidas fijas del troquel original que no dependen de los parámetros.
+const FIX = { tongueW: 33, tongueFromCentre: 13, notchW: 25, flareW: 40, flareLen: 23.8, edgeNotchW: 35, edgeNotchD: 4, gap: 8 };
+
+function derived(P) {
+  const wall = P.A - 6, main = P.L - 65, Wi = P.H - 6;
+  return { wall, main, Wi, bottle: P.L - 14, insertLen: 4 * wall + 2 * P.t + main, folded: main + 2 * P.t };
+}
+
+function validate(P) {
+  const d = derived(P), w = [];
+  const R = P.Dc / 2;
+  if (P.Dc > d.wall - 4) w.push(`El agujero de ⌀${P.Dc} no entra en el tabique de ${d.wall} (A − 6): dejá al menos 2 mm por lado.`);
+  if (P.Dn >= P.Dc) w.push(`La ranura del cuello (${P.Dn}) tiene que ser menor que el agujero del cuerpo (${P.Dc}).`);
+  if (FIX.flareW <= P.Dn) w.push(`La ranura del cuello (${P.Dn}) es más ancha que la boca de 40 mm de la ranura.`);
+  if (R < FIX.tongueW / 2 + 1) w.push(`Con ⌀${P.Dc} la lengüeta de apoyo de 33 mm no cabe en el agujero.`);
+  const span = (P.n - 1) * P.p + P.Dc;
+  if (span > d.Wi - 6) w.push(`${P.n} frascos con paso ${P.p} ocupan ${span.toFixed(1)} mm y el interior mide ${d.Wi} (H − 6).`);
+  if (P.n > 1 && P.p < P.Dc + 2) w.push(`El paso (${P.p}) es menor que el agujero más 2 mm: los agujeros se tocan.`);
+  if (d.main < 40) w.push(`El panel entre tabiques queda en ${d.main} mm (L − 65).`);
+  return w;
+}
+
+// ---------- Caja: mapa por zonas sobre la plantilla ----------
+function boxMap(P) {
+  const dL = P.L - 320, dA = P.A - 94, dH = P.H - 274;
+  const sA = P.A / 94;
+  const base = ([x, y]) => {
+    let sx = 0;
+    if (x < 531) sx -= dA; // costado
+    if (x < 330) sx -= dL; // frente
+    if (x < 114) sx -= dA; // costado exterior
+    if (x > 640) sx += dL / 2; // contrafrente (dos franjas: la traba queda centrada)
+    if (x > 840) sx += dL / 2;
+    if (x > 943) sx += dA; // solapa de pegado
+    let sy = y > 872 ? dH : 0;
+    if (x >= 165 && x <= 484.1) {
+      if (y > 1040) sy += dA; // contratapa
+      if (y < 704) sy -= dA;
+    } else if (x > 484.1) {
+      if (y > 1067) sy += dA; // tapa y guardapolvos
+      if (y > 1169) sy += dA; // lengüeta
+      if (y < 677) sy -= dA;
+      if (y < 575) sy -= dA;
+    }
+    return [x + sx, y + sy];
+  };
+  const ear = ([x, y]) => (x < 165 && (y > 1012 || y < 732) ? (y > 872 ? [161.1, 1017] : [161.1, 727]) : null);
+  const map = (p) => {
+    const a = ear(p);
+    if (!a) return base(p);
+    const A2 = base(a);
+    return [A2[0] + (p[0] - a[0]) * sA, A2[1] + (p[1] - a[1]) * sA];
+  };
+  return { map, ear, sA };
+}
+
+function box(P, plantilla, out, problems) {
+  const { map, ear, sA } = boxMap(P);
+  for (const e of plantilla) {
+    if (e[0] === "L") {
+      out.push({ t: "L", k: e[1], a: map([e[2], e[3]]), b: map([e[4], e[5]]) });
+    } else {
+      const [, k, cx, cy, r, a0, a1] = e;
+      let mid = a0 + (((a1 - a0) % 360) + 360) % 360 / 2;
+      const m = [cx + r * Math.cos((mid * Math.PI) / 180), cy + r * Math.sin((mid * Math.PI) / 180)];
+      const anchor = ear(m);
+      let c, R;
+      if (anchor) {
+        const A2 = map(anchor);
+        c = [A2[0] + (cx - anchor[0]) * sA, A2[1] + (cy - anchor[1]) * sA];
+        R = r * sA;
+      } else {
+        const d = [map(m)[0] - m[0], map(m)[1] - m[1]];
+        c = [cx + d[0], cy + d[1]];
+        R = r;
+      }
+      // Los extremos del arco tienen que caer donde caen las líneas vecinas.
+      for (const ang of [a0, a1]) {
+        const p0 = [cx + r * Math.cos((ang * Math.PI) / 180), cy + r * Math.sin((ang * Math.PI) / 180)];
+        const want = map(p0), got = [c[0] + R * Math.cos((ang * Math.PI) / 180), c[1] + R * Math.sin((ang * Math.PI) / 180)];
+        const err = Math.hypot(want[0] - got[0], want[1] - got[1]);
+        if (err > 0.05) problems.push(`arco en (${cx}, ${cy}) desplazado ${err.toFixed(2)} mm`);
+      }
+      out.push({ t: "A", k, c, r: R, a0, a1 });
+    }
+  }
+  return map;
+}
+
+// ---------- Interior ----------
+function insert(P, x0, y0, out) {
+  const d = derived(P);
+  const { wall, main, Wi } = d;
+  const t = P.t;
+  const c1 = wall, c2 = wall + t, p1 = 2 * wall + t, p2 = p1 + main, c3 = p2 + wall, c4 = c3 + t, top = c4 + wall;
+  const R = P.Dc / 2, hn = P.Dn / 2, hf = FIX.flareW / 2;
+  const L = (k, u0, v0, u1, v1) => out.push({ t: "L", k, a: [x0 + u0, y0 + v0], b: [x0 + u1, y0 + v1] });
+  const Arc = (k, u, v, r, a0, a1) => out.push({ t: "A", k, c: [x0 + u, y0 + v], r, a0, a1 });
+  const deg = (v) => (Math.acos(v) * 180) / Math.PI;
+  const centres = Array.from({ length: P.n }, (_, i) => Wi / 2 + (i - (P.n - 1) / 2) * P.p);
+  const gaps = { c1: [], c2: [], p1: [], p2: [], c3: [], c4: [], bottom: [], top: [] };
+
+  // Lado A: tabique entre p2 (intermitente) y c3 (hendido); lado B: entre c2 (hendido) y p1 (intermitente).
+  const sides = {
+    A: { vp: p2, vc: c3, far: c4, s: 1, rowP: "p2", rowC: "c3", rowFar: "c4", edge: "top" },
+    B: { vp: p1, vc: c2, far: c1, s: -1, rowP: "p1", rowC: "c2", rowFar: "c1", edge: "bottom" },
+  };
+  centres.forEach((u, i) => {
+    const baseSide = i % 2 === 0 ? "A" : "B";
+    const neckSide = baseSide === "A" ? "B" : "A";
+    // Agujero del cuerpo con lengüeta de apoyo y muesca al hendido.
+    {
+      const S = sides[baseSide], vm = (S.vp + S.vc) / 2, ht = FIX.tongueW / 2, hn2 = FIX.notchW / 2;
+      const aT = deg(ht / R), aN = deg(hn2 / R);
+      if (S.s > 0) { Arc("c", u, vm, R, 360 - aT, aN); Arc("c", u, vm, R, 180 - aN, 180 + aT); }
+      else { Arc("c", u, vm, R, 180 - aT, 180 + aN); Arc("c", u, vm, R, 360 - aN, aT); }
+      const vt = vm - S.s * FIX.tongueFromCentre;
+      L("c", u - ht, S.vp, u - ht, vt); L("c", u + ht, S.vp, u + ht, vt); L("c", u - ht, vt, u + ht, vt);
+      gaps[S.rowP].push([u - ht, u + ht]);
+      const vn = vm + S.s * Math.sqrt(R * R - hn2 * hn2);
+      L("c", u - hn2, vn, u - hn2, S.vc); L("c", u + hn2, vn, u + hn2, S.vc); L("c", u - hn2, S.vc, u + hn2, S.vc);
+      gaps[S.rowC].push([u - hn2, u + hn2]);
+      // Muesca en el borde exterior, del lado de la base.
+      const hw = FIX.edgeNotchW / 2, dd = FIX.edgeNotchD;
+      const ve = S.edge === "top" ? top : 0, vi = S.edge === "top" ? top - dd : dd;
+      L("c", u - hw, ve, u - hw, vi); L("c", u - hw, vi, u + hw, vi); L("c", u + hw, vi, u + hw, ve);
+      gaps[S.edge].push([u - hw, u + hw]);
+    }
+    // Ranura del cuello, abierta hacia el puente.
+    {
+      const S = sides[neckSide], vm = (S.vp + S.vc) / 2, vf = S.vc - S.s * FIX.flareLen;
+      if (S.s > 0) Arc("c", u, vm, hn, 180, 360); else Arc("c", u, vm, hn, 0, 180);
+      L("c", u - hn, vm, u - hn, vf); L("c", u + hn, vm, u + hn, vf);
+      L("c", u - hn, vf, u - hf, S.vc); L("c", u + hn, vf, u + hf, S.vc);
+      L("c", u - hf, S.vc, u - hf, S.far); L("c", u + hf, S.vc, u + hf, S.far); L("c", u - hf, S.far, u + hf, S.far);
+      gaps[S.rowC].push([u - hf, u + hf]);
+      gaps[S.rowFar].push([u - hf, u + hf]);
+    }
+  });
+  const row = (k, v, list) => {
+    const g = [...list].sort((a, b) => a[0] - b[0]);
+    let at = 0;
+    for (const [a, b] of g) { if (a > at + 0.01) L(k, at, v, a, v); at = Math.max(at, b); }
+    if (at < Wi - 0.01) L(k, at, v, Wi, v);
+  };
+  row("h", c1, gaps.c1); row("h", c2, gaps.c2); row("p", p1, gaps.p1); row("p", p2, gaps.p2); row("h", c3, gaps.c3); row("h", c4, gaps.c4);
+  row("c", 0, gaps.bottom); row("c", top, gaps.top);
+  L("c", 0, 0, 0, top); L("c", Wi, 0, Wi, top);
+  return { rows: { c1, c2, p1, p2, c3, c4, top }, centres, x0, y0 };
+}
+
+// Puntos de un arco (extremos y cuadrantes que recorre), para medir la plancha.
+function arcPoints(e) {
+  let a1 = e.a1;
+  while (a1 <= e.a0) a1 += 360;
+  const out = [];
+  // Extremos exactos: los ángulos cardinales que el arco recorre.
+  for (let q = Math.ceil(e.a0 / 90) * 90; q < a1; q += 90) out.push([e.c[0] + e.r * Math.cos((q * Math.PI) / 180), e.c[1] + e.r * Math.sin((q * Math.PI) / 180)]);
+  for (let a = e.a0; a < a1; a += 1) out.push([e.c[0] + e.r * Math.cos((a * Math.PI) / 180), e.c[1] + e.r * Math.sin((a * Math.PI) / 180)]);
+  out.push([e.c[0] + e.r * Math.cos((a1 * Math.PI) / 180), e.c[1] + e.r * Math.sin((a1 * Math.PI) / 180)]);
+  return out;
+}
+
+// ---------- Todo ----------
+function generate(params, plantilla) {
+  const P = { ...DEFAULTS, ...params };
+  const entities = [], problems = [];
+  const map = box(P, plantilla, entities, problems);
+  const right = map([989.1, 900])[0];
+  const bottom = map([700, 525])[1];
+  const ins = insert(P, right + FIX.gap, bottom + 31, entities);
+  const d = derived(P);
+  // Cotas (en el plano generado).
+  const X = (x) => map([x, 900])[0];
+  const Yb = (y) => map([700, y])[1];
+  const Yf = (y) => map([300, y])[1];
+  const dims = [];
+  const H_ = (x0, x1, at, name) => dims.push({ dir: "h", x0, x1, at, name, value: x1 - x0 });
+  const V_ = (y0, y1, at, name) => dims.push({ dir: "v", y0, y1, at, name, value: y1 - y0 });
+  const cols = [67.1, 161.1, 484.1, 578.1, 898.1, 989.1].map(X);
+  const names = ["costado", "frente", "costado", "contrafrente", "pegado"];
+  const pts = entities.flatMap((e) => (e.t === "L" ? [e.a, e.b] : arcPoints(e)));
+  const yMin = Math.min(...pts.map((q) => q[1])), yMax = Math.max(...pts.map((q) => q[1])), xMin = Math.min(...pts.map((q) => q[0]));
+  const xMax = ins.x0 + d.Wi;
+  cols.slice(1).forEach((x, i) => H_(cols[i], x, yMin - 40, names[i]));
+  H_(ins.x0, xMax, yMin - 40, "interior");
+  H_(cols[0], cols[5], yMin - 90, "caja");
+  H_(xMin, xMax, yMin - 140, "plano total");
+  const lidX = (X(586.1) + X(698)) / 2;
+  [530, 620, 630, 724, 1020, 1114, 1124, 1214].map(Yb).forEach((y, i, all) => i && V_(all[i - 1], y, lidX, ["lengüeta", "pestaña", "tapa", "contrafrente", "tapa", "pestaña", "lengüeta"][i - 1]));
+  V_(Yf(735), Yf(1009), X(300), "frente");
+  const r = ins.rows;
+  [0, r.c1, r.c2, r.p1, r.p2, r.c3, r.c4, r.top].map((v) => ins.y0 + v).forEach((y, i, all) => i && V_(all[i - 1], y, xMax + 45, ["pared", "puente", "tabique", "panel", "tabique", "puente", "pared"][i - 1]));
+  V_(ins.y0, ins.y0 + r.top, xMax + 110, "interior");
+  V_(yMin, yMax, xMax + 175, "plano total");
+  const info = {
+    caja: `${P.L} × ${P.A} × ${P.H}`,
+    plancha: `${(xMax - xMin).toFixed(1)} × ${(yMax - yMin).toFixed(1)}`,
+    frasco: `largo máx. ≈ ${d.bottle} · ⌀ cuerpo < ${P.Dc} · ⌀ cuello ≤ ${P.Dn}`,
+    interior: `${d.Wi} × ${d.insertLen} (plegado ${d.folded} × ${d.Wi} × ${d.wall})`,
+    bounds: { xMin, xMax, yMin, yMax },
+  };
+  return { P, entities, dims, info, anchors: { map, insert: ins }, warnings: [...validate(P), ...problems] };
+}
+
+// ---------- Salidas ----------
+const LAYERS = { c: ["CORTE", 1], h: ["HENDIDO", 2], p: ["PERFORADO", 6] };
+
+function toDxf(model, { dims = true, name = "GALENO" } = {}) {
+  const out = [];
+  const put = (c, v) => out.push(String(c).padStart(3), String(v));
+  const f = (v) => (Math.round(v * 1e4) / 1e4).toString();
+  put(0, "SECTION"); put(2, "HEADER"); put(9, "$ACADVER"); put(1, "AC1009"); put(9, "$INSUNITS"); put(70, 4); put(9, "$MEASUREMENT"); put(70, 1); put(0, "ENDSEC");
+  put(0, "SECTION"); put(2, "TABLES"); put(0, "TABLE"); put(2, "LAYER"); put(70, 4);
+  for (const [n, c] of [...Object.values(LAYERS), ["COTAS", 5]]) { put(0, "LAYER"); put(2, n); put(70, 0); put(62, c); put(6, "CONTINUOUS"); }
+  put(0, "ENDTAB"); put(0, "ENDSEC");
+  put(0, "SECTION"); put(2, "ENTITIES");
+  for (const e of model.entities) {
+    const [layer, color] = LAYERS[e.k];
+    if (e.t === "L") { put(0, "LINE"); put(8, layer); put(62, color); put(10, f(e.a[0])); put(20, f(e.a[1])); put(30, 0); put(11, f(e.b[0])); put(21, f(e.b[1])); put(31, 0); }
+    else { put(0, "ARC"); put(8, layer); put(62, color); put(10, f(e.c[0])); put(20, f(e.c[1])); put(30, 0); put(40, f(e.r)); put(50, f(((e.a0 % 360) + 360) % 360)); put(51, f(((e.a1 % 360) + 360) % 360)); }
+  }
+  if (dims) {
+    const line = (a, b) => { put(0, "LINE"); put(8, "COTAS"); put(62, 5); put(10, f(a[0])); put(20, f(a[1])); put(30, 0); put(11, f(b[0])); put(21, f(b[1])); put(31, 0); };
+    const text = (at, s, rot) => { put(0, "TEXT"); put(8, "COTAS"); put(62, 5); put(10, f(at[0])); put(20, f(at[1])); put(30, 0); put(40, 10); put(1, s); if (rot) put(50, rot); put(72, 1); put(11, f(at[0])); put(21, f(at[1])); put(31, 0); };
+    for (const d of model.dims) {
+      const v = fmt(d.value);
+      if (d.dir === "h") { line([d.x0, d.at], [d.x1, d.at]); line([d.x0, d.at - 7], [d.x0, d.at + 7]); line([d.x1, d.at - 7], [d.x1, d.at + 7]); text([(d.x0 + d.x1) / 2, d.at + 5], v); }
+      else { line([d.at, d.y0], [d.at, d.y1]); line([d.at - 7, d.y0], [d.at + 7, d.y0]); line([d.at - 7, d.y1], [d.at + 7, d.y1]); text([d.at - 5, (d.y0 + d.y1) / 2], v, 90); }
+    }
+    const b = model.info.bounds;
+    const notes = [`${name}  caja ${model.info.caja} mm`, `L=${model.P.L} A=${model.P.A} H=${model.P.H} n=${model.P.n} Dc=${model.P.Dc} Dn=${model.P.Dn} p=${model.P.p} t=${model.P.t}`, "CORTE rojo - HENDIDO amarillo - PERFORADO magenta (intermitente 5x5). Troquelar de dorso."];
+    notes.forEach((s, i) => { put(0, "TEXT"); put(8, "COTAS"); put(62, 5); put(10, f(b.xMin)); put(20, f(b.yMax + 60 - i * 18)); put(30, 0); put(40, i ? 9 : 14); put(1, s); });
+  }
+  put(0, "ENDSEC"); put(0, "EOF");
+  return out.join("\r\n") + "\r\n";
+}
+
+// CF2 (Common Format 2): formato de intercambio de troquelería que ArtiosCAD importa.
+// Tipo de línea: 1 corte, 2 hendido, 3 perforado. Pointage 2 pt. Arcos: dirección 1 antihorario.
+function toCf2(model, { name = "GALENO" } = {}) {
+  const b = model.info.bounds;
+  const f = (v) => (Math.round(v * 1e3) / 1e3).toFixed(3);
+  const type = { c: 1, h: 2, p: 3 };
+  const lines = ["$BOF", "V2", "ORDER", `MAIN,${name}`, "END", `MAIN,${name}`, "UM", `LL,${f(b.xMin)},${f(b.yMin)}`, `UR,${f(b.xMax)},${f(b.yMax)}`, "SCALE,1,1"];
+  for (const e of model.entities) {
+    if (e.t === "L") lines.push(`L,2,${type[e.k]},0,${f(e.a[0])},${f(e.a[1])},${f(e.b[0])},${f(e.b[1])},0,0`);
+    else {
+      const p = (a) => [e.c[0] + e.r * Math.cos((a * Math.PI) / 180), e.c[1] + e.r * Math.sin((a * Math.PI) / 180)];
+      const [s, t] = [p(e.a0), p(e.a1)];
+      lines.push(`A,2,${type[e.k]},0,${f(s[0])},${f(s[1])},${f(t[0])},${f(t[1])},${f(e.c[0])},${f(e.c[1])},1,0,0`);
+    }
+  }
+  lines.push("END", "$EOF");
+  return lines.join("\r\n") + "\r\n";
+}
+
+const fmt = (v) => (Math.abs(v - Math.round(v)) < 0.05 ? String(Math.round(v)) : v.toFixed(1));
+
+// Fórmulas del galeno paramétrico: las mismas que muestra la guía, como funciones de las variables.
+// DIM_FORMULAS etiqueta las cotas del plano; TABLES arma las tablas de la guía.
+
+const DIM_FORMULAS = {
+  h: {
+    costado: ["A", (P) => P.A],
+    frente: ["L + 3", (P) => P.L + 3],
+    contrafrente: ["L", (P) => P.L],
+    pegado: ["A − 3", (P) => P.A - 3],
+    interior: ["H − 6", (P) => P.H - 6],
+    caja: ["3A + 2L", (P) => 3 * P.A + 2 * P.L],
+  },
+  v: {
+    lengüeta: ["A − 4", (P) => P.A - 4],
+    pestaña: ["10", () => 10],
+    tapa: ["A", (P) => P.A],
+    contrafrente: ["H + 22", (P) => P.H + 22],
+    frente: ["H", (P) => P.H],
+    pared: ["A − 6", (P) => P.A - 6],
+    puente: ["t", (P) => P.t],
+    tabique: ["A − 6", (P) => P.A - 6],
+    panel: ["L − 65", (P) => P.L - 65],
+    interior: ["4A + 2t + L − 89", (P) => 4 * P.A + 2 * P.t + P.L - 89],
+  },
+};
+
+const x = (a, b) => `${fmtMm(a)} × ${fmtMm(b)}`;
+const fmtMm = (v) => (Math.abs(v - Math.round(v)) < 0.005 ? String(Math.round(v)) : (Math.round(v * 100) / 100).toString().replace(".", ","));
+
+// [pieza, fórmula, valor(P)]
+const TABLES = {
+  tubo: [
+    ["Costado exterior · ancho", "A", (P) => P.A],
+    ["Frente · ancho", "L + 3", (P) => P.L + 3],
+    ["Costado · ancho", "A", (P) => P.A],
+    ["Contrafrente · ancho", "L", (P) => P.L],
+    ["Solapa de pegado · ancho", "A − 3", (P) => P.A - 3],
+    ["Contrafrente · alto", "H + 22", (P) => P.H + 22],
+    ["Frente · alto", "H", (P) => P.H],
+    ["Costado exterior · alto", "H + 16", (P) => P.H + 16],
+    ["Costado · alto", "H + 13", (P) => P.H + 13],
+    ["Solapa de pegado · alto", "H + 8", (P) => P.H + 8],
+    ["Tubo abierto · ancho", "3A + 2L", (P) => 3 * P.A + 2 * P.L],
+  ],
+  cierres: [
+    ["Tapa", "A × L", (P) => x(P.A, P.L)],
+    ["Pestaña de pared doble", "10", () => 10],
+    ["Lengüeta", "(A − 4) × (L − 17)", (P) => x(P.A - 4, P.L - 17)],
+    ["Diente de la lengüeta", "85 × 5", () => x(85, 5)],
+    ["Ranura de traba", "86,5 × 10", () => x(86.5, 10)],
+    ["Contratapa · profundidad", "A − 6", (P) => P.A - 6],
+    ["Contratapa · tramo recto", "L − 135,3", (P) => P.L - 135.3],
+    ["Guardapolvo del costado", "A + 26", (P) => P.A + 26],
+    ["Guardapolvo de la solapa", "A + 28,5", (P) => P.A + 28.5],
+    ["Oreja · escala", "A / 94", (P) => P.A / 94],
+  ],
+  interior: [
+    ["Ancho", "H − 6", (P) => P.H - 6],
+    ["Pared exterior", "A − 6", (P) => P.A - 6],
+    ["Puente", "t", (P) => P.t],
+    ["Tabique", "A − 6", (P) => P.A - 6],
+    ["Panel central", "L − 65", (P) => P.L - 65],
+    ["Largo total", "4A + 2t + L − 89", (P) => 4 * P.A + 2 * P.t + P.L - 89],
+    ["Plegado", "(L − 65 + 2t) × (H − 6) × (A − 6)", (P) => `${fmtMm(P.L - 65 + 2 * P.t)} × ${fmtMm(P.H - 6)} × ${fmtMm(P.A - 6)}`],
+    ["Frasco · largo máximo", "L − 14", (P) => P.L - 14],
+    ["Agujero del cuerpo", "⌀ Dc", (P) => P.Dc],
+    ["Ranura del cuello", "Dn", (P) => P.Dn],
+    ["Centros de los frascos", "Wi/2 + (i − (n − 1)/2)·p", (P) => Array.from({ length: P.n }, (_, i) => fmtMm((P.H - 6) / 2 + (i - (P.n - 1) / 2) * P.p)).join(" · ")],
+  ],
+};
+
+const PLANTILLA = [["L","h",484.093,734.749,484.093,1009.285],["L","h",161.093,1017.017,161.093,727.017],["L","h",578.093,1015.517,578.093,728.517],["L","h",898.093,1013.017,898.093,731.017],["L","h",170.155,735.017,483.093,735.017],["L","h",161.093,727.018,67.093,727.018],["L","h",577.093,724.017,698.343,724.017],["L","h",784.843,724.017,898.093,724.017],["L","h",989.093,731.017,898.093,731.017],["L","h",898.093,630.017,577.093,630.017],["L","h",484.927,728.517,578.093,728.517],["L","h",586.093,620.017,889.093,620.017],["L","h",170.093,1009.017,483.093,1009.017],["L","h",161.093,1017.016,67.093,1017.016],["L","h",577.093,1020.017,698.343,1020.017],["L","h",784.843,1020.017,898.093,1020.017],["L","h",989.093,1013.017,898.093,1013.017],["L","h",898.093,1114.017,577.093,1114.017],["L","h",484.927,1015.517,578.093,1015.517],["L","h",586.093,1124.017,889.093,1124.017],["L","c",898.093,731.017,898.093,630.017],["L","c",889.093,530.017,784.343,530.017],["L","c",699.343,530.017,586.093,530.017],["L","c",484.927,728.517,484.927,733.816],["L","c",989.093,1015.517,989.093,728.517],["L","c",578.093,728.517,577.093,724.017],["L","c",577.093,724.017,577.093,630.017],["A","c",256.294,693.158,101.043,160.422,191.802],["L","c",69.093,725.018,67.093,727.018],["A","c",194.062,775.558,134.802,202.019,242.027],["A","c",140.799,670,16.776,233.557,8.545],["L","c",67.093,1017.016,67.093,727.018],["L","c",170.155,735.017,207.026,663.3],["L","c",481.455,734.164,445.023,663.3],["A","c",418.343,677.017,30,270,332.792],["A","c",483.094,733.017,2,23.539,145.013],["L","c",898.093,1013.017,898.093,1114.017],["L","c",888.093,1214.017,784.343,1214.017],["L","c",699.343,1214.017,586.093,1214.017],["L","c",578.093,1015.517,577.093,1020.017],["L","c",577.093,1020.017,577.093,1115.017],["L","c",69.093,1019.016,67.093,1017.016],["L","c",170.093,1009.017,206.963,1080.733],["L","c",481.455,1009.87,445.024,1080.733],["A","c",418.343,1067.017,30,27.208,90],["A","c",483.094,1011.017,2,215.005,336.475],["L","c",484.927,1015.517,484.927,1010.218],["A","c",256.294,1050.876,101.043,168.199,199.579],["A","c",194.063,968.475,134.803,117.973,157.98],["A","c",140.798,1074.034,16.775,351.453,126.443],["L","c",699.343,525.017,784.343,525.017],["L","c",699.343,525.017,699.343,530.017],["L","c",784.343,525.017,784.343,530.017],["L","c",698.343,724.017,784.843,724.017],["L","c",698.343,724.017,698.343,734.017],["L","c",784.843,724.017,784.843,734.017],["L","c",698.343,734.017,784.843,734.017],["L","c",569.093,608.517,487.927,608.517],["L","c",233.706,647.017,418.343,647.017],["A","c",233.706,677.017,30,207.209,270],["L","c",699.343,1219.017,784.343,1219.017],["L","c",699.343,1219.017,699.343,1214.017],["L","c",784.343,1219.017,784.343,1214.017],["L","c",698.343,1020.017,784.843,1020.017],["L","c",698.343,1020.017,698.343,1010.017],["L","c",784.843,1020.017,784.843,1010.017],["L","c",698.343,1010.017,784.843,1010.017],["L","c",233.644,1097.017,418.343,1097.017],["A","c",233.644,1067.017,30,90,152.792],["L","c",577.093,630.017,569.093,608.517],["L","c",569.093,1135.517,487.927,1135.517],["L","c",577.093,1114.017,569.093,1135.517],["L","c",989.093,1015.517,989.093,1135.517],["L","c",989.093,1135.517,906.093,1135.517],["L","c",898.093,1114.017,906.093,1135.517],["L","c",989.093,728.517,989.093,608.517],["L","c",989.093,608.517,906.093,608.517],["L","c",898.093,630.017,906.093,608.517],["L","c",487.927,1018.517,484.927,1015.517],["L","c",487.927,1018.517,487.927,1135.517],["L","c",487.927,725.517,484.927,728.517],["L","c",487.927,725.517,487.927,608.517],["L","c",577.093,1115.017,586.093,1124.017],["L","c",586.093,1124.017,586.093,1214.017],["L","c",898.093,1115.017,889.093,1124.017],["L","c",577.093,629.017,586.093,620.017],["L","c",586.093,620.017,586.093,530.017],["L","c",898.093,629.017,889.093,620.017],["L","c",889.093,620.017,889.093,530.017],["L","c",161.093,1017.017,162.093,1017.017],["L","c",162.093,1017.017,170.093,1009.017],["L","c",161.155,727.017,162.155,727.017],["L","c",162.155,727.017,170.155,735.017],["L","c",898.093,1114.017,898.093,1115.017],["L","c",889.093,1124.017,888.093,1214.017],["L","c",577.093,629.017,577.093,630.017],["L","c",898.093,629.017,898.093,630.017]];
+const form = document.getElementById("form");
+const state = { ...DEFAULTS };
+let model, last = null;
+for (const p of PARAMS) {
+  const row = document.createElement("div");
+  row.className = "var";
+  row.innerHTML = '<b>' + p.key + '</b><label for="v-' + p.key + '">' + p.label + '</label><input id="v-' + p.key + '" type="number" inputmode="decimal" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + DEFAULTS[p.key] + '"><input id="r-' + p.key + '" type="range" aria-label="' + p.label + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + DEFAULTS[p.key] + '">';
+  form.appendChild(row);
+}
+const f1 = (v) => (Math.round(v * 10) / 10).toString();
+const fmtV = (v) => (typeof v === "number" ? fmtMm(v) : v);
+function arrow(x0, y0, x1, y1) {
+  const L = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / L, uy = (y1 - y0) / L, s = Math.min(9, L / 4), w = s * 0.35;
+  const h = (x, y, dx, dy) => "M" + f1(x) + " " + f1(y) + "L" + f1(x + dx * s - dy * w) + " " + f1(y + dy * s + dx * w) + "L" + f1(x + dx * s + dy * w) + " " + f1(y + dy * s - dx * w) + "Z";
+  return h(x0, y0, ux, uy) + h(x1, y1, -ux, -uy);
+}
+function planSvg(prevDims) {
+  const b = model.info.bounds;
+  for (const d of model.dims) if (d.dir === "v" && d.at > b.xMax + 60) d.at += 100;
+  const X0 = b.xMin - 40, X1 = b.xMax + 330, Y0 = b.yMin - 175, Y1 = b.yMax + 30;
+  const Y = (y) => Y1 - y;
+  const paths = { c: "", h: "", p: "" };
+  for (const e of model.entities) {
+    if (e.t === "L") paths[e.k] += "M" + f1(e.a[0]) + " " + f1(Y(e.a[1])) + "L" + f1(e.b[0]) + " " + f1(Y(e.b[1]));
+    else {
+      let sweep = e.a1 - e.a0; while (sweep <= 0) sweep += 360; while (sweep > 360) sweep -= 360;
+      const at = (a) => [e.c[0] + e.r * Math.cos(a * Math.PI / 180), e.c[1] + e.r * Math.sin(a * Math.PI / 180)];
+      const s = at(e.a0), t = at(e.a1);
+      paths[e.k] += "M" + f1(s[0]) + " " + f1(Y(s[1])) + "A" + f1(e.r) + " " + f1(e.r) + " 0 " + (sweep > 180 ? 1 : 0) + " 0 " + f1(t[0]) + " " + f1(Y(t[1]));
+    }
+  }
+  const text = (d) => {
+    const entry = DIM_FORMULAS[d.dir][d.name], v = fmt(d.value).replace(".", ",");
+    return entry && entry[0] !== v ? [entry[0] + " = " + v, '<tspan class="fx">' + entry[0] + '</tspan><tspan class="val"> = ' + v + "</tspan>"] : [v, '<tspan class="val">' + v + "</tspan>"];
+  };
+  let dims = "";
+  model.dims.forEach((d, i) => {
+    const hot = prevDims && prevDims[i] !== undefined && Math.abs(prevDims[i] - d.value) > 0.005 ? " hot" : "";
+    const [plain, rich] = text(d);
+    if (d.dir === "h") {
+      const y = Y(d.at);
+      dims += '<g class="dim' + hot + '"><path d="M' + f1(d.x0) + " " + f1(y - 8) + "V" + f1(y + 8) + "M" + f1(d.x1) + " " + f1(y - 8) + "V" + f1(y + 8) + "M" + f1(d.x0) + " " + f1(y) + "H" + f1(d.x1) + '"/><path class="ar" d="' + arrow(d.x0, y, d.x1, y) + '"/><text x="' + f1((d.x0 + d.x1) / 2) + '" y="' + f1(y - 7) + '">' + rich + "</text></g>";
+    } else {
+      const x = d.at, ym = Y((d.y0 + d.y1) / 2);
+      const base = '<g class="dim' + hot + '"><path d="M' + f1(x - 8) + " " + f1(Y(d.y0)) + "H" + f1(x + 8) + "M" + f1(x - 8) + " " + f1(Y(d.y1)) + "H" + f1(x + 8) + "M" + f1(x) + " " + f1(Y(d.y0)) + "V" + f1(Y(d.y1)) + '"/><path class="ar" d="' + arrow(x, Y(d.y0), x, Y(d.y1)) + '"/>';
+      dims += plain.length * 10.4 < Math.abs(d.y1 - d.y0) - 12
+        ? base + '<text x="' + f1(x - 7) + '" y="' + f1(ym) + '" transform="rotate(-90 ' + f1(x - 7) + " " + f1(ym) + ')">' + rich + "</text></g>"
+        : base + '<text class="side" x="' + f1(x + 10) + '" y="' + f1(ym + 6) + '">' + rich + "</text></g>";
+    }
+  });
+  const map = model.anchors.map, ins = model.anchors.insert, r = ins.rows;
+  const calls = [
+    [map([530, 1090]), "guardapolvo A + 26"],
+    [map([944, 1090]), "A + 28,5"],
+    [map([112, 1050]), "oreja × A/94"],
+    [map([326, 1068]), "contratapa A − 6"],
+    [map([741.5, 1000]), "traba 86,5 × 10"],
+    [map([741.5, 1228]), "diente 85 × 5"],
+    [[ins.x0 + ins.centres[0], ins.y0 + (r.p2 + r.c3) / 2], "⌀Dc"],
+  ];
+  if (ins.centres.length > 1) calls.push([[ins.x0 + ins.centres[1], ins.y0 + (r.p2 + r.c3) / 2 + 9], "Dn"]);
+  calls.push([[ins.x0 + ins.centres[ins.centres.length > 1 ? 1 : 0], ins.y0 + r.c1 / 2], "muesca 35 × 4"]);
+  const callSvg = calls.map(([p, t]) => '<text class="call" x="' + f1(p[0]) + '" y="' + f1(Y(p[1])) + '">' + t + "</text>").join("");
+  return '<svg class="plan" viewBox="' + f1(X0) + " 0 " + f1(X1 - X0) + " " + f1(Y1 - Y0) + '" role="img" aria-label="Troquel galeno ' + model.info.caja + ' mm con cada cota expresada en sus variables"><path class="c" d="' + paths.c + '"/><path class="h" d="' + paths.h + '"/><path class="p" d="' + paths.p + '"/>' + dims + callSvg + "</svg>";
+}
+const prevTables = {};
+function tableHtml(key) {
+  const rows = TABLES[key].map(([name, formula, fn]) => [name, formula, fmtV(fn(state))]);
+  const before = prevTables[key];
+  prevTables[key] = rows.map((r) => r[2]);
+  return "<div class=\"scroll\"><table><thead><tr><th>Pieza</th><th>Fórmula</th><th>mm</th></tr></thead><tbody>" + rows.map((r, i) => "<tr" + (before && before[i] !== r[2] ? ' class="hot"' : "") + "><td>" + r[0] + '</td><td class="f">' + r[1] + '</td><td class="v">' + r[2] + "</td></tr>").join("") + "</tbody></table></div>";
+}
+let hotTimer = 0;
+function render(source) {
+  for (const p of PARAMS) {
+    const num = document.getElementById("v-" + p.key), rng = document.getElementById("r-" + p.key);
+    if (source === rng) num.value = rng.value; else if (source === num) rng.value = num.value;
+    const v = Number(num.value);
+    if (Number.isFinite(v) && v > 0) state[p.key] = p.key === "n" ? Math.max(1, Math.round(v)) : v;
+  }
+  const prevDims = model ? model.dims.map((d) => d.value) : null;
+  model = generate(state, PLANTILLA);
+  document.getElementById("plan").innerHTML = planSvg(prevDims);
+  for (const key of ["tubo", "cierres", "interior"]) document.getElementById("tb-" + key).innerHTML = tableHtml(key);
+  document.getElementById("caption").textContent = "L " + fmtMm(state.L) + " · A " + fmtMm(state.A) + " · H " + fmtMm(state.H) + " · t " + fmtMm(state.t) + " · plancha " + model.info.plancha;
+  const facts = [["Caja", model.info.caja + " mm"], ["Plancha", model.info.plancha + " mm"], ["Frasco", model.info.frasco], ["Interior", model.info.interior]];
+  document.getElementById("facts").innerHTML = facts.map(([k, v]) => "<dt>" + k + "</dt><dd>" + v + "</dd>").join("");
+  document.getElementById("warn").innerHTML = model.warnings.map((w) => "<li>" + w + "</li>").join("");
+  clearTimeout(hotTimer);
+  hotTimer = setTimeout(() => document.querySelectorAll(".hot").forEach((e) => e.classList.remove("hot")), 1400);
+}
+const name = () => "GALENO-" + fmtMm(state.L) + "x" + fmtMm(state.A) + "x" + fmtMm(state.H);
+const say = (t) => (document.getElementById("status").textContent = t);
+function download(text, ext) {
+  try {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: "application/octet-stream" }));
+    a.download = name() + "." + ext;
+    document.body.appendChild(a); a.click(); a.remove();
+    say("Descarga iniciada: " + a.download + ".");
+  } catch (e) { say("No se pudo descargar. Usá Copiar y pegalo en un archivo ." + ext + "."); }
+}
+document.getElementById("dl-dxf").addEventListener("click", () => download(toDxf(model, { name: name() }), "dxf"));
+document.getElementById("dl-cf2").addEventListener("click", () => download(toCf2(model, { name: name() }), "cf2"));
+async function copy(text, ext) {
+  try { await navigator.clipboard.writeText(text); say("Copiado. Pegalo en un archivo de texto y guardalo como " + name() + "." + ext + "."); }
+  catch (e) { say("El navegador no dejó copiar."); }
+}
+document.getElementById("cp-dxf").addEventListener("click", () => copy(toDxf(model, { name: name() }), "dxf"));
+document.getElementById("cp-cf2").addEventListener("click", () => copy(toCf2(model, { name: name() }), "cf2"));
+form.addEventListener("input", (e) => render(e.target));
+document.querySelectorAll("[data-preset]").forEach((b) => b.addEventListener("click", () => {
+  const p = { ...DEFAULTS, ...JSON.parse(b.dataset.preset) };
+  for (const k in p) { document.getElementById("v-" + k).value = p[k]; document.getElementById("r-" + k).value = p[k]; }
+  render(); say("Cargado: " + b.textContent + ".");
+}));
+render();
+</script>
