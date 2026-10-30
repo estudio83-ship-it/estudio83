@@ -1,25 +1,33 @@
 // Caja tipo galeno, troquel 6463: del plano DXF a la caja armada, en una figura isométrica.
-// node build.mjs [--light]  →  caja-galeno.html / caja-galeno-light.html
+// node build.mjs [--light] [--mas 50]  →  caja-galeno.html / caja-galeno-light.html
+// --mas N: frasco N mm más largo (por defecto 50). Lee troquel-6463-masN.dxf, que escribe estirar.mjs;
+// con --mas 0 usa el troquel original.
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as k from "./kit/iso-kit.mjs";
 import * as G from "./kit/lathe.mjs";
 import { readDxf, facesOf, hingeTree, faceAt } from "./troquel.mjs";
+import { stretchOf } from "./estirar.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const theme = process.argv.includes("--light") ? "light" : "dark";
+const argAt = process.argv.indexOf("--mas");
+const E = argAt > 0 ? Number(process.argv[argAt + 1]) : 50;
+// Todas las coordenadas de abajo son del plano original; «o» las lleva al plano estirado.
+const o = stretchOf(E);
 const kitScript = () => readFileSync(join(HERE, "kit/iso-kit.mjs"), "utf8").replace(/^export /gm, "");
 
 // ---------- Verdad: el troquel ----------
-const model = facesOf(readDxf(join(HERE, "troquel-6463.dxf")));
-const BACK = faceAt(model, [738, 872]);
-const INSERT = faceAt(model, [1131, 887]);
+const DXF = E ? `troquel-6463-mas${E}.dxf` : "troquel-6463.dxf";
+const model = facesOf(readDxf(join(HERE, DXF)));
+const BACK = faceAt(model, o([738, 872]));
+const INSERT = faceAt(model, o([1131, 880]));
 const tree = hingeTree(model, [BACK, INSERT]);
-const at = (x, y) => faceAt(model, [x, y]);
+const at = (x, y) => faceAt(model, o([x, y]));
 
-// Medidas del plano (mm): tubo 320 × 94, alto 276 entre hendidos del frente.
-const W = 320, D = 94, H = 276;
+// Medidas del plano (mm): tubo (320 + E) × 94, alto 276 entre hendidos del frente.
+const W = 320 + E, D = 94, H = 276;
 
 // Papel de cada cara y su secuencia, en segundos de un ciclo de 20 s.
 const ROLE = {};
@@ -54,15 +62,16 @@ const STEP_AT = [0, 1.4, 4.1, 6.0, 8.4, 12.1, 15.6, 19.2];
 const CYCLE = 20;
 
 // Interior: del plano (x 997–1265, y 556–1219) al fondo de la caja, girado 90°.
-const INSERT_FROM = [1131.1, 887.5];
-const INSERT_TO = [738, 872];
+const INSERT_FROM = [1131.1 + E, 887.5 + E / 2];
+const INSERT_TO = [738 + E / 2, 872];
 const MOVE = [4.1, 6.0];
 
-// Frascos: cuerpo ⌀76 en el agujero ⌀80, cuello ⌀31 en la ranura ⌀31.
+// Frascos: cuerpo ⌀76 en el agujero ⌀80, cuello ⌀31 en la ranura ⌀31; largo 306 + E.
+const LEN = 306 + E;
 const AXIS_Z = 44.5;
 const BOTTLES = [
   { y: 1045.6 - 259.1, from: 584, dir: 1 },
-  { y: 1131.6 - 259.1, from: 892, dir: -1 },
+  { y: 1131.6 - 259.1, from: 892 + E, dir: -1 },
   { y: 1218.1 - 259.1, from: 584, dir: 1 },
 ];
 const DROP = 230;
@@ -70,11 +79,11 @@ const BOTTLE_T = [[6.1, 7.4], [6.5, 7.8], [6.9, 8.2]];
 
 // ---------- Cámara ----------
 const WIDTH = 640, HEIGHT = 400;
-const MAT = { x: 10, y: 470, w: 1330, d: 840, r: 14 };
+const MAT = { x: 10 - E, y: 470, w: 1330 + 2 * E, d: 840, r: 14 };
 const MAT_H = 6;
-const P = k.fitProjection([...k.boxCorners(MAT, -MAT_H - 18, 0), [738, 872, 330]], WIDTH, HEIGHT, { pad: 22, azimuth: 58, elevation: 32 });
+const P = k.fitProjection([...k.boxCorners(MAT, -MAT_H - 18, 0), [738 + E / 2, 872, 330]], WIDTH, HEIGHT, { pad: 22, azimuth: 58, elevation: 32 });
 const ZOOM = 1.85;
-const FOCUS = [738, 872, 47];
+const FOCUS = [738 + E / 2, 872, 47];
 
 const pt = (p) => k.iso(p, P);
 const S = (paths, style) => k.solidSvg(paths, style);
@@ -104,7 +113,7 @@ function bench() {
   out.push(L(k.lineOnTop([ry.x, ry.y], [ry.x + ry.w, ry.y], 0, P), { tone: "lo" }));
   out.push(L(t1.minor, { tone: "faint" }), L(t1.major, { tone: "lo" }));
   const rx = { x: inner.x + inner.w + 2, y: inner.y, w: 16, d: inner.d };
-  const t2 = k.topTicks(rx.y + 6, rx.y + rx.d - 6, 10, 5, rx.x, 0, [4, 8], P, "x");
+  const t2 = k.topTicks(rx.y + 6, rx.y + rx.d - 6, 10, 5, rx.x, 0, [4, 8], P, "y");
   out.push(L(k.lineOnTop([rx.x, rx.y], [rx.x, rx.y + rx.d], 0, P), { tone: "lo" }));
   out.push(L(t2.minor, { tone: "faint" }), L(t2.major, { tone: "lo" }));
   // Marcas de registro en las cuatro esquinas de la retícula.
@@ -131,15 +140,15 @@ function tools() {
 
 // ---------- Frascos ----------
 const BODY_R = 38, NECK_R = 15.5;
-const PROFILE = [[0, 30], [1.5, 35, 1], [5, 38, 1], [228, 38], [236, 36.5, 1], [250, 29, 1], [262, 19, 1], [268, NECK_R], [292, NECK_R], [292, 17], [306, 17]];
+const PROFILE = [[0, 30], [1.5, 35, 1], [5, 38, 1], [228, 38], [236, 36.5, 1], [250, 29, 1], [262, 19, 1], [268, NECK_R], [292, NECK_R], [292, 17], [306, 17]].map(([s, r, f], i) => (i > 2 ? [s + E, r, f] : [s, r, f]).filter((v) => v !== undefined));
 function bottle(b) {
   const F = G.frameAlong([b.from, b.y, AXIS_Z], [b.dir, 0, 0]);
-  const label = L(G.arcOf(F, 40, BODY_R, P) + G.arcOf(F, 196, BODY_R, P), { tone: "lo" });
+  const label = L(G.arcOf(F, 40, BODY_R, P) + G.arcOf(F, 196 + E, BODY_R, P), { tone: "lo" });
   const out = [S(G.solidOf(PROFILE.slice(0, 9), F, P), { tone: "hi", inner: label })];
-  out.push(L(G.ribsOf(F, 64, 172, BODY_R, 3, P, { phase: 0.4, least: 0.5 }), { tone: "faint", free: true }));
-  out.push(S(G.disc(274, 278, NECK_R + 1.2, F, P), { tone: "mid" }));
-  out.push(S(G.disc(292, 306, 17, F, P), { tone: "mid" }));
-  out.push(L(G.ribsOf(F, 292, 306, 17, 30, P, { seams: true }), { tone: "lo" }));
+  out.push(L(G.ribsOf(F, 64, 172 + E, BODY_R, 3, P, { phase: 0.4, least: 0.5 }), { tone: "faint", free: true }));
+  out.push(S(G.disc(274 + E, 278 + E, NECK_R + 1.2, F, P), { tone: "mid" }));
+  out.push(S(G.disc(292 + E, 306 + E, 17, F, P), { tone: "mid" }));
+  out.push(L(G.ribsOf(F, 292 + E, 306 + E, 17, 30, P, { seams: true }), { tone: "lo" }));
   return out.join("");
 }
 
@@ -155,7 +164,7 @@ const FACES = model.faces.map((f, i) => ({
 
 // Impresión en la cara exterior (lado de abajo del plano: «troquelar de dorso»).
 const MARKS = [];
-const mark = (face, side, pts, tone, extra = {}) => MARKS.push({ face, side, pts, tone, ...extra });
+const mark = (face, side, pts, tone, extra = {}) => MARKS.push({ face, side, pts: pts.map(o), tone, ...extra });
 const FRONT = at(320, 870);
 {
   const [x0, x1, y0, y1] = [161.1 + 14, 484.1 - 14, 735 + 14, 1009 - 14];
@@ -181,10 +190,11 @@ for (const lid of LIDS) {
 // ---------- SVG ----------
 const bottlesSvg = BOTTLES.map((b, i) => `<g data-bottle="${i}" opacity="0">${bottle(b)}</g>`).join("");
 const backHalo = k.haloOf({ x: 578, y: 724, w: W, d: 296, r: 3 }, 0, D, P);
+const LABEL = E ? `troquel 6463 +${E}` : "troquel 6463";
 const svg = k.figureSvg({
   width: WIDTH,
   height: HEIGHT,
-  label: `Caja tipo galeno del troquel 6463, armada sobre una plancha de corte. El plano de cartón se pliega por sus hendidos: el interior levanta dos tabiques huecos de 28 mm y se apoya en el fondo, entran tres frascos alternados (cuerpo en el agujero de 80 mm, cuello en la ranura de 31 mm), el tubo se cierra sobre la solapa de pegado y cada extremo se cierra con contratapa, guardapolvos y una tapa de pared doble de 10 mm cuya lengüeta traba en la ranura del fondo. Caja de ${W} × ${D} × ${H} mm.`,
+  label: `Caja tipo galeno del ${LABEL}, armada sobre una plancha de corte. El plano de cartón se pliega por sus hendidos: el interior levanta dos tabiques huecos de 28 mm y se apoya en el fondo, entran tres frascos alternados (cuerpo en el agujero de 80 mm, cuello en la ranura de 31 mm), el tubo se cierra sobre la solapa de pegado y cada extremo se cierra con contratapa, guardapolvos y una tapa de pared doble de 10 mm cuya lengüeta traba en la ranura del fondo. Caja de ${W} × ${D} × ${H} mm.`,
   body: [
     `<g data-part="scene">`,
     bench(),
@@ -212,7 +222,7 @@ const MARKS = ${JSON.stringify(MARKS)};
 const BOTTLES = ${JSON.stringify(BOTTLES)};
 const BOTTLE_T = ${JSON.stringify(BOTTLE_T)};
 const STEPS = ${JSON.stringify(STEPS)}, STEP_AT = ${JSON.stringify(STEP_AT)};
-const CYCLE = ${CYCLE}, DROP = ${DROP}, ZOOM = ${ZOOM};
+const CYCLE = ${CYCLE}, LEN = ${LEN}, DROP = ${DROP}, ZOOM = ${ZOOM};
 const MOVE = ${JSON.stringify(MOVE)}, INSERT_FROM = ${JSON.stringify(INSERT_FROM)}, INSERT_TO = ${JSON.stringify(INSERT_TO)};
 const FOCUS = ${JSON.stringify(FOCUS)}, AXIS_Z = ${AXIS_Z}, VIEW = [${WIDTH}, ${HEIGHT}];
 const DIMS = "${W} × ${D} × ${H} mm";
@@ -368,7 +378,7 @@ function engine() {
       B.g.setAttribute("transform", translateAlong(P, [0, 0, dz]));
       B.g.setAttribute("opacity", op.toFixed(3));
       B.g.style.display = op > 0 ? "" : "none";
-      const x0 = Math.min(B.b.from, B.b.from + B.b.dir * 306), x1 = Math.max(B.b.from, B.b.from + B.b.dir * 306);
+      const x0 = Math.min(B.b.from, B.b.from + B.b.dir * LEN), x1 = Math.max(B.b.from, B.b.from + B.b.dir * LEN);
       const w = [];
       for (const x of [x0, x1]) for (const y of [B.b.y - 38, B.b.y + 38]) for (const z of [AXIS_Z - 38 + dz, AXIS_Z + 38 + dz]) w.push([x, y, z]);
       items.push({ bottle: B, w, s: w.map((q) => iso(q, P)), depth: depthOf([(x0 + x1) / 2, B.b.y, AXIS_Z + dz], P), hidden: op <= 0 });
@@ -524,7 +534,7 @@ function engine() {
 
 const body = k.plateHtml({
   fig: "Fig 1",
-  title: "Caja galeno · troquel 6463",
+  title: `Caja galeno · ${LABEL}`,
   hint: "Mové el puntero para armarla",
   readout: "1/7 troquel plano",
   keys: [
@@ -533,7 +543,7 @@ const body = k.plateHtml({
     { mark: "dashed", label: "Intermitente 5×5" },
     { mark: "lit", label: "La solapa que se está plegando" },
   ],
-  caption: `El plano DXF del troquel 6463 plegado por sus propios hendidos. Un tubo de ${W} × ${D} mm y ${H} mm de alto: frente, dos costados, contrafrente y solapa de pegado. Cada extremo cierra con contratapa, guardapolvos, y una tapa de pared doble cuya pestaña de 10 mm cubre el espesor y cuya lengüeta traba en la ranura de 86 × 10 mm del fondo. El interior, de una sola pieza, forma dos tabiques huecos de 28 mm que sostienen tres frascos alternados: el cuerpo en un agujero de ⌀80 y el cuello en una ranura de ⌀31.`,
+  caption: `El plano DXF del ${LABEL} plegado por sus propios hendidos${E ? `: el original estirado ${E} mm a lo ancho para un frasco de ${LEN} mm, ${E} mm más largo` : ""}. Un tubo de ${W} × ${D} mm y ${H} mm de alto: frente, dos costados, contrafrente y solapa de pegado. Cada extremo cierra con contratapa, guardapolvos, y una tapa de pared doble cuya pestaña de 10 mm cubre el espesor y cuya lengüeta traba en la ranura de 86 × 10 mm del fondo. El interior, de una sola pieza, forma dos tabiques huecos de 28 mm que sostienen tres frascos alternados: el cuerpo en un agujero de ⌀80 y el cuello en una ranura de ⌀31, con ${255 + E} mm de panel entre tabiques.`,
   body: `<div class="iso-stage" tabindex="0" role="slider" aria-label="Caja galeno: flechas para avanzar o retroceder un paso del armado" aria-valuemin="1" aria-valuemax="7" aria-valuenow="1">${svg}</div>`,
 });
 
