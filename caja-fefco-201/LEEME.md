@@ -23,7 +23,7 @@ TROQUEL_CLAVE='la-clave' node caja-fefco-201/pagina.mjs --proteger --out caja-fe
 | Caja | `A` | Ancho interior | 80 a 600 | 200 |
 | Caja | `H` | Alto interior | 50 a 800 | 250 |
 | Caja | `g` | Solapa de pegado | 25 a 50 | 35 |
-| Cartón | `e` | Espesor del cartón (E 2 · B 3 · C 4) | 1 a 7 | 3 |
+| Cartón | `e` | Espesor del cartón (simples E 2 · B 3 · C 4; dobles EB 5 · BC 7) | 1 a 7 | 3 |
 
 ## Fórmulas del plano
 

@@ -9,7 +9,8 @@
 import { escribirDxf, escribirCf2, limitesDe, mmEntero } from "../troqueles/cad.mjs";
 import { caja201Svg, onda201Svg } from "./dibujos.mjs";
 
-export const ONDAS_201 = { E: 2, B: 3, C: 4 };
+// Simples (E, B, C) y dobles (EB, BC): espesor de referencia en mm.
+export const ONDAS_201 = { E: 2, B: 3, C: 4, EB: 5, BC: 7 };
 export const BISEL_201 = 10; // biseles de la solapa de pegado, en las puntas
 
 export const PARAMS_201 = [
@@ -99,6 +100,8 @@ export function crearDiseno() {
 .figura .carton .onda{fill:none;stroke:var(--accent);stroke-width:1.4;stroke-linejoin:round}
 .figura .carton .borde{fill:none;stroke:var(--ink);stroke-width:1;stroke-linejoin:round}
 .figura .carton.active .onda{stroke:var(--orange)}
+#atajos{flex-wrap:nowrap;gap:5px}
+#atajos button{padding:7px 11px}
 `,
     formulas: {
       h: {

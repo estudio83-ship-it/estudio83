@@ -49,24 +49,32 @@ export function caja201Svg(P) {
 }
 
 // Trozo de cartón corrugado en isométrico: dos papeles lisos y la onda entre ellos, a la vista en el
-// corte. La onda crece con el espesor (E 2, B 3, C 4: más alta y más espaciada).
+// corte. La onda crece con el espesor (E 2, B 3, C 4: más alta y más espaciada); las dobles (EB 5, BC 7)
+// llevan dos ondas y un papel en el medio.
 export function onda201Svg(P, ondas) {
-  const k = 0.8, e = P.e, T = (6 + e * 3) * k, paso = (4 + e * 3) * k, W = 120 * k, D = 36 * k, liner = 1.4 * k, Tmax = (6 + 7 * 3) * k;
+  const k = 0.8, e = P.e, T = (6 + e * 3) * k, W = 120 * k, D = 36 * k, liner = 1.4 * k, Tmax = (6 + 7 * 3) * k;
   const c = Math.cos(Math.PI / 6), sn = Math.sin(Math.PI / 6);
   // Alto fijo (el del espesor máximo) para que el panel no cambie de tamaño; el trozo apoya abajo.
   const ox = 163 - ((W - D) * c) / 2, oy = 6 + Tmax - T, Hv = Tmax + (W + D) * sn + 30;
   const pt = (x, y, z) => r1(ox + (x - y) * c) + " " + r1(oy + (x + y) * sn - z + T);
   const poly = (ps) => "M" + ps.map((p) => pt(...p)).join("L") + "Z";
-  const amp = (T - 2 * liner) / 2 - 0.6, mid = T / 2;
-  let onda = "";
-  for (let i = 0; i <= 60; i++) { const x = (W * i) / 60; onda += (i ? "L" : "M") + pt(x, D, mid + amp * Math.sin((2 * Math.PI * x) / paso)); }
+  // Onda doble (EB, BC): dos ondas separadas por un papel del medio, cada una con su alto y su paso.
   const tipo = Object.keys(ondas).find((n) => ondas[n] === e);
+  const capas = tipo && tipo.length === 2 ? [...tipo].map((n) => ondas[n]) : [e];
+  const util = T - (capas.length + 1) * liner, total = capas.reduce((a, b) => a + b, 0);
+  let onda = "", lisos = "", z0 = liner;
+  capas.forEach((ec, j) => {
+    const alto = (util * ec) / total, amp = alto / 2 - 0.4, mid = z0 + alto / 2, paso = (4 + ec * 3) * k * (capas.length > 1 ? 0.8 : 1);
+    for (let i = 0; i <= 60; i++) { const x = (W * i) / 60; onda += (i ? "L" : "M") + pt(x, D, mid + amp * Math.sin((2 * Math.PI * x) / paso)); }
+    z0 += alto + liner;
+    if (j < capas.length - 1) lisos += "M" + pt(0, D, z0 - liner / 2) + "L" + pt(W, D, z0 - liner / 2) + "L" + pt(W, 0, z0 - liner / 2);
+  });
   return '<svg viewBox="0 0 326 ' + r1(Hv) + '" role="img" aria-label="Cartón corrugado ' + (tipo ? "onda " + tipo : "") + ", " + e + ' mm">' +
     '<g data-var="e" class="carton">' +
     '<path class="sup" d="' + poly([[0, 0, T], [W, 0, T], [W, D, T], [0, D, T]]) + '"/>' +
     '<path class="lado" d="' + poly([[W, 0, 0], [W, D, 0], [W, D, T], [W, 0, T]]) + '"/>' +
     '<path class="corte" d="' + poly([[0, D, 0], [W, D, 0], [W, D, T], [0, D, T]]) + '"/>' +
-    '<path class="liner" d="M' + pt(0, D, liner) + "L" + pt(W, D, liner) + "L" + pt(W, 0, liner) + "M" + pt(0, D, T - liner) + "L" + pt(W, D, T - liner) + "L" + pt(W, 0, T - liner) + '"/>' +
+    '<path class="liner" d="M' + pt(0, D, liner) + "L" + pt(W, D, liner) + "L" + pt(W, 0, liner) + "M" + pt(0, D, T - liner) + "L" + pt(W, D, T - liner) + "L" + pt(W, 0, T - liner) + lisos + '"/>' +
     '<path class="onda" d="' + onda + '"/>' +
     '<path class="borde" d="' + poly([[0, 0, T], [W, 0, T], [W, 0, 0], [W, D, 0], [0, D, 0], [0, D, T]]) + "M" + pt(0, D, T) + "L" + pt(W, D, T) + "L" + pt(W, 0, T) + "M" + pt(W, D, T) + "L" + pt(W, D, 0) + '"/>' +
     '<text class="tx" x="163" y="' + r1(Hv - 6) + '" text-anchor="middle">' + (tipo ? "Onda " + tipo + " · " : "") + e + " mm</text>" +
