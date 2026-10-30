@@ -6,14 +6,14 @@
 export const CAPAS_CAD = { c: ["CORTE", 1], h: ["HENDIDO", 2], p: ["PERFORADO", 6] };
 export const mmEntero = (v) => String(Math.round(v));
 
-// cotas: lista de cotas a dibujar en la capa COTAS; rotulo(d) da el texto ("H=274").
+// cotas: lista de cotas a dibujar en la capa COTAS (color 7, blanco); rotulo(d) da el texto ("H=274").
 export function escribirDxf(model, { cotas = [], rotulo = (d) => mmEntero(d.value) } = {}) {
   const out = [];
   const put = (c, v) => out.push(String(c).padStart(3), String(v));
   const f = (v) => (Math.round(v * 1e4) / 1e4).toString();
   put(0, "SECTION"); put(2, "HEADER"); put(9, "$ACADVER"); put(1, "AC1009"); put(9, "$INSUNITS"); put(70, 4); put(9, "$MEASUREMENT"); put(70, 1); put(0, "ENDSEC");
   put(0, "SECTION"); put(2, "TABLES"); put(0, "TABLE"); put(2, "LAYER"); put(70, 4);
-  for (const [n, c] of [...Object.values(CAPAS_CAD), ["COTAS", 5]]) { put(0, "LAYER"); put(2, n); put(70, 0); put(62, c); put(6, "CONTINUOUS"); }
+  for (const [n, c] of [...Object.values(CAPAS_CAD), ["COTAS", 7]]) { put(0, "LAYER"); put(2, n); put(70, 0); put(62, c); put(6, "CONTINUOUS"); }
   put(0, "ENDTAB"); put(0, "ENDSEC");
   put(0, "SECTION"); put(2, "ENTITIES");
   for (const e of model.entities) {
@@ -21,8 +21,8 @@ export function escribirDxf(model, { cotas = [], rotulo = (d) => mmEntero(d.valu
     if (e.t === "L") { put(0, "LINE"); put(8, layer); put(62, color); put(10, f(e.a[0])); put(20, f(e.a[1])); put(30, 0); put(11, f(e.b[0])); put(21, f(e.b[1])); put(31, 0); }
     else { put(0, "ARC"); put(8, layer); put(62, color); put(10, f(e.c[0])); put(20, f(e.c[1])); put(30, 0); put(40, f(e.r)); put(50, f(((e.a0 % 360) + 360) % 360)); put(51, f(((e.a1 % 360) + 360) % 360)); }
   }
-  const line = (a, b) => { put(0, "LINE"); put(8, "COTAS"); put(62, 5); put(10, f(a[0])); put(20, f(a[1])); put(30, 0); put(11, f(b[0])); put(21, f(b[1])); put(31, 0); };
-  const text = (at, s, rot) => { put(0, "TEXT"); put(8, "COTAS"); put(62, 5); put(10, f(at[0])); put(20, f(at[1])); put(30, 0); put(40, 10); put(1, s); if (rot) put(50, rot); put(72, 1); put(11, f(at[0])); put(21, f(at[1])); put(31, 0); };
+  const line = (a, b) => { put(0, "LINE"); put(8, "COTAS"); put(62, 7); put(10, f(a[0])); put(20, f(a[1])); put(30, 0); put(11, f(b[0])); put(21, f(b[1])); put(31, 0); };
+  const text = (at, s, rot) => { put(0, "TEXT"); put(8, "COTAS"); put(62, 7); put(10, f(at[0])); put(20, f(at[1])); put(30, 0); put(40, 10); put(1, s); if (rot) put(50, rot); put(72, 1); put(11, f(at[0])); put(21, f(at[1])); put(31, 0); };
   for (const d of cotas) {
     const v = rotulo(d);
     if (d.dir === "h") { line([d.x0, d.at], [d.x1, d.at]); line([d.x0, d.at - 7], [d.x0, d.at + 7]); line([d.x1, d.at - 7], [d.x1, d.at + 7]); text([(d.x0 + d.x1) / 2, d.at + 5], v); }

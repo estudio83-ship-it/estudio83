@@ -1,7 +1,8 @@
 // La caja tipo galeno como diseño de la plantilla de troqueles (../../troqueles/LEEME.md):
 // todo lo que la página necesita saber de este troquel en particular.
-import { DEFAULTS, PARAMS, ONDAS, generate, limits, widthFor, depthFor, pitchMin, toDxf, toCf2 } from "./galeno.mjs";
+import { DEFAULTS, PARAMS, ONDAS, generate, limits, widthFor, depthFor, pitchFor, toDxf, toCf2 } from "./galeno.mjs";
 import { DIM_FORMULAS } from "./formulas.mjs";
+import { botellaSvg, ondaSvg } from "./dibujos.mjs";
 
 export function crearDiseno(PLANTILLA) {
   return {
@@ -14,22 +15,37 @@ export function crearDiseno(PLANTILLA) {
     // Botones rápidos para el espesor.
     atajos: { titulo: "Onda", key: "e", opciones: Object.entries(ONDAS) },
     // Las medidas de la caja acompañan a las botellas (después se pueden corregir a mano):
-    // la cantidad y el paso mueven el ancho H; el diámetro mueve la profundidad A y, si los agujeros
-    // ya no entran con el paso que hay, también el paso y el ancho.
+    // la cantidad mueve el ancho H; el diámetro mueve el alto A y el ancho H (el paso es Dc + 6).
     enlazar(s, key) {
-      const ancho = (p) => Math.max(120, Math.min(600, widthFor(Math.min(6, s.n), p, s.e)));
-      if (key === "n" || key === "p") return { H: ancho(s.p) };
-      if (key !== "Dc") return null;
-      const out = { A: Math.max(60, Math.min(200, depthFor(s.Dc, s.e))) };
-      if (s.p < pitchMin(s.Dc)) Object.assign(out, { p: pitchMin(s.Dc), H: ancho(pitchMin(s.Dc)) });
-      return out;
+      const ancho = Math.max(120, Math.min(600, widthFor(Math.min(6, s.n), pitchFor(s.Dc), s.e)));
+      if (key === "n") return { H: ancho };
+      if (key === "Dc") return { A: Math.max(60, Math.min(200, depthFor(s.Dc, s.e))), H: ancho };
+      return null;
     },
+    // Dibujos del panel: la botella con sus cotas y el cartón con su onda.
+    figuras: { Botella: (P) => botellaSvg(P), "Cartón": (P) => ondaSvg(P, ONDAS) },
+    estilos: `
+.figura .vidrio{fill:var(--tint)}
+.figura .contorno{fill:none;stroke:var(--ink);stroke-width:1.1;stroke-linejoin:round}
+.figura .etiqueta{fill:var(--sheet);stroke:var(--rule);stroke-width:.8}
+.figura .raya{fill:none;stroke:var(--rule);stroke-width:1.4;stroke-linecap:round}
+.figura .capsula{fill:var(--soft);stroke:var(--ink);stroke-width:.8}
+.figura .brillo{fill:none;stroke:var(--sheet);stroke-width:1.6;stroke-linecap:round;opacity:.9}
+.figura .carton .sup{fill:var(--sheet)}
+.figura .carton .lado{fill:var(--soft-bg)}
+.figura .carton .corte{fill:var(--tint)}
+.figura .carton .canal{fill:none;stroke:var(--rule);stroke-width:.8}
+.figura .carton .liner{fill:none;stroke:var(--soft);stroke-width:.7}
+.figura .carton .onda{fill:none;stroke:var(--accent);stroke-width:1.4;stroke-linejoin:round}
+.figura .carton .borde{fill:none;stroke:var(--ink);stroke-width:1;stroke-linejoin:round}
+.figura .carton.active .onda{stroke:var(--orange)}
+`,
     formulas: DIM_FORMULAS,
     // Vista simple: sólo las cotas de las variables que se cargan (con su letra) y los totales de la plancha.
     simple: { "h:costado": "A", "h:contrafrente": "L", "v:frente": "H", "v:puente": "t", "h:plano total": "", "v:plano total": "" },
     // Letras del plano y qué letras mueve cada variable del panel.
     letras: "Dc|Dn|(?<![A-Za-zÀ-ÿ])[LAHte](?![A-Za-zÀ-ÿ])",
-    toca: { Lb: ["L"], Dc: ["Dc", "A"], Dn: ["Dn"], n: ["Dc", "Dn", "H"], p: ["Dc", "Dn", "H"], A: ["A"], H: ["H"], t: ["t"], e: ["e"] },
+    toca: { Lb: ["L"], Dc: ["Dc", "A", "H"], Dn: ["Dn"], n: ["Dc", "Dn", "H"], A: ["A"], H: ["H"], t: ["t"], e: ["e"] },
     // Notas sueltas sobre el plano: [punto, texto, visible en la vista simple].
     llamadas(model) {
       const map = (p) => model.anchors.rot(model.anchors.map(p)), ins = model.anchors.insert, r = ins.rows;

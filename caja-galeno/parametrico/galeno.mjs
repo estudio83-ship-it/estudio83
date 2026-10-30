@@ -16,7 +16,6 @@ export const DEFAULTS = {
   Dc: 80, // ⌀ del cuerpo de la botella: agujero del tabique
   Dn: 31, // ⌀ del cuello de la botella: ranura del tabique
   n: 3, // botellas
-  p: 86, // paso entre ejes de botellas (el 6463 tiene 86,25)
   A: 94, // profundidad de la caja (costados)
   H: 274, // alto del frente entre hendidos (largo del tubo)
   t: 28, // puente de los tabiques
@@ -33,19 +32,21 @@ export const depthFor = (Dc, e) => Math.round(Dc + 2 * e + DEPTH_GAP);
 // Paso mínimo para que los agujeros de ⌀Dc no se toquen.
 export const pitchMin = (Dc) => Math.ceil(Math.max(Dc + 2, Dc / 2 + FIX.flareW / 2 + 3));
 export const widthFor = (n, p, e) => Math.round(n * p + 2 * e + SIDE_GAP);
+// Paso entre ejes de botellas: el diámetro más 6 mm de tabique entre agujeros (86 con ⌀80; el 6463 tiene 86,25).
+export const PITCH_GAP = 6;
+export const pitchFor = (Dc) => Dc + PITCH_GAP;
 
 // Espesores de referencia por onda (mm). Cada fabricante tiene los suyos: e se puede editar.
 export const ONDAS = { E: 2, B: 3, C: 4 };
 
 export const PARAMS = [
-  { key: "Lb", group: "Botella", label: "Largo de la botella", min: 180, max: 690, step: 1 },
-  { key: "Dc", group: "Botella", label: "⌀ cuerpo (agujero)", min: 36, max: 95, step: 1 },
-  { key: "Dn", group: "Botella", label: "⌀ cuello (ranura)", min: 8, max: 38, step: 1 },
-  { key: "n", group: "Botella", label: "Cantidad de botellas", min: 1, max: 6, step: 1 },
-  { key: "p", group: "Botella", label: "Paso entre botellas", min: 20, max: 500, step: 1 },
-  { key: "A", group: "Caja", label: "Profundidad (costados)", min: 60, max: 200, step: 1 },
-  { key: "H", group: "Caja", label: "Alto del frente (tubo)", min: 120, max: 600, step: 1 },
-  { key: "t", group: "Caja", label: "Puente de los tabiques", min: 10, max: 80, step: 1 },
+  { key: "Lb", group: "Botella", label: "Alto botella", min: 180, max: 690, step: 1 },
+  { key: "Dc", group: "Botella", label: "Diámetro botella", min: 36, max: 95, step: 1 },
+  { key: "Dn", group: "Botella", label: "Diámetro cuello", min: 8, max: 38, step: 1 },
+  { key: "n", group: "Botella", label: "Cantidad", min: 1, max: 6, step: 1 },
+  { key: "A", group: "Caja", label: "Alto", min: 60, max: 200, step: 1 },
+  { key: "H", group: "Caja", label: "Ancho", min: 120, max: 600, step: 1 },
+  { key: "t", group: "Caja", label: "Puente separador", min: 10, max: 80, step: 1 },
   { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 6, step: 1 },
 ];
 const L_RANGE = [210, 700];
@@ -80,7 +81,7 @@ export function limits(P) {
   const pMin = Math.max(Dc + 2, Dc / 2 + FIX.flareW / 2 + 3);
   lim.n = [1, Math.max(1, Math.min(st.n[1], 1 + Math.floor(room / pMin + 1e-9)))];
   const n = cl(Math.round(P.n), lim.n);
-  lim.p = n > 1 ? [pMin, Math.max(pMin, Math.min(st.p[1], room / (n - 1)))] : [pMin, Math.max(pMin, st.p[1])];
+  lim.p = n > 1 ? [pMin, Math.max(pMin, Math.min(500, room / (n - 1)))] : [pMin, Math.max(pMin, 500)];
   // Todo en milímetros enteros: los rangos se redondean hacia adentro.
   for (const k in lim) { const a = Math.ceil(lim[k][0] - 1e-9), b = Math.floor(lim[k][1] + 1e-9); lim[k] = [a, Math.max(a, b)]; }
   return lim;
@@ -90,14 +91,18 @@ export function clampParams(params) {
   const P = { ...DEFAULTS, ...params };
   // Compatibilidad: si viene L (largo de caja) y no Lb, se deduce la botella.
   if (params && params.L !== undefined && params.Lb === undefined) P.Lb = params.L - 3 * P.e - BOTTLE_GAP;
-  // Si cambian las botellas y no viene H, el ancho las acompaña.
-  if (params && params.H === undefined && (params.n !== undefined || params.p !== undefined)) P.H = Math.max(120, widthFor(Math.round(P.n), P.p, P.e));
+  // El paso sale del diámetro (salvo que venga dado). Si cambian las botellas y no vienen A o H,
+  // la caja las acompaña: el diámetro mueve el alto A; la cantidad y el paso, el ancho H.
+  const given = (k) => params && params[k] !== undefined;
+  if (!given("p")) P.p = pitchFor(P.Dc);
+  if (!given("A") && given("Dc")) P.A = Math.max(60, Math.min(200, depthFor(P.Dc, P.e)));
+  if (!given("H") && (given("n") || given("p") || given("Dc"))) P.H = Math.max(120, Math.min(600, widthFor(Math.round(P.n), P.p, P.e)));
   const notes = [];
   const lim = limits(P);
   for (const key of ["e", "Lb", "A", "H", "t", "Dc", "Dn", "n", "p"]) {
     const [a, b] = limits(P)[key];
     let v = key === "n" ? Math.round(P[key]) : P[key];
-    if (!Number.isFinite(v)) v = DEFAULTS[key];
+    if (!Number.isFinite(v)) v = key === "p" ? pitchFor(P.Dc) : DEFAULTS[key];
     const c = Math.min(b, Math.max(a, v));
     if (Math.abs(c - P[key]) > 1e-9) notes.push(`${key} ajustado a ${Math.round(c)} (rango ${a}–${b} con estas medidas).`);
     P[key] = c;

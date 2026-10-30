@@ -5,7 +5,7 @@ Todo lo que tiene la página de la Caja tipo Galeno, listo para usar con cualqui
 | Archivo | Para qué |
 |---|---|
 | `pagina.mjs` | `armarPagina(...)`: arma el HTML interactivo de un diseño (variables, plano, resumen, descargas). |
-| `cad.mjs` | `escribirDxf` y `escribirCf2` (capas CORTE / HENDIDO / PERFORADO / COTAS), `limitesDe`, `mmEntero`. |
+| `cad.mjs` | `escribirDxf` y `escribirCf2` (capas CORTE / HENDIDO / PERFORADO / COTAS, las cotas en blanco), `limitesDe`, `mmEntero`. |
 | `carton.mjs` | Encuentra las superficies de cartón del troquel para pintarlas en el plano. |
 | `proteger.mjs` | `protegerPagina(html, clave)`: encripta la página; sin la clave no se puede abrir ni leer. |
 | `verificar.mjs` | `verificarDiseno(...)`: prueba cientos de combinaciones de medidas: sin líneas sueltas, cruzadas ni superpuestas. |
@@ -45,7 +45,9 @@ La página sale encriptada (AES-GCM 256, clave derivada con PBKDF2-SHA256 de 600
 | `generate(state)` | Devuelve el modelo: `{ P, entities, dims, info: { bounds } }` (ver abajo). |
 | `limits(P)` | Opcional. Rangos que dependen de otras medidas: `{ key: [min, max] }`. |
 | `enlazar(state, key)` | Opcional. Variables que siguen a otra: devuelve `{ H: ... }` cuando cambia `key`. |
-| `atajos` | Opcional. `{ titulo, key, opciones: [[nombre, valor], ...] }`. |
+| `atajos` | Opcional. `{ titulo, key, opciones: [[nombre, valor], ...] }`; los botones muestran sólo el nombre. |
+| `figuras` | Opcional. `{ grupo: (P) => svg }`: un dibujo debajo del título del grupo, redibujado con cada cambio. Las cotas del dibujo llevan `class="cota" data-var="clave"` para marcarse en naranja con su variable. El alto del SVG tiene que ser fijo. |
+| `estilos` | Opcional. CSS propio del diseño (los colores de sus dibujos). |
 | `formulas` | `{ h: { nombre: ["L + e", (P) => P.L + P.e] }, v: { ... } }`: la fórmula de cada cota. |
 | `simple` | Cotas de la vista simple: `{ "h:largo": "L", "h:plano total": "" }` (la letra que se muestra). |
 | `letras` | Expresión regular con las letras de las variables en las fórmulas. |

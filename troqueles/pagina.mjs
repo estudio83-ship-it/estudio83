@@ -135,7 +135,18 @@ svg.plan{display:block;width:100%;height:100%}
 .legend{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:13px;color:var(--soft)}
 .legend span{display:inline-flex;align-items:center;gap:8px}.legend svg{width:28px;height:8px}
 .legend [hidden]{display:none}
-</style>
+.figura{margin:2px 0 4px}
+.figura svg{display:block;width:100%;height:auto;overflow:visible}
+.figura .tx{font:500 10.5px var(--mono);fill:var(--soft)}
+.figura .cota path{fill:none;stroke:var(--accent);stroke-width:.8}
+.figura .cota .ar{fill:var(--accent);stroke:none}
+.figura .cota text{font:600 10.5px var(--mono);fill:var(--accent)}
+.figura [data-var] path,.figura [data-var] text{transition:stroke 1.5s ease,fill 1.5s ease,stroke-width 1.5s ease}
+.figura [data-var].active path,.figura [data-var].active text{transition:none}
+.figura .cota.active path{stroke:var(--orange);stroke-width:1.6}
+.figura .cota.active .ar,.figura .cota.active text{fill:var(--orange-deep)}
+@media (prefers-reduced-motion:reduce){.figura *{transition:none!important}}
+${design.estilos || ""}
 </style>
 <main>
   <header>
@@ -192,6 +203,13 @@ for (const p of PARAMETROS) {
     h.className = "group";
     h.textContent = group;
     form.appendChild(h);
+    // Dibujo del grupo (DESIGN.figuras), redibujado con cada cambio.
+    if (DESIGN.figuras && DESIGN.figuras[group]) {
+      const fig = document.createElement("div");
+      fig.className = "figura";
+      fig.dataset.group = group;
+      form.appendChild(fig);
+    }
   }
   const row = document.createElement("div");
   row.className = "var";
@@ -206,7 +224,7 @@ for (const p of PARAMETROS) {
 const atajos = document.getElementById("atajos");
 if (DESIGN.atajos) {
   atajos.setAttribute("aria-label", DESIGN.atajos.titulo);
-  atajos.innerHTML = '<span class="tag">' + DESIGN.atajos.titulo + "</span>" + DESIGN.atajos.opciones.map(([n, v]) => '<button type="button" data-atajo="' + v + '">' + n + " · " + v + "</button>").join("");
+  atajos.innerHTML = '<span class="tag">' + DESIGN.atajos.titulo + "</span>" + DESIGN.atajos.opciones.map(([n, v]) => '<button type="button" data-atajo="' + v + '" data-nombre="' + n + '" aria-label="' + DESIGN.atajos.titulo + " " + n + ", " + v + ' mm">' + n + "</button>").join("");
 } else atajos.remove();
 const f1 = (v) => (Math.round(v * 10) / 10).toString();
 const mm = (v) => String(Math.round(v));
@@ -222,6 +240,7 @@ const formulaOf = (d) => (DESIGN.formulas[d.src] && DESIGN.formulas[d.src][d.nam
 let activeVar = null;
 function applyActive() {
   document.querySelectorAll(".var").forEach((row) => row.classList.toggle("active", row.dataset.key === activeVar));
+  document.querySelectorAll(".figura [data-var]").forEach((el) => el.classList.toggle("active", el.dataset.var === activeVar));
   const want = activeVar ? DESIGN.toca[activeVar] || [] : [];
   document.querySelectorAll("#plan [data-vars]").forEach((el) => {
     const vars = el.dataset.vars ? el.dataset.vars.split(" ") : [];
@@ -317,6 +336,7 @@ function render(source) {
     if (source === "commit" || source === rng) num.value = p.step >= 1 ? Math.round(model.P[p.key]) : model.P[p.key];
   }
   document.getElementById("plan").innerHTML = planSvg(prevDims);
+  document.querySelectorAll(".figura").forEach((fig) => { fig.innerHTML = DESIGN.figuras[fig.dataset.group](model.P); });
   // La leyenda muestra sólo los tipos de línea que tiene el troquel.
   document.querySelectorAll(".legend [data-k]").forEach((el) => { el.hidden = !model.entities.some((e) => e.k === el.dataset.k); });
   applyActive();
@@ -390,7 +410,7 @@ document.getElementById("formulas").addEventListener("click", (e) => {
 form.addEventListener("change", () => render("commit"));
 document.querySelectorAll("[data-atajo]").forEach((b) => b.addEventListener("click", () => {
   setValue(DESIGN.atajos.key, Number(b.dataset.atajo));
-  render("commit"); say(DESIGN.atajos.titulo + " " + b.textContent.split(" · ")[0] + ": " + b.dataset.atajo + " mm.");
+  render("commit"); say(DESIGN.atajos.titulo + " " + b.dataset.nombre + ": " + b.dataset.atajo + " mm.");
 }));
 document.getElementById("reset").addEventListener("click", () => {
   for (const k in INICIAL) setValue(k, INICIAL[k]);

@@ -102,7 +102,18 @@ svg.plan{display:block;width:100%;height:100%}
 .legend{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:13px;color:var(--soft)}
 .legend span{display:inline-flex;align-items:center;gap:8px}.legend svg{width:28px;height:8px}
 .legend [hidden]{display:none}
-</style>
+.figura{margin:2px 0 4px}
+.figura svg{display:block;width:100%;height:auto;overflow:visible}
+.figura .tx{font:500 10.5px var(--mono);fill:var(--soft)}
+.figura .cota path{fill:none;stroke:var(--accent);stroke-width:.8}
+.figura .cota .ar{fill:var(--accent);stroke:none}
+.figura .cota text{font:600 10.5px var(--mono);fill:var(--accent)}
+.figura [data-var] path,.figura [data-var] text{transition:stroke 1.5s ease,fill 1.5s ease,stroke-width 1.5s ease}
+.figura [data-var].active path,.figura [data-var].active text{transition:none}
+.figura .cota.active path{stroke:var(--orange);stroke-width:1.6}
+.figura .cota.active .ar,.figura .cota.active text{fill:var(--orange-deep)}
+@media (prefers-reduced-motion:reduce){.figura *{transition:none!important}}
+
 </style>
 <main>
   <header>
@@ -151,14 +162,14 @@ svg.plan{display:block;width:100%;height:100%}
 const CAPAS_CAD = { c: ["CORTE", 1], h: ["HENDIDO", 2], p: ["PERFORADO", 6] };
 const mmEntero = (v) => String(Math.round(v));
 
-// cotas: lista de cotas a dibujar en la capa COTAS; rotulo(d) da el texto ("H=274").
+// cotas: lista de cotas a dibujar en la capa COTAS (color 7, blanco); rotulo(d) da el texto ("H=274").
 function escribirDxf(model, { cotas = [], rotulo = (d) => mmEntero(d.value) } = {}) {
   const out = [];
   const put = (c, v) => out.push(String(c).padStart(3), String(v));
   const f = (v) => (Math.round(v * 1e4) / 1e4).toString();
   put(0, "SECTION"); put(2, "HEADER"); put(9, "$ACADVER"); put(1, "AC1009"); put(9, "$INSUNITS"); put(70, 4); put(9, "$MEASUREMENT"); put(70, 1); put(0, "ENDSEC");
   put(0, "SECTION"); put(2, "TABLES"); put(0, "TABLE"); put(2, "LAYER"); put(70, 4);
-  for (const [n, c] of [...Object.values(CAPAS_CAD), ["COTAS", 5]]) { put(0, "LAYER"); put(2, n); put(70, 0); put(62, c); put(6, "CONTINUOUS"); }
+  for (const [n, c] of [...Object.values(CAPAS_CAD), ["COTAS", 7]]) { put(0, "LAYER"); put(2, n); put(70, 0); put(62, c); put(6, "CONTINUOUS"); }
   put(0, "ENDTAB"); put(0, "ENDSEC");
   put(0, "SECTION"); put(2, "ENTITIES");
   for (const e of model.entities) {
@@ -166,8 +177,8 @@ function escribirDxf(model, { cotas = [], rotulo = (d) => mmEntero(d.value) } = 
     if (e.t === "L") { put(0, "LINE"); put(8, layer); put(62, color); put(10, f(e.a[0])); put(20, f(e.a[1])); put(30, 0); put(11, f(e.b[0])); put(21, f(e.b[1])); put(31, 0); }
     else { put(0, "ARC"); put(8, layer); put(62, color); put(10, f(e.c[0])); put(20, f(e.c[1])); put(30, 0); put(40, f(e.r)); put(50, f(((e.a0 % 360) + 360) % 360)); put(51, f(((e.a1 % 360) + 360) % 360)); }
   }
-  const line = (a, b) => { put(0, "LINE"); put(8, "COTAS"); put(62, 5); put(10, f(a[0])); put(20, f(a[1])); put(30, 0); put(11, f(b[0])); put(21, f(b[1])); put(31, 0); };
-  const text = (at, s, rot) => { put(0, "TEXT"); put(8, "COTAS"); put(62, 5); put(10, f(at[0])); put(20, f(at[1])); put(30, 0); put(40, 10); put(1, s); if (rot) put(50, rot); put(72, 1); put(11, f(at[0])); put(21, f(at[1])); put(31, 0); };
+  const line = (a, b) => { put(0, "LINE"); put(8, "COTAS"); put(62, 7); put(10, f(a[0])); put(20, f(a[1])); put(30, 0); put(11, f(b[0])); put(21, f(b[1])); put(31, 0); };
+  const text = (at, s, rot) => { put(0, "TEXT"); put(8, "COTAS"); put(62, 7); put(10, f(at[0])); put(20, f(at[1])); put(30, 0); put(40, 10); put(1, s); if (rot) put(50, rot); put(72, 1); put(11, f(at[0])); put(21, f(at[1])); put(31, 0); };
   for (const d of cotas) {
     const v = rotulo(d);
     if (d.dir === "h") { line([d.x0, d.at], [d.x1, d.at]); line([d.x0, d.at - 7], [d.x0, d.at + 7]); line([d.x1, d.at - 7], [d.x1, d.at + 7]); text([(d.x0 + d.x1) / 2, d.at + 5], v); }
@@ -425,6 +436,13 @@ for (const p of PARAMETROS) {
     h.className = "group";
     h.textContent = group;
     form.appendChild(h);
+    // Dibujo del grupo (DESIGN.figuras), redibujado con cada cambio.
+    if (DESIGN.figuras && DESIGN.figuras[group]) {
+      const fig = document.createElement("div");
+      fig.className = "figura";
+      fig.dataset.group = group;
+      form.appendChild(fig);
+    }
   }
   const row = document.createElement("div");
   row.className = "var";
@@ -439,7 +457,7 @@ for (const p of PARAMETROS) {
 const atajos = document.getElementById("atajos");
 if (DESIGN.atajos) {
   atajos.setAttribute("aria-label", DESIGN.atajos.titulo);
-  atajos.innerHTML = '<span class="tag">' + DESIGN.atajos.titulo + "</span>" + DESIGN.atajos.opciones.map(([n, v]) => '<button type="button" data-atajo="' + v + '">' + n + " · " + v + "</button>").join("");
+  atajos.innerHTML = '<span class="tag">' + DESIGN.atajos.titulo + "</span>" + DESIGN.atajos.opciones.map(([n, v]) => '<button type="button" data-atajo="' + v + '" data-nombre="' + n + '" aria-label="' + DESIGN.atajos.titulo + " " + n + ", " + v + ' mm">' + n + "</button>").join("");
 } else atajos.remove();
 const f1 = (v) => (Math.round(v * 10) / 10).toString();
 const mm = (v) => String(Math.round(v));
@@ -455,6 +473,7 @@ const formulaOf = (d) => (DESIGN.formulas[d.src] && DESIGN.formulas[d.src][d.nam
 let activeVar = null;
 function applyActive() {
   document.querySelectorAll(".var").forEach((row) => row.classList.toggle("active", row.dataset.key === activeVar));
+  document.querySelectorAll(".figura [data-var]").forEach((el) => el.classList.toggle("active", el.dataset.var === activeVar));
   const want = activeVar ? DESIGN.toca[activeVar] || [] : [];
   document.querySelectorAll("#plan [data-vars]").forEach((el) => {
     const vars = el.dataset.vars ? el.dataset.vars.split(" ") : [];
@@ -550,6 +569,7 @@ function render(source) {
     if (source === "commit" || source === rng) num.value = p.step >= 1 ? Math.round(model.P[p.key]) : model.P[p.key];
   }
   document.getElementById("plan").innerHTML = planSvg(prevDims);
+  document.querySelectorAll(".figura").forEach((fig) => { fig.innerHTML = DESIGN.figuras[fig.dataset.group](model.P); });
   // La leyenda muestra sólo los tipos de línea que tiene el troquel.
   document.querySelectorAll(".legend [data-k]").forEach((el) => { el.hidden = !model.entities.some((e) => e.k === el.dataset.k); });
   applyActive();
@@ -623,7 +643,7 @@ document.getElementById("formulas").addEventListener("click", (e) => {
 form.addEventListener("change", () => render("commit"));
 document.querySelectorAll("[data-atajo]").forEach((b) => b.addEventListener("click", () => {
   setValue(DESIGN.atajos.key, Number(b.dataset.atajo));
-  render("commit"); say(DESIGN.atajos.titulo + " " + b.textContent.split(" · ")[0] + ": " + b.dataset.atajo + " mm.");
+  render("commit"); say(DESIGN.atajos.titulo + " " + b.dataset.nombre + ": " + b.dataset.atajo + " mm.");
 }));
 document.getElementById("reset").addEventListener("click", () => {
   for (const k in INICIAL) setValue(k, INICIAL[k]);

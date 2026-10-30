@@ -14,7 +14,7 @@ const plantillaText = readFileSync(join(HERE, "plantilla-caja.json"), "utf8");
 
 const abierta = armarPagina({
   design: crearDiseno(JSON.parse(plantillaText)),
-  fuentes: ["galeno.mjs", "formulas.mjs", "diseno.mjs"].map((f) => join(HERE, f)),
+  fuentes: ["galeno.mjs", "formulas.mjs", "dibujos.mjs", "diseno.mjs"].map((f) => join(HERE, f)),
   prologo: `const PLANTILLA = ${plantillaText};`,
   crear: "crearDiseno(PLANTILLA)",
 });

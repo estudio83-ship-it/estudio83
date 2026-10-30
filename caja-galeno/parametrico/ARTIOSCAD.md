@@ -30,7 +30,7 @@ node check.mjs   # 410 combinaciones: sin líneas sueltas, cruces ni superposici
 | `CORTE` | 1 rojo | Corte (2 pt) |
 | `HENDIDO` | 2 amarillo | Hendido (2 pt) |
 | `PERFORADO` | 6 magenta | Perforado intermitente 5×5 |
-| `COTAS` | 5 azul | Anotación (o no importar) |
+| `COTAS` | 7 blanco | Anotación (o no importar) |
 
 Guardá esa tabla de conversión para reutilizarla con cada variante. Unidades: mm. Se troquela de dorso.
 
@@ -41,23 +41,24 @@ Guardá esa tabla de conversión para reutilizarla con cada variante. Unidades: 
 El troquel sale con la caja girada 90° a la derecha (tubo vertical) y el separador a su derecha, a 8 mm, con el largo vertical. El DXF lleva las líneas del troquel y sólo las cotas H y L (`--todas-las-cotas` para el resto).
 
 
-| Grupo | Var | Qué es | Original |
-|---|---|---|---|
-| Botella | `Lb` | Largo de la botella (va acostada a lo largo de la caja) | 306 |
-| Botella | `Dc` | ⌀ del cuerpo: agujero del tabique (hasta 95, y hasta A − 2e − 4 y H − 2e − 6) | 80 |
-| Botella | `Dn` | ⌀ del cuello: ranura del tabique | 31 |
-| Botella | `n` | Cantidad de botellas (hasta 6) | 3 |
-| Botella | `p` | Paso entre ejes de botellas | 86 (el 6463 tiene 86,25) |
-| Caja | `A` | Profundidad: ancho de los costados | 94 |
-| Caja | `H` | Alto del frente entre hendidos (largo del tubo); sale de las botellas, se puede corregir | 274 |
-| Caja | `t` | Puente de los tabiques | 28 |
-| Cartón | `e` | Espesor: onda E 2 · B 3 · C 4 (el 6463 es onda B) | 3 |
+| Grupo | Var | En la página | Qué es | Original |
+|---|---|---|---|---|
+| Botella | `Lb` | Alto botella | Largo de la botella (va acostada a lo largo de la caja) | 306 |
+| Botella | `Dc` | Diámetro botella | Agujero del tabique (hasta 95, y hasta A − 2e − 4 y H − 2e − 6) | 80 |
+| Botella | `Dn` | Diámetro cuello | Ranura del tabique | 31 |
+| Botella | `n` | Cantidad | Botellas (hasta 6) | 3 |
+| Caja | `A` | Alto | Ancho de los costados; sale del diámetro, se puede corregir | 94 |
+| Caja | `H` | Ancho | Alto del frente entre hendidos (largo del tubo); sale de las botellas, se puede corregir | 274 |
+| Caja | `t` | Puente separador | Puente de los tabiques | 28 |
+| Cartón | `e` | Espesor del cartón | Onda E 2 · B 3 · C 4 (el 6463 es onda B) | 3 |
+
+El paso entre ejes de botellas ya no es una variable: sale del diámetro, `p = Dc + 6` (86 con ⌀80; el 6463 tiene 86,25). `generar.mjs` todavía acepta `--p` para forzarlo.
 
 El largo de la caja sale de la botella: `L = Lb + 3e + 5` (entra en el separador plegado, `L − 3e`, con 5 mm de juego). Con la botella del 6463 y onda B, L = 320.
 
-El ancho también sale de las botellas: `H = n·p + 2e + 10`, redondeado al milímetro (10 es el juego lateral). Al cambiar `n` o `p` en la página, H se recalcula; después se puede ajustar a mano. En `generar.mjs`, si pasás `--n` o `--p` sin `--H`, H se calcula igual.
+El ancho también sale de las botellas: `H = n·(Dc + 6) + 2e + 10`, redondeado al milímetro (10 es el juego lateral). Al cambiar `n` o `Dc` en la página, H se recalcula; después se puede ajustar a mano. En `generar.mjs`, si pasás `--n` o `--p` sin `--H`, H se calcula igual.
 
-La profundidad sale del diámetro: `A = Dc + 2e + 8` (el agujero con 4 mm por lado en el tabique de `A − 2e`). Al cambiar `Dc` en la página, A se recalcula; si los agujeros ya no entran con el paso que hay, el paso sube a `Dc + 2` y el ancho H lo acompaña.
+La profundidad sale del diámetro: `A = Dc + 2e + 8` (el agujero con 4 mm por lado en el tabique de `A − 2e`). Al cambiar `Dc` en la página, A y H se recalculan.
 
 Derivadas: el separador plegado ocupa `L − 3e` de largo (si crece `t`, se achica el panel central `L − 3e − 2t`, la caja no cambia); frasco hasta `L − 3e − 5`; interior de `H − 2e` de ancho por `4A + L − 11e` de largo.
 
