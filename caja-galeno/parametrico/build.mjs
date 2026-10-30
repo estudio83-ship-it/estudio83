@@ -11,7 +11,7 @@ const outAt = process.argv.indexOf("--out");
 const lib = readFileSync(join(HERE, "galeno.mjs"), "utf8").replace(/^export /gm, "");
 const plantilla = readFileSync(join(HERE, "plantilla-caja.json"), "utf8");
 
-const page = `<title>Galeno paramétrico</title>
+let page = `<title>Galeno paramétrico</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
@@ -189,6 +189,12 @@ document.getElementById("cp-cf2").addEventListener("click", () => copy(toCf2(mod
 render();
 </script>
 `;
+if (ARTIFACT) {
+  // Sin descargas en el visor: se quita el código que las intentaba.
+  const from = page.indexOf("function download(text, ext) {"), to = page.indexOf("async function copy(");
+  page = page.slice(0, from) + page.slice(to);
+  page = page.replace(/document\.getElementById\("dl-(dxf|cf2)"\)\?\.addEventListener[^\n]*\n/g, "");
+}
 const file = outAt > 0 ? process.argv[outAt + 1] : join(HERE, "galeno-parametrico.html");
 writeFileSync(file, page);
 console.log("wrote", file, (page.length / 1024).toFixed(0) + " KB");
