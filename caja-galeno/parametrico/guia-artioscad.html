@@ -1,46 +1,55 @@
 <title>Galeno 6463 para ArtiosCAD</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Ficha técnica viva: variables a la izquierda, plano con fórmulas a la derecha, tablas fórmula/valor debajo. */
+/* Sistema CARTOCOR: fondo claro, tinta verde oscura, acento green-700, cuadrícula técnica de 32 px en el plano.
+   Un solo tema claro (el sistema pide fondos claros o verdes, nunca negros). Descargas en azul y Reset en
+   naranja por pedido expreso. */
 :root{
-  --paper:#f4f5f2;--sheet:#fcfcfa;--ink:#24282b;--soft:#6b7176;--rule:#c9ccc8;--crease:#8b9095;--accent:#1f6fd6;--accent-deep:#1558b0;--on-accent:#ffffff;--warn:#a4441b;--note:#6b7176;--orange:#e8630a;--orange-deep:#c25105;--on-orange:#ffffff;--field:#ffffff;--flash:#e3ecfa;
-  --display:"Barlow Condensed","Arial Narrow",sans-serif;--body:"IBM Plex Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --paper:#fbfbfd;--sheet:#ffffff;--mint:#eef7f0;--soft-bg:#f3f7f4;--tint:#e6f6eb;
+  --ink:#0b2a16;--soft:#3a4a40;--rule:#cfe3d5;--hairline:#d5e2d9;--crease:#6f8a78;
+  --accent:#007a31;--accent-deep:#00612b;--eyebrow:#00612b;--on-accent:#ffffff;--grid:rgba(0,186,73,0.09);
+  --blue:#1f6fd6;--blue-deep:#1558b0;--on-blue:#ffffff;
+  --warn:#a3471f;--note:#3a4a40;--orange:#e8630a;--orange-deep:#c25105;--on-orange:#ffffff;--field:#ffffff;--flash:#e6f6eb;
+  --shadow-float:0 10px 30px rgba(0,122,49,0.12);
+  --display:Montserrat,Inter,sans-serif;--body:Inter,-apple-system,"Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:light;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#4ba3ff;--accent-deep:#7dbcff;--on-accent:#06121f;--warn:#f0956b;--note:#8d959b;--orange:#ff8a3d;--orange-deep:#ffa463;--on-orange:#1f0d00;--field:#101214;--flash:#1d2a3d;color-scheme:dark}}
-:root[data-theme="dark"]{--paper:#121416;--sheet:#181b1e;--ink:#dfe3e6;--soft:#8d959b;--rule:#33383d;--crease:#7c848a;--accent:#4ba3ff;--accent-deep:#7dbcff;--on-accent:#06121f;--warn:#f0956b;--note:#8d959b;--orange:#ff8a3d;--orange-deep:#ffa463;--on-orange:#1f0d00;--field:#101214;--flash:#1d2a3d;color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--paper);color:var(--ink);font:15px/1.55 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-main{max-width:1240px;margin:0 auto;padding-block:32px 64px;display:grid;gap:22px}
-header{display:grid;gap:6px}
-.tag{font:500 12px/1.3 var(--mono);color:var(--soft);letter-spacing:.06em;text-transform:uppercase}
-h1{font:600 clamp(28px,4vw,42px)/1.05 var(--display);margin:0;text-wrap:balance}
-h2{font:600 18px/1.2 var(--display);letter-spacing:.05em;text-transform:uppercase;margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:1240px;margin:0 auto;padding-block:40px 72px;display:grid;gap:22px}
+header{display:grid;gap:10px}
+.tag{font:500 12px/1.4 var(--mono);color:var(--soft);letter-spacing:.14em;text-transform:uppercase}
+header .tag{color:var(--eyebrow);letter-spacing:.16em}
+h1{font:700 clamp(34px,5vw,56px)/1.02 var(--display);letter-spacing:-.04em;margin:0;text-wrap:balance}
+h1 span{display:block;color:var(--accent)}
+h2{font:700 20px/1.15 var(--display);letter-spacing:-.02em;margin:0}
 p{margin:0;max-width:70ch}
 .lede{color:var(--soft)}
-.sheet{background:var(--sheet);border:1px solid var(--rule);padding:16px;display:grid;gap:12px;min-width:0;align-content:start}
+.sheet{background:var(--sheet);border:1px solid var(--rule);border-radius:28px;padding:22px;display:grid;gap:14px;min-width:0;align-content:start}
+.sheet.plan-sheet{background-color:var(--mint);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px}
 .head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;align-items:baseline}
-.desk{display:grid;grid-template-columns:300px minmax(0,1fr);gap:22px;align-items:start}
+.desk{display:grid;grid-template-columns:350px minmax(0,1fr);gap:22px;align-items:start}
 @media (max-width:860px){.desk{grid-template-columns:minmax(0,1fr)}}
 .side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
 @media (max-width:860px){.side{position:static}}
 form{display:grid;gap:9px}
 .var{display:grid;grid-template-columns:30px minmax(0,1fr) 84px;gap:2px 10px;align-items:center}
 .var b{font:500 14px var(--mono);color:var(--accent)}
-.var label{font-size:13px;color:var(--soft);line-height:1.25}
-.var input[type=number]{width:100%;font:500 14px var(--mono);color:var(--ink);background:var(--field);border:1px solid var(--rule);border-radius:999px;padding:6px 12px;text-align:right;font-variant-numeric:tabular-nums}
+.var label{font-size:14px;color:var(--soft);line-height:1.25}
+.var input[type=number]{width:100%;font:500 14px var(--mono);color:var(--ink);background:var(--field);border:1px solid var(--rule);border-radius:980px;padding:6px 12px;text-align:right;font-variant-numeric:tabular-nums}
 .var input[type=range]{grid-column:2 / 4;width:100%;accent-color:var(--accent);margin:0}
 input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .presets.onda .tag{margin-right:4px}
-h3.group{font:600 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--soft);margin:10px 0 0;padding-top:12px;border-top:1px solid var(--rule)}
+h3.group{font:500 12px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--eyebrow);margin:10px 0 0;padding-top:12px;border-top:1px solid var(--rule)}
 h3.group:first-child{margin-top:0;padding-top:0;border-top:0}
 button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--flash);font-weight:600}
-button{font:500 13px var(--body);color:var(--ink);background:transparent;border:1px solid var(--rule);border-radius:999px;padding:7px 14px;cursor:pointer}
-button:hover{border-color:var(--ink)}
-button.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
-button.primary:hover{background:var(--accent-deep);border-color:var(--accent-deep)}
+button{font:500 14px var(--body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:980px;padding:8px 16px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--blue);color:var(--on-blue);border-color:var(--blue);font-weight:600;box-shadow:var(--shadow-float)}
+button.primary:hover{background:var(--blue-deep);border-color:var(--blue-deep)}
 button.primary:disabled{opacity:.5;cursor:default}
 button.reset{justify-self:start;background:var(--orange);color:var(--on-orange);border-color:var(--orange);font-weight:600;padding:7px 22px}
 button.reset:hover{background:var(--orange-deep);border-color:var(--orange-deep)}
@@ -86,13 +95,13 @@ li b{font-weight:500}
 </style>
 <main>
   <header>
-    <span class="tag">Troquel 6463 · caja tipo galeno · guía de diseño paramétrico</span>
-    <h1>Galeno 6463 para ArtiosCAD</h1>
+    <span class="tag">Troquel 6463 — caja tipo galeno</span>
+    <h1>Galeno 6463.<span>Paramétrico para ArtiosCAD.</span></h1>
   </header>
 
   <div class="desk">
     <section class="sheet side" aria-labelledby="t-vars">
-      <h2 id="t-vars">Variables · mm</h2>
+      <h2 id="t-vars">Variables</h2>
       <form id="form" autocomplete="off"></form>
       <div class="presets onda" role="group" aria-label="Onda del cartón">
         <span class="tag">Onda</span>
@@ -109,7 +118,7 @@ li b{font-weight:500}
       </div>
       <p class="status" id="status" role="status"></p>
     </section>
-    <section class="sheet" aria-labelledby="t-plano">
+    <section class="sheet plan-sheet" aria-labelledby="t-plano">
       <div class="head"><h2 id="t-plano">Plano con fórmulas</h2><span class="tag" id="caption"></span></div>
       <div class="legend" aria-hidden="true">
         <span><svg viewBox="0 0 28 8"><path d="M0 4H28" stroke="var(--ink)" stroke-width="1.4"/></svg>Corte</span>
