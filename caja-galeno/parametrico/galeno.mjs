@@ -40,6 +40,7 @@ export const PARAMS = [
 const L_RANGE = [210, 700];
 
 // Medidas fijas del troquel original que no dependen de los parámetros.
+export const SEPARATOR_GAP = 5;
 const FIX = { tongueW: 33, tongueFromCentre: 13, notchW: 25, flareW: 40, flareLen: 23.8, edgeNotchW: 35, edgeNotchD: 4, gap: 8 };
 
 // Medidas del separador. El plegado ocupa siempre L − 3e de largo: si crece el puente t,
@@ -316,10 +317,11 @@ export function generate(params, plantilla) {
   const boxPts = ptsOf(entities.slice(0, nBox));
   const bx = { xMin: Math.min(...boxPts.map((q) => q[0])), xMax: Math.max(...boxPts.map((q) => q[0])), yMin: Math.min(...boxPts.map((q) => q[1])), yMax: Math.max(...boxPts.map((q) => q[1])) };
 
-  // El separador queda a la derecha de la caja, a 8 mm, alineado arriba, con su largo vertical
+  // El separador queda a la derecha de la caja con su largo vertical
   // (girado 90° respecto de como quedaba debajo de la caja).
   const r = ins.rows;
-  const tx = bx.xMax + FIX.gap - ins.x0, ty = bx.yMax - (ins.y0 + r.top);
+  // Pegado a la caja (5 mm de separación de corte) y centrado en su altura.
+  const tx = bx.xMax + SEPARATOR_GAP - ins.x0, ty = (bx.yMax + bx.yMin) / 2 - (ins.y0 + r.top / 2);
   const insT = ([x, y]) => [x + tx, y + ty];
   for (const e of entities.slice(nBox)) {
     if (e.t === "L") { e.a = insT(e.a); e.b = insT(e.b); }
@@ -344,6 +346,9 @@ export function generate(params, plantilla) {
   dims[dims.length - 1].src = "v";
   const info = {
     caja: `${P.L} × ${P.A} × ${P.H}`,
+    // Exterior del tubo armado: dos paredes en largo y profundidad; en alto, el contrafrente entre
+    // los hendidos de las tapas (incluye los cierres de pared doble).
+    externa: [P.L + 2 * P.e, P.A + 2 * P.e, P.H + (22 / 3) * P.e],
     plancha: `${(xMax - xMin).toFixed(1)} × ${(yMax - yMin).toFixed(1)}`,
     botella: `${P.n} × ${P.Lb} de largo · ⌀ ${P.Dc} cuerpo · ⌀ ${P.Dn} cuello`,
     interior: `${d.Wi} × ${d.insertLen} (plegado ${d.folded} × ${d.Wi} × ${d.wall})`,

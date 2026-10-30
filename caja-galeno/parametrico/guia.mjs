@@ -56,10 +56,10 @@ p{margin:0;max-width:70ch}
 .sheet{background:var(--sheet);border:1px solid var(--rule);border-radius:28px;padding:22px;display:grid;gap:14px;min-width:0;align-content:start}
 .sheet.plan-sheet{background-color:var(--mint);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px}
 .head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;align-items:baseline}
-.desk{display:grid;grid-template-columns:350px minmax(0,1fr);gap:22px;align-items:start}
+.desk{display:grid;grid-template-columns:370px minmax(0,1fr);gap:22px;align-items:stretch}
 @media (max-width:860px){.desk{grid-template-columns:minmax(0,1fr)}}
-.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
-@media (max-width:860px){.side{position:static}}
+.plan-sheet{grid-template-rows:auto auto 1fr}
+.plan-sheet #plan{display:grid;align-items:center}
 form{display:grid;gap:9px}
 .var{display:grid;grid-template-columns:30px minmax(0,1fr) 84px;gap:2px 10px;align-items:center}
 .var b{font:500 14px var(--mono);color:var(--accent)}
@@ -79,9 +79,19 @@ button.primary:hover{background:var(--blue-deep);border-color:var(--blue-deep)}
 button.primary:disabled{opacity:.5;cursor:default}
 button.reset{justify-self:start;background:var(--orange);color:var(--on-orange);border-color:var(--orange);font-weight:600;padding:7px 22px}
 button.reset:hover{background:var(--orange-deep);border-color:var(--orange-deep)}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0;font-size:13px}
-.facts dt{color:var(--soft)}.facts dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+.right{display:grid;grid-template-rows:1fr auto;gap:22px;min-width:0}
+.facts{margin:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+@media (max-width:1200px){.facts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:600px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.facts .row{display:grid;align-content:start;gap:6px;padding:14px 13px;background:var(--soft-bg);border:1px solid var(--rule);border-radius:22px;min-width:0}
+.facts dt{font:500 10.5px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--eyebrow)}
+.facts dd{margin:0;display:grid;gap:3px}
+.facts dd strong{font:700 16px/1.2 var(--display);white-space:nowrap;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+.facts dd span{font:500 12px/1.3 var(--body);color:var(--soft)}
+.side .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:14px;border-top:1px solid var(--rule)}
+.side .actions .status{grid-column:1 / -1}
+.side{grid-template-rows:auto auto auto auto auto 1fr}
 .warn{margin:0;padding:0;list-style:none;display:grid;gap:6px;color:var(--warn);font-size:13px}
 .warn li.note{color:var(--note)}
 .status{font:13px var(--mono);color:var(--soft);min-height:1.4em;margin:0}
@@ -139,14 +149,14 @@ li b{font-weight:500}
         <button type="button" data-onda="C">C · 4</button>
       </div>
       <button type="button" class="reset" id="reset">Reset</button>
-      <dl class="facts" id="facts"></dl>
       <ul class="warn" id="warn"></ul>
       <div class="actions">
         <button type="button" class="primary" id="dl-dxf">Descargar DXF</button>
         <button type="button" class="primary" id="dl-cf2">Descargar CF2</button>
+        <p class="status" id="status" role="status"></p>
       </div>
-      <p class="status" id="status" role="status"></p>
     </section>
+    <div class="right">
     <section class="sheet plan-sheet" aria-labelledby="t-plano">
       <div class="head"><h2 id="t-plano">Plano</h2><button type="button" id="formulas" aria-pressed="false">Ver fórmulas</button></div>
       <div class="legend" aria-hidden="true">
@@ -157,6 +167,11 @@ li b{font-weight:500}
       </div>
       <div class="scroll" id="plan"></div>
     </section>
+    <section class="sheet summary" aria-labelledby="t-res">
+      <div class="head"><h2 id="t-res">Resumen</h2><span class="tag">mm</span></div>
+      <dl class="facts" id="facts"></dl>
+    </section>
+    </div>
   </div>
 
 </main>
@@ -196,7 +211,7 @@ const SIMPLE = { "h:costado": "A", "h:contrafrente": "L", "v:frente": "H", "v:pu
 let showFormulas = false;
 function planSvg(prevDims) {
   const b = model.info.bounds;
-  const X0 = b.xMin - 270, X1 = b.xMax + 300, Y0 = b.yMin - 110, Y1 = b.yMax + 30;
+  const X0 = b.xMin - 270, X1 = b.xMax + (showFormulas ? 300 : 180), Y0 = b.yMin - 110, Y1 = b.yMax + 30;
   const cx = (b.xMin + b.xMax) / 2;
   const Y = (y) => Y1 - y;
   const paths = { c: "", h: "", p: "" };
@@ -288,8 +303,16 @@ function render(source) {
   document.getElementById("plan").innerHTML = planSvg(prevDims);
     document.querySelectorAll("[data-onda]").forEach((b) => b.setAttribute("aria-pressed", String(Math.abs(ONDAS[b.dataset.onda] - model.P.e) < 1e-9)));
   const onda = Object.keys(ONDAS).find((k) => Math.abs(ONDAS[k] - model.P.e) < 1e-9);
-  const facts = [["Cartón", (onda ? "onda " + onda + " · " : "") + "e = " + fmtMm(model.P.e) + " mm"], ["Botella", model.info.botella], ["Largo de caja", "L = Lb + 3e + 5 = " + fmtMm(model.P.L)], ["Caja", model.info.caja + " mm"], ["Plancha", model.info.plancha + " mm"], ["Separador", model.info.interior]];
-  document.getElementById("facts").innerHTML = facts.map(([k, v]) => "<dt>" + k + "</dt><dd>" + v + "</dd>").join("");
+  const P = model.P, ext = model.info.externa, x3 = (a) => a.map(fmtMm).join(" × ");
+  const b = model.info.bounds;
+  const facts = [
+    ["Tipo de cartón", onda ? "Onda " + onda : "Espesor propio", "espesor " + fmtMm(P.e) + " mm"],
+    ["Botella", fmtMm(P.Lb) + " × ⌀" + fmtMm(P.Dc), P.n + (P.n > 1 ? " botellas" : " botella") + " · cuello ⌀" + fmtMm(P.Dn)],
+    ["Medidas internas", x3([P.L, P.A, P.H]), "L × A × H"],
+    ["Medidas externas", x3(ext), "con paredes y cierres"],
+    ["Plancha total", x3([b.xMax - b.xMin, b.yMax - b.yMin]), "ancho × alto"],
+  ];
+  document.getElementById("facts").innerHTML = facts.map(([k, v, hint]) => '<div class="row"><dt>' + k + "</dt><dd><strong>" + v + "</strong><span>" + hint + "</span></dd></div>").join("");
   document.getElementById("warn").innerHTML = model.notes.map((w) => '<li class="note">' + w + "</li>").join("") + model.warnings.map((w) => "<li>" + w + "</li>").join("");
   clearTimeout(hotTimer);
   hotTimer = setTimeout(() => document.querySelectorAll(".hot").forEach((e) => e.classList.remove("hot")), 1400);
