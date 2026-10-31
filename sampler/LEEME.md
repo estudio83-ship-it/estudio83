@@ -16,6 +16,7 @@ En la compu también se puede abrir el archivo directamente con doble clic (Chro
 ## Lo básico
 - **Grabar**: mantené **●** y apretá un pad (1–8). Graba mientras el pad está apretado.
   Con una mano: tocá **●** (titila) y después mantené el pad.
+- **Teclado**: podés deslizar el dedo sobre las teclas y van sonando una por una; con varios dedos suenan varias a la vez.
 - **Tocar**: los pads disparan los sonidos; el **teclado** toca el pad seleccionado en distintas notas.
 - **Modos** (fila de 4 botones): Sampler · Synth · Secuencia · Efectos. Las 4 perillas cambian según el modo.
 - **▶** arranca el secuenciador (16 pasos, 4 patrones). Con ▶ andando, tocá ● y tocá pads para grabar en vivo.
