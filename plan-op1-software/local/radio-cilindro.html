@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-<title>E83 · radio cilindro AM</title>
+<title>Radio cilindro AM</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script>
 // KiwiAM: escucha AM "del aire" a través de receptores KiwiSDR públicos cercanos a Buenos Aires.
@@ -98,8 +98,7 @@
   html,body{margin:0;min-height:100%;font-family:Inter,system-ui,sans-serif;user-select:none;-webkit-user-select:none}
   body{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:18px;background:#ecebe7;color:#2a2a2a}
   svg#radio{width:min(380px,86vw);height:auto;display:block;touch-action:none}
-  #capHit{cursor:ew-resize}
-  #wheelHit{cursor:ew-resize}
+  #capHit,#wheelHit{cursor:ew-resize}
   .bar{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:520px}
   .chip{border:1px solid #cfcdc7;border-radius:999px;padding:7px 12px;font:500 12px Inter,sans-serif;background:#f7f6f3;color:#333;cursor:pointer}
   .chip.on{background:#222;border-color:#222;color:#fff}
@@ -109,86 +108,11 @@
 </style>
 </head>
 <body>
-<svg id="radio" viewBox="0 0 400 500" aria-label="Radio AM cilíndrica, vista de frente">
-  <defs>
-    <clipPath id="winClip"><rect x="150" y="122" width="100" height="40" rx="2"/></clipPath>
-    <clipPath id="wheelClip"><rect x="148" y="196" width="104" height="32"/></clipPath>
-    <clipPath id="bodyClip"><rect x="60" y="190" width="280" height="240"/></clipPath>
-    <clipPath id="capClip"><rect x="78" y="40" width="244" height="54"/></clipPath>
-  </defs>
-  <!-- sombra plana -->
-  <rect x="72" y="474" width="256" height="8" rx="4" fill="#000" opacity=".1"/>
-  <!-- patas -->
-  <g fill="#151515">
-    <rect x="80" y="444" width="10" height="34"/><rect x="128" y="444" width="12" height="36"/><rect x="182" y="444" width="13" height="37"/>
-    <rect x="206" y="444" width="13" height="37"/><rect x="261" y="444" width="12" height="36"/><rect x="311" y="444" width="10" height="34"/>
-  </g>
-  <rect x="66" y="428" width="268" height="18" fill="#161616"/>
-
-  <!-- cuerpo -->
-  <g clip-path="url(#bodyClip)">
-    <rect id="bodyFill" x="60" y="190" width="280" height="240" fill="#7a4628"/>
-    <g id="grain"></g>
-    <!-- volumen de cilindro con franjas planas (sin degradé) -->
-    <g id="edges">
-    <rect x="60" y="190" width="10" height="240" fill="#000" opacity=".22"/>
-    <rect x="70" y="190" width="10" height="240" fill="#000" opacity=".1"/>
-    <rect x="320" y="190" width="10" height="240" fill="#000" opacity=".12"/>
-    <rect x="330" y="190" width="10" height="240" fill="#000" opacity=".25"/>
-    <rect x="108" y="190" width="18" height="240" fill="#fff" opacity=".06"/>
-  </g>
-  </g>
-  <!-- ranura + ruedita de volumen -->
-  <rect x="140" y="190" width="120" height="44" fill="#0c0c0c"/>
-  <g clip-path="url(#wheelClip)">
-    <rect x="148" y="196" width="104" height="32" fill="#232323"/>
-    <g id="wheelTeeth"></g>
-    <g id="wheelNums"></g>
-  </g>
-  <rect x="148" y="196" width="8" height="32" fill="#0c0c0c" opacity=".7"/>
-  <rect x="244" y="196" width="8" height="32" fill="#0c0c0c" opacity=".7"/>
-  <rect id="wheelHit" x="132" y="186" width="136" height="54" fill="transparent"/>
-
-  <!-- banda cromada (franjas planas) -->
-  <rect x="60" y="94" width="280" height="96" fill="#c7c9ca"/>
-  <rect x="60" y="94" width="12" height="96" fill="#9fa1a3"/>
-  <rect x="72" y="94" width="10" height="96" fill="#b4b6b8"/>
-  <rect x="112" y="94" width="26" height="96" fill="#e3e4e5"/>
-  <rect x="138" y="94" width="6" height="96" fill="#d5d6d7"/>
-  <rect x="300" y="94" width="20" height="96" fill="#b6b8ba"/>
-  <rect x="320" y="94" width="20" height="96" fill="#9a9c9e"/>
-  <g id="brush" opacity=".07"></g>
-  <rect x="60" y="94" width="280" height="2" fill="#8d8f91"/>
-  <rect x="60" y="188" width="280" height="2" fill="#7f8183"/>
-  <!-- índice del volumen -->
-  <path d="M195 190 L205 190 L200 196 Z" fill="#7f8183"/>
-  <!-- ventana del dial -->
-  <rect x="144" y="116" width="112" height="52" rx="4" fill="#3a3b3c"/>
-  <rect x="147" y="119" width="106" height="46" rx="3" fill="#0f0f0f"/>
-  <g clip-path="url(#winClip)">
-    <rect x="150" y="122" width="100" height="40" fill="#1a1a1a"/>
-    <g id="drum"></g>
-    <rect x="150" y="122" width="100" height="5" fill="#000" opacity=".55"/>
-    <rect x="150" y="157" width="100" height="5" fill="#000" opacity=".55"/>
-    <rect x="199.3" y="122" width="1.4" height="40" fill="#f4f4f4"/>
-    <rect x="150" y="122" width="100" height="9" fill="#fff" opacity=".05"/>
-  </g>
-
-  <!-- perilla de sintonía (tapa) -->
-  <rect x="78" y="40" width="244" height="54" rx="3" fill="#141414"/>
-  <g clip-path="url(#capClip)"><g id="capRidges"></g></g>
-  <rect x="78" y="40" width="244" height="5" rx="2" fill="#2c2c2c"/>
-  <rect x="78" y="40" width="20" height="54" fill="#000" opacity=".35"/>
-  <rect x="302" y="40" width="20" height="54" fill="#000" opacity=".4"/>
-  <rect x="78" y="90" width="244" height="4" fill="#0a0a0a"/>
-  <rect id="capHit" x="60" y="24" width="280" height="76" fill="transparent"/>
-</svg>
-
+<svg id="radio" viewBox="0 0 400 560" aria-label="Radio AM cilíndrica"></svg>
 <div class="status" id="status">tocá la ruedita para encender</div>
 <div class="bar" id="stations"></div>
 <div class="bar" id="finish"></div>
 <div class="hint">Arrastrá la perilla negra de arriba hacia la derecha para subir de frecuencia (o rueda del mouse / flechas). La ruedita con números es el volumen: en OFF se apaga.</div>
-
 <script>
 (()=>{
 // =================== emisoras AM ===================
@@ -264,56 +188,134 @@ function update(){
 }
 
 
-// =================== dibujo plano 2D ===================
-const NS='http://www.w3.org/2000/svg';
-const mk=(tag,a,parent)=>{const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);parent&&parent.appendChild(e);return e;};
-const $=id=>document.getElementById(id);
-// veta de madera: líneas planas onduladas (semilla fija)
+
+// =================== dibujo en perspectiva con colores planos ===================
+const NS='http://www.w3.org/2000/svg', svg=document.getElementById('radio'), $=id=>document.getElementById(id);
+const mk=(tag,a,parent=svg)=>{const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);parent.appendChild(e);return e;};
+const CX=200, K=40/140;                   // relación alto/ancho de las elipses (ángulo de vista)
+const R=140, RC=128;                      // radio del cuerpo/banda y de la tapa
+const YCAP=70, YBAND=104, YBODY=188, YBOT=430;
+// punto sobre la superficie del cilindro: ángulo u (0 = frente), altura y0 del borde superior + v
+const P=(r,u,yc)=>[CX+r*Math.sin(u), yc+r*K*Math.cos(u)];
+const f2=n=>n.toFixed(2);
+// banda curva entre dos alturas (yc1, yc2) para u en [u0,u1]
+function curvedBand(r,u0,u1,yc1,yc2,steps=24){let d='';
+  for(let i=0;i<=steps;i++){const u=u0+(u1-u0)*i/steps,[x,y]=P(r,u,yc1);d+=(i?'L':'M')+f2(x)+' '+f2(y);}
+  for(let i=steps;i>=0;i--){const u=u0+(u1-u0)*i/steps,[x,y]=P(r,u,yc2);d+='L'+f2(x)+' '+f2(y);}
+  return d+'Z';}
+const side=(r,yc1,yc2)=>`M${CX-r} ${yc1} A${r} ${r*K} 0 0 0 ${CX+r} ${yc1} L${CX+r} ${yc2} A${r} ${r*K} 0 0 1 ${CX-r} ${yc2} Z`;
+const defs=mk('defs',{});
+const clip=(id,d)=>{const c=mk('clipPath',{id},defs);mk('path',{d},c);};
+clip('cBody',side(R,YBODY,YBOT));clip('cBand',side(R,YBAND,YBODY));clip('cCap',side(RC,YCAP,YBAND));
+// franjas de sombreado planas (sin degradé) según el ángulo
+function shade(group,r,yTop,yBot,strength=1){
+  const bands=[[-1.57,-1.25,.30],[-1.25,-.95,.17],[-.95,-.62,.07],[.55,.85,.06],[.85,1.15,.15],[1.15,1.57,.30]];
+  bands.forEach(([a,b,o])=>mk('rect',{x:f2(CX+r*Math.sin(a)),y:yTop-60,width:f2(r*(Math.sin(b)-Math.sin(a))),height:yBot-yTop+120,fill:'#000',opacity:o*strength},group));
+  mk('rect',{x:f2(CX+r*Math.sin(-.5)),y:yTop-60,width:f2(r*(Math.sin(-.3)-Math.sin(-.5))),height:yBot-yTop+120,fill:'#fff',opacity:.07*strength},group);
+}
+
+// sombra y base
+mk('ellipse',{cx:205,cy:505,rx:168,ry:24,fill:'#000',opacity:.1});
+const legs=mk('g',{fill:'#141414'});
+[-1.2,-.72,-.24,.24,.72,1.2].forEach(u=>{const[x,y]=P(134,u,446),w=12*Math.cos(u)+3;mk('path',{d:`M${f2(x-w/2)} ${f2(y-4)} L${f2(x+w/2)} ${f2(y-4)} L${f2(x+w/2-2)} ${f2(y+34)} L${f2(x-w/2+2)} ${f2(y+34)} Z`},legs);});
+mk('path',{d:side(134,428,446),fill:'#1a1a1a'});
+
+// cuerpo
+const body=mk('g',{'clip-path':'url(#cBody)'});
+const bodyFill=mk('rect',{x:50,y:150,width:300,height:340,fill:'#7a4628'},body);
+const grain=mk('g',{},body);
 let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
-const grain=$('grain');
-for(let i=0;i<70;i++){const x0=60+rnd()*280,amp=1+rnd()*4,per=40+rnd()*120,ph=rnd()*6.28,w=.5+rnd()*2.2;
-  let d='';for(let y=186;y<=434;y+=6){const x=x0+Math.sin(y/per+ph)*amp+Math.sin(y/17+ph*2)*.6;d+=(d?'L':'M')+x.toFixed(1)+' '+y;}
-  mk('path',{d,fill:'none','stroke-width':w,stroke:['#5c3119','#6a3a1f','#8b5534','#94603c'][i%4],opacity:.55+rnd()*.4},grain);}
-// cepillado del cromo: líneas horizontales finas
-for(let y=97;y<188;y+=2+Math.floor(rnd()*3))mk('rect',{x:60,y,width:280,height:.6,fill:rnd()>.5?'#fff':'#777'},$('brush'));
-
-// --- perilla: estrías proyectadas sobre un cilindro (se juntan en los bordes) ---
-const capR=122,capN=150,capG=$('capRidges'),capEls=[];
-for(let i=0;i<capN;i++)capEls.push(mk('rect',{y:45,height:45,fill:'#3d3d3d'},capG));
-let capRot=0;
-function drawCap(){for(let i=0;i<capN;i++){const a=i/capN*Math.PI*2+capRot,c=Math.cos(a),e=capEls[i];
-  if(c<=0.02){e.setAttribute('width',0);continue;}
-  const x=200+capR*Math.sin(a),w=1.7*c;e.setAttribute('x',(x-w/2).toFixed(2));e.setAttribute('width',w.toFixed(2));
-  e.setAttribute('fill',c>.8?'#555':c>.5?'#3e3e3e':c>.25?'#2e2e2e':'#232323');}}
-
-// --- tambor del dial: números sobre un cilindro ---
-const FMIN_=530,DR=72,KD=.0062,drum=$('drum'),labels=[],ticks=[];
-for(let f=530;f<=1610;f+=10){const big=f%100===0&&f<=1600;
-  ticks.push({f,big,e:mk('rect',{y:big?152:155,height:big?7:4,fill:'#cfcfcf'},drum)});
-  if(big)labels.push({f,e:mk('text',{y:147,'text-anchor':'middle','font-family':'Inter','font-weight':500,'font-size':17,fill:'#eeeeee'},drum)});}
-labels.forEach(l=>l.e.textContent=l.f);
-function drawDrum(){
-  for(const t of ticks){const a=(t.f-freq)*KD,c=Math.cos(a);if(c<.25||Math.abs(a)>1.3){t.e.setAttribute('width',0);continue;}
-    t.e.setAttribute('x',(200+DR*Math.sin(a)-.5*c).toFixed(2));t.e.setAttribute('width',(1*c).toFixed(2));}
-  for(const l of labels){const a=(l.f-freq)*KD,c=Math.cos(a);if(c<.25||Math.abs(a)>1.3){l.e.setAttribute('opacity',0);continue;}
-    const x=200+DR*Math.sin(a);l.e.setAttribute('opacity',Math.min(1,c*1.1).toFixed(2));
-    l.e.setAttribute('transform',`translate(${x.toFixed(2)} 0) scale(${c.toFixed(3)} 1)`);l.e.setAttribute('x',0);}
-}
-
-// --- ruedita de volumen con números ---
-const WR=56,STEP=.44,MAXA=10*STEP,wNums=$('wheelNums'),wTeeth=$('wheelTeeth'),nums=[],teeth=[];
+for(let i=0;i<80;i++){const u=-1.45+rnd()*2.9,amp=.004+rnd()*.012,per=30+rnd()*90,ph=rnd()*6.3,w=(.5+rnd()*2)*Math.cos(u);
+  let d='';for(let y=170;y<=480;y+=6){const x=CX+R*Math.sin(u+Math.sin(y/per+ph)*amp);d+=(d?'L':'M')+f2(x)+' '+y;}
+  mk('path',{d,fill:'none','stroke-width':f2(w),stroke:['#5c3119','#6a3a1f','#8b5534','#94603c'][i%4],opacity:f2(.5+rnd()*.4)},grain);}
+const bodyShade=mk('g',{},body);shade(bodyShade,R,YBODY,YBOT);
+// ranura del volumen (sigue la curva del cuerpo)
+const SU=.43;
+mk('path',{d:curvedBand(R,-SU,SU,YBAND+80,YBAND+126),fill:'#0b0b0b'},body);
+// ruedita: cilindro chico de eje vertical, con su propia curvatura
+const RW=72, WY=209;                                   // radio y altura base de la ruedita
+const wy=(a,off)=>WY+off+RW*K*Math.cos(a);
+const wheelClipD=(()=>{let d='';const a0=Math.asin(57/RW);
+  for(let i=0;i<=20;i++){const a=-a0+2*a0*i/20;d+=(i?'L':'M')+f2(CX+RW*Math.sin(a))+' '+f2(wy(a,4));}
+  for(let i=20;i>=0;i--){const a=-a0+2*a0*i/20;d+='L'+f2(CX+RW*Math.sin(a))+' '+f2(wy(a,36));}return d+'Z';})();
+clip('cWheel',wheelClipD);
+const wheelG=mk('g',{'clip-path':'url(#cWheel)'});
+mk('path',{d:wheelClipD,fill:'#202020'},wheelG);
+const wTeeth=mk('g',{},wheelG), wNums=mk('g',{},wheelG), wShade=mk('g',{},wheelG);
+[[-1,-.62,.55],[-.62,-.4,.25],[.4,.62,.25],[.62,1,.55]].forEach(([a,b,o])=>mk('rect',{x:f2(CX+RW*Math.sin(a)),y:200,width:f2(RW*(Math.sin(b)-Math.sin(a))),height:80,fill:'#000',opacity:o},wShade));
+const STEP=.42,MAXA=10*STEP,nums=[],teeth=[];
 ['OFF','1','2','3','4','5','6','7','8','9','10'].forEach((t,i)=>{const g=mk('g',{},wNums);
-  const tx=mk('text',{y:217,'text-anchor':'middle','font-family':'Inter','font-weight':600,'font-size':t==='OFF'?10:12,fill:'#ececec','letter-spacing':t==='OFF'?1:0},g);tx.textContent=t;
-  const tk=mk('rect',{y:221,width:1,height:3,x:-.5,fill:'#9a9a9a'},g);nums.push({i,g});});
-for(let i=0;i<70;i++){teeth.push(mk('rect',{y:196,height:4,fill:'#4a4a4a'},wTeeth),mk('rect',{y:224,height:4,fill:'#4a4a4a'},wTeeth));}
-let wheelA=0;
-function drawWheel(){
-  nums.forEach(n=>{const a=-n.i*STEP+wheelA,c=Math.cos(a);if(c<.15||Math.abs(a)>1.5){n.g.setAttribute('opacity',0);return;}
-    n.g.setAttribute('opacity',Math.min(1,c*1.15).toFixed(2));n.g.setAttribute('transform',`translate(${(200+WR*Math.sin(a)).toFixed(2)} 0) scale(${c.toFixed(3)} 1)`);});
-  for(let i=0;i<70;i++){const a=i/70*Math.PI*2+wheelA,c=Math.cos(a);for(const e of [teeth[2*i],teeth[2*i+1]]){
-    if(c<=.05){e.setAttribute('width',0);continue;}const w=1.6*c;e.setAttribute('x',(200+WR*Math.sin(a)-w/2).toFixed(2));e.setAttribute('width',w.toFixed(2));}}
-}
+  const tx=mk('text',{x:0,y:0,'text-anchor':'middle','font-family':'Inter','font-weight':600,'font-size':t==='OFF'?10:12,fill:'#ececec','letter-spacing':t==='OFF'?1:0},g);tx.textContent=t;
+  mk('rect',{x:-.5,y:4,width:1,height:3,fill:'#9a9a9a'},g);nums.push({i,g});});
+for(let i=0;i<80;i++)teeth.push(mk('line',{stroke:'#4a4a4a'},wTeeth),mk('line',{stroke:'#4a4a4a'},wTeeth));
 
+// banda cromada
+mk('ellipse',{cx:CX,cy:YBAND,rx:R,ry:R*K,fill:'#d3d5d6',stroke:'#9a9c9e','stroke-width':1});
+const band=mk('g',{'clip-path':'url(#cBand)'});
+mk('rect',{x:50,y:60,width:300,height:200,fill:'#c8cacb'},band);
+[[-1.57,-1.2,'#9a9c9e'],[-1.2,-.95,'#b3b5b7'],[-.62,-.38,'#e6e7e8'],[-.38,-.3,'#d6d7d8'],[.7,1.05,'#b5b7b9'],[1.05,1.57,'#97999b']]
+  .forEach(([a,b,c])=>mk('rect',{x:f2(CX+R*Math.sin(a)),y:60,width:f2(R*(Math.sin(b)-Math.sin(a))),height:200,fill:c},band));
+const brush=mk('g',{opacity:.07},band);
+for(let v=2;v<84;v+=2+Math.floor(rnd()*3))mk('path',{d:curvedBand(R,-1.57,1.57,YBAND+v,YBAND+v+.6,40),fill:rnd()>.5?'#fff':'#666'},brush);
+mk('path',{d:`M${CX-R} ${YBODY} A${R} ${R*K} 0 0 0 ${CX+R} ${YBODY}`,fill:'none',stroke:'#7f8183','stroke-width':1.5});
+// índice del volumen
+{const[x,y]=P(R,0,YBODY);mk('path',{d:`M${x-5} ${y} L${x+5} ${y} L${x} ${y+6} Z`,fill:'#7f8183'});}
+// ventana del dial (curva)
+const WU=.37;
+mk('path',{d:curvedBand(R,-WU-.03,WU+.03,YBAND+15,YBAND+67),fill:'#3a3b3c'});
+mk('path',{d:curvedBand(R,-WU-.015,WU+.015,YBAND+17,YBAND+65),fill:'#0f0f0f'});
+clip('cWin',curvedBand(R,-WU,WU,YBAND+19,YBAND+63));
+const win=mk('g',{'clip-path':'url(#cWin)'});
+mk('path',{d:curvedBand(R,-WU,WU,YBAND+19,YBAND+63),fill:'#1a1a1a'},win);
+const drum=mk('g',{},win);
+mk('path',{d:curvedBand(R,-WU,WU,YBAND+19,YBAND+25),fill:'#000',opacity:.55},win);
+mk('path',{d:curvedBand(R,-WU,WU,YBAND+57,YBAND+63),fill:'#000',opacity:.55},win);
+[[-WU,-.27,.45],[.27,WU,.45]].forEach(([a,b,o])=>mk('path',{d:curvedBand(R,a,b,YBAND+19,YBAND+63),fill:'#000',opacity:o},win));
+{const[,y1]=P(R,0,YBAND+19),[,y2]=P(R,0,YBAND+63);mk('rect',{x:199.3,y:y1,width:1.4,height:y2-y1,fill:'#f4f4f4'},win);}
+mk('path',{d:curvedBand(R,-WU,WU,YBAND+19,YBAND+28),fill:'#fff',opacity:.05},win);
+const KD=.0034,labels=[],ticks=[];
+for(let f=530;f<=1610;f+=10){const big=f%100===0&&f<=1600;
+  ticks.push({f,big,e:mk('line',{stroke:'#cfcfcf'},drum)});
+  if(big){const t=mk('text',{x:0,y:0,'text-anchor':'middle','font-family':'Inter','font-weight':500,'font-size':17,fill:'#eeeeee'},drum);t.textContent=f;labels.push({f,e:t});}}
+
+// tapa / perilla de sintonía (sin marca)
+const capG=mk('g',{});
+mk('path',{d:side(RC,YCAP,YBAND),fill:'#141414'},capG);
+const ridgeG=mk('g',{'clip-path':'url(#cCap)'},capG), ridges=[];
+const CAPN=150;for(let i=0;i<CAPN;i++)ridges.push(mk('line',{},ridgeG));
+const capShade=mk('g',{'clip-path':'url(#cCap)'},capG);shade(capShade,RC,YCAP,YBAND,.9);
+mk('ellipse',{cx:CX,cy:YCAP,rx:RC,ry:RC*K,fill:'#1b1b1b'},capG);
+const topRidges=mk('ellipse',{cx:CX,cy:YCAP,rx:RC-6,ry:(RC-6)*K,fill:'none',stroke:'#2c2c2c','stroke-width':7,'stroke-dasharray':'2.2 2.6'},capG);
+mk('ellipse',{cx:CX,cy:YCAP,rx:104,ry:104*K,fill:'#0e0e0e'},capG);
+mk('ellipse',{cx:CX,cy:YCAP,rx:84,ry:84*K,fill:'#c6c8ca',stroke:'#76787a','stroke-width':1},capG);
+mk('path',{d:`M${CX-84} ${YCAP} A84 ${84*K} 0 0 1 ${CX+84} ${YCAP} A84 ${84*K*.55} 0 0 0 ${CX-84} ${YCAP} Z`,fill:'#dfe0e1'},capG);
+const capHit=mk('path',{id:'capHit',d:side(RC+12,YCAP-6,YBAND+6),fill:'transparent'});
+const wheelHit=mk('path',{id:'wheelHit',d:curvedBand(R,-.5,.5,YBAND+76,YBAND+132),fill:'transparent'});
+
+// =================== animación de las partes que giran ===================
+let capRot=0,wheelA=0;
+function drawCap(){for(let i=0;i<CAPN;i++){const a=i/CAPN*Math.PI*2+capRot,c=Math.cos(a),e=ridges[i];
+  if(c<=.03){e.setAttribute('stroke-width',0);continue;}
+  const[x,y1]=P(RC,a,YCAP),[,y2]=P(RC,a,YBAND);
+  e.setAttribute('x1',f2(x));e.setAttribute('x2',f2(x));e.setAttribute('y1',f2(y1));e.setAttribute('y2',f2(y2));
+  e.setAttribute('stroke-width',f2(1.7*c));e.setAttribute('stroke',c>.8?'#555':c>.5?'#3e3e3e':c>.25?'#2e2e2e':'#232323');}
+  topRidges.setAttribute('stroke-dashoffset',f2(-capRot*RC*.5));}
+function drawDrum(){
+  for(const t of ticks){const u=(t.f-freq)*KD;if(Math.abs(u)>WU+.05){t.e.setAttribute('stroke-width',0);continue;}
+    const[x,y1]=P(R,u,YBAND+(t.big?49:52)),[,y2]=P(R,u,YBAND+56);
+    t.e.setAttribute('x1',f2(x));t.e.setAttribute('x2',f2(x));t.e.setAttribute('y1',f2(y1));t.e.setAttribute('y2',f2(y2));t.e.setAttribute('stroke-width',f2(Math.cos(u)));}
+  for(const l of labels){const u=(l.f-freq)*KD;if(Math.abs(u)>WU+.15){l.e.setAttribute('opacity',0);continue;}
+    const[x,y]=P(R,u,YBAND+45),ang=Math.atan2(-R*K*Math.sin(u),R*Math.cos(u))*180/Math.PI;
+    l.e.setAttribute('opacity',1);l.e.setAttribute('transform',`translate(${f2(x)} ${f2(y)}) rotate(${f2(ang)}) scale(${f2(Math.cos(u))} 1)`);}
+}
+function drawWheel(){
+  nums.forEach(n=>{const a=-n.i*STEP+wheelA,c=Math.cos(a);if(c<.15||Math.abs(a)>1.4){n.g.setAttribute('opacity',0);return;}
+    const x=CX+RW*Math.sin(a),y=wy(a,25),ang=Math.atan2(-RW*K*Math.sin(a),RW*c)*180/Math.PI;
+    n.g.setAttribute('opacity',f2(Math.min(1,c*1.15)));n.g.setAttribute('transform',`translate(${f2(x)} ${f2(y)}) rotate(${f2(ang)}) scale(${f2(c)} 1)`);});
+  for(let i=0;i<80;i++){const a=i/80*Math.PI*2+wheelA,c=Math.cos(a),x=f2(CX+RW*Math.sin(a));
+    [[teeth[2*i],4,9],[teeth[2*i+1],31,36]].forEach(([e,o1,o2])=>{if(c<=.05){e.setAttribute('stroke-width',0);return;}
+      e.setAttribute('x1',x);e.setAttribute('x2',x);e.setAttribute('y1',f2(wy(a,o1)));e.setAttribute('y2',f2(wy(a,o2)));e.setAttribute('stroke-width',f2(1.5*c));});}
+}
 function render(){
   drawCap();drawDrum();drawWheel();
   const {st,d}=nearest(),on=vol>0.02,status=$('status');
@@ -325,25 +327,24 @@ function render(){
 function loop(){update();render();requestAnimationFrame(loop);}
 
 // =================== controles ===================
-const svg=$('radio');
 const sx=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse()).x;};
 const KF=100; // kHz por radián de giro
 function turnCap(rad){capRot+=rad;freq=Math.max(FMIN,Math.min(FMAX,freq+rad*KF));}
 function wake(){initAudio();ctx.resume();}
-// perilla: arrastrar a la derecha = sube la frecuencia (la superficie sigue al dedo)
-const capHit=$('capHit');let cId=null,cx0=0;
+// perilla: arrastrar a la derecha = sube la frecuencia (el frente de la perilla sigue al dedo)
+let cId=null,cx0=0;
 capHit.addEventListener('pointerdown',e=>{wake();cId=e.pointerId;capHit.setPointerCapture(cId);cx0=sx(e);cancelAnimationFrame(sweep);});
-capHit.addEventListener('pointermove',e=>{if(e.pointerId!==cId)return;const x=sx(e);turnCap((x-cx0)/capR);cx0=x;});
+capHit.addEventListener('pointermove',e=>{if(e.pointerId!==cId)return;const x=sx(e);turnCap((x-cx0)/RC);cx0=x;});
 capHit.addEventListener('pointerup',()=>cId=null);capHit.addEventListener('pointercancel',()=>cId=null);
 capHit.addEventListener('wheel',e=>{e.preventDefault();const d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:-e.deltaY);turnCap(Math.sign(d)*(e.shiftKey?10:2)/KF);},{passive:false});
 // ruedita: arrastrar a la derecha = más volumen
-const wHit=$('wheelHit');let wId=null,wx0=0,moved=0;
+let wId=null,wx0=0,moved=0;
 const setWheel=a=>{wheelA=Math.max(0,Math.min(MAXA,a));vol=wheelA/MAXA;};
-wHit.addEventListener('pointerdown',e=>{wake();wId=e.pointerId;wHit.setPointerCapture(wId);wx0=sx(e);moved=0;});
-wHit.addEventListener('pointermove',e=>{if(e.pointerId!==wId)return;const x=sx(e);moved+=Math.abs(x-wx0);setWheel(wheelA+(x-wx0)/WR);wx0=x;});
-wHit.addEventListener('pointerup',()=>{wId=null;if(moved<3)animWheel(vol>0.02?0:5*STEP);});
-wHit.addEventListener('pointercancel',()=>wId=null);
-wHit.addEventListener('wheel',e=>{e.preventDefault();wake();setWheel(wheelA-Math.sign(e.deltaY)*STEP/2);},{passive:false});
+wheelHit.addEventListener('pointerdown',e=>{wake();wId=e.pointerId;wheelHit.setPointerCapture(wId);wx0=sx(e);moved=0;});
+wheelHit.addEventListener('pointermove',e=>{if(e.pointerId!==wId)return;const x=sx(e);moved+=Math.abs(x-wx0);setWheel(wheelA+(x-wx0)/RW);wx0=x;});
+wheelHit.addEventListener('pointerup',()=>{wId=null;if(moved<3)animWheel(vol>0.02?0:5*STEP);});
+wheelHit.addEventListener('pointercancel',()=>wId=null);
+wheelHit.addEventListener('wheel',e=>{e.preventDefault();wake();setWheel(wheelA-Math.sign(e.deltaY)*STEP/2);},{passive:false});
 function animWheel(t){const a0=wheelA,t0=performance.now();const st=now=>{const k=Math.min(1,(now-t0)/350),e=1-Math.pow(1-k,3);setWheel(a0+(t-a0)*e);if(k<1)requestAnimationFrame(st);};requestAnimationFrame(st);}
 addEventListener('keydown',e=>{if(e.key==='ArrowRight')turnCap((e.shiftKey?10:1)/KF);if(e.key==='ArrowLeft')turnCap(-(e.shiftKey?10:1)/KF);
   if(e.key==='ArrowUp')setWheel(wheelA+STEP/2);if(e.key==='ArrowDown')setWheel(wheelA-STEP/2);});
@@ -355,8 +356,8 @@ STATIONS.forEach(s=>{const b=document.createElement('button');b.className='chip'
   b.onclick=()=>{wake();if(vol<=0.02)animWheel(5*STEP);
     if(s.kiwi&&cur&&cur.st===s&&cur.state==='nosig'){window.open(KiwiAM.webLink(s.f),'_blank');return;}goTo(s.f);};$('stations').appendChild(b);});
 // terminaciones
-const FIN={madera:{fill:'#7a4628',grain:1,edge:1},blanco:{fill:'#f1efe9',grain:0,edge:.35},naranja:{fill:'#e0601f',grain:0,edge:.8}};
-function setFinish(k){const o=FIN[k];$('bodyFill').setAttribute('fill',o.fill);grain.style.display=o.grain?'':'none';$('edges').setAttribute('opacity',o.edge);
+const FIN={madera:{fill:'#7a4628',grain:1,sh:1},blanco:{fill:'#f1efe9',grain:0,sh:.45},naranja:{fill:'#e0601f',grain:0,sh:.8}};
+function setFinish(k){const o=FIN[k];bodyFill.setAttribute('fill',o.fill);grain.style.display=o.grain?'':'none';bodyShade.setAttribute('opacity',o.sh);
   document.querySelectorAll('#finish .chip').forEach(b=>b.classList.toggle('on',b.dataset.k===k));try{localStorage.setItem('e83-cil',k);}catch(e){}}
 Object.keys(FIN).forEach(k=>{const b=document.createElement('button');b.className='chip';b.dataset.k=k;b.textContent=k[0].toUpperCase()+k.slice(1);b.onclick=()=>setFinish(k);$('finish').appendChild(b);});
 let saved='madera';try{saved=localStorage.getItem('e83-cil')||'madera';}catch(e){}setFinish(FIN[saved]?saved:'madera');
