@@ -124,7 +124,7 @@ function connect(st,aire){
   if(st.kiwi&&(aire||!st.url)){ // AM real: el audio llega del receptor (ya es AM, va directo)
     const g=ctx.createGain();g.connect(chainIn);
     const c={st,el:null,src:g,mode:'fx',state:'conectando'};cur=c;
-    c.kiwi=KiwiAM.open(ctx,st.f,g,{onState:x=>{if(cur===c)c.state=x==='ok'?'ok':x==='nosig'?'sin señal':'conectando';}});
+    c.kiwi=KiwiAM.open(ctx,st.f,g,{onState:(x,h)=>{if(cur!==c)return;c.state=x==='ok'?'ok':x==='nosig'?'sin señal':'conectando';if(x==='ok'&&h.kind==='yt'){c.mode='plain';c.el=h;}}});
     return;
   }
   const el=new Audio(); el.preload='none';

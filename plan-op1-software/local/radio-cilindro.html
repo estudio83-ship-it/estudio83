@@ -6,30 +6,86 @@
 <title>Radio cilindro AM</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script>
-// KiwiAM: escucha AM "del aire" a través de receptores KiwiSDR públicos cercanos a Buenos Aires.
-// Uso: const k = KiwiAM.open(ctx, 950, destinoNode, {onState, onSignal}); k.close();
-// Protocolo KiwiSDR (igual que kiwiclient): WebSocket /<ts>/SND, comandos "SET ...",
-// audio PCM 16 bits big-endian sin comprimir.
-// Los receptores solo hablan ws:// (sin TLS): el navegador lo permite si la página se abre
-// desde la compu (file://) o desde http://, y lo bloquea desde páginas https://.
+// KiwiAM: plan B para escuchar una AM (el 950) cuando su señal online oficial no responde.
+// Uso: const h = KiwiAM.open(ctx, 950, destinoNode, {onState(state, h)}); h.volume = 0.5; h.close();
+// Prueba en orden:
+//   1. YouTube: el video en vivo que publica la web oficial de StreAM 950 (/api/live-stream).
+//   2. YouTube: el vivo del canal "Origen AM950".
+//      (YouTube funciona desde páginas https; el audio sale del reproductor, no pasa por el filtro AM.)
+//   3. Receptores KiwiSDR de Buenos Aires / Montevideo: la onda AM real, del aire.
+//      Solo hablan ws:// (sin TLS): el navegador lo permite si la página se abre desde la compu
+//      (file://) o desde http://, y lo bloquea desde páginas https://.
+// h.kind indica la fuente que quedó sonando: 'yt' o 'kiwi'.
 (function(){
   const RECEIVERS = [
-    { name: 'RAMOS MEJIA (LU4EEC)',          host: 'lu4eec.ddns.net',         port: 8073 },
-    { name: 'RADIO CLUB ARGENTINO (LU4AA)',  host: 'lu4aa.proxy.kiwisdr.com', port: null },
-    { name: 'MONTEVIDEO (CX8BIT)',           host: 'cx8bit.proxy.kiwisdr.com',port: null },
+    { name: 'RAMOS MEJIA (LU4EEC)',          host: 'lu4eec.ddns.net',          port: 8073 },
+    { name: 'RADIO CLUB ARGENTINO (LU4AA)',  host: 'lu4aa.proxy.kiwisdr.com',  port: null },
+    { name: 'MONTEVIDEO (CX8BIT)',           host: 'cx8bit.proxy.kiwisdr.com', port: null },
   ];
+  const YT_CHANNELS = ['UCrVXrl6-YV40UD9cNI5nsgA'];          // Origen AM950
+  const OFFICIAL_API = 'https://stream950.com.ar/api/live-stream';
   const base = r => `${r.host}${r.port ? ':' + r.port : ''}`;
   // Página del receptor ya sintonizada (se abre aparte cuando no se puede conectar desde acá)
   const webLink = (khz, r = RECEIVERS[0]) => `http://${base(r)}/?f=${khz}am`;
   const canConnect = () => location.protocol !== 'https:';
 
-  function open(ctx, khz, dest, cb = {}) {
-    let ws = null, closed = false, idx = 0, keep = null, playAt = 0, rate = 12000, gotAudio = false, timer = null;
-    const state = s => cb.onState && cb.onState(s);
-    if (!canConnect()) { setTimeout(() => state('nosig'), 0); return { close() {} }; }
+  // ---------- YouTube ----------
+  let ytReady = null;
+  function loadYT() {
+    if (ytReady) return ytReady;
+    ytReady = new Promise(res => {
+      if (window.YT && YT.Player) return res(true);
+      const prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => { prev && prev(); res(true); };
+      const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api';
+      s.onerror = () => res(false); document.head.appendChild(s);
+      setTimeout(() => res(!!(window.YT && YT.Player)), 8000);
+    });
+    return ytReady;
+  }
+  async function officialVideoId() {
+    // la API oficial no permite consultas desde otras webs: se pasa por un proxy público de lectura
+    const urls = [OFFICIAL_API,
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent(OFFICIAL_API + '?t=' + Date.now()),
+      'https://corsproxy.io/?url=' + encodeURIComponent(OFFICIAL_API)];
+    for (const u of urls) {
+      try {
+        const ac = new AbortController(); const t = setTimeout(() => ac.abort(), 5000);
+        const r = await fetch(u, { signal: ac.signal, cache: 'no-store' }); clearTimeout(t);
+        const j = await r.json(); if (j && j.videoId) return j.videoId;
+        if (j && 'videoId' in j) return null;            // respondió: no hay vivo ahora
+      } catch (e) {}
+    }
+    return null;
+  }
+  function ytPlay(opts, vol) {   // opts: {videoId} o {channel}
+    return new Promise(async resolve => {
+      if (!(await loadYT())) return resolve(null);
+      const host = document.createElement('div');
+      host.style.cssText = 'position:fixed;left:0;bottom:0;width:200px;height:113px;opacity:.01;pointer-events:none;z-index:-1';
+      const inner = document.createElement('div'); host.appendChild(inner); document.body.appendChild(host);
+      let done = false;
+      const finish = p => { if (done) return; done = true; clearTimeout(t); if (!p) { try { player.destroy(); } catch (e) {} host.remove(); } resolve(p ? { player, host } : null); };
+      const player = new YT.Player(inner, {
+        width: 200, height: 113,
+        videoId: opts.videoId || 'live_stream',
+        playerVars: Object.assign({ autoplay: 1, controls: 0, playsinline: 1, rel: 0 }, opts.channel ? { channel: opts.channel } : {}),
+        events: {
+          onReady: e => { try { e.target.unMute(); e.target.setVolume(Math.round(vol() * 100)); e.target.playVideo(); } catch (x) {} },
+          onStateChange: e => { if (e.data === 1) finish(true); if (e.data === 0) finish(false); },
+          onError: () => finish(false),
+        },
+      });
+      const t = setTimeout(() => finish(false), 12000);
+    });
+  }
 
+  // ---------- receptores KiwiSDR (AM del aire) ----------
+  function kiwi(ctx, khz, dest, h, state) {
+    let ws = null, idx = 0, keep = null, playAt = 0, rate = 12000, gotAudio = false, timer = null;
+    h._closers.push(() => { clearInterval(keep); clearTimeout(timer); try { ws && ws.close(); } catch (e) {} });
     function next() {
-      if (closed) return;
+      if (h.closed) return;
       if (idx >= RECEIVERS.length) { state('nosig'); return; }
       const r = RECEIVERS[idx++];
       state('tuning'); gotAudio = false;
@@ -67,8 +123,6 @@
         // cuerpo: flags(1) seq(4, LE) smeter(2, BE) datos(int16 BE)
         const dv = new DataView(ev.data, 3);
         if (dv.getUint8(0) & 0x10) return;              // llegó comprimido (no debería): se descarta
-        const smeter = dv.getUint16(5, false);
-        cb.onSignal && cb.onSignal(Math.max(0, Math.min(1, ((smeter * 0.1 - 127) + 110) / 70)));
         const n = (dv.byteLength - 7) >> 1;
         if (n <= 0) return;
         const buf = ctx.createBuffer(1, n, rate), ch = buf.getChannelData(0);
@@ -77,19 +131,45 @@
         const now = ctx.currentTime;
         if (playAt < now + 0.05 || playAt > now + 1.5) playAt = now + 0.35; // colchón anti-cortes
         src.start(playAt); playAt += buf.duration;
-        if (!gotAudio) { gotAudio = true; clearTimeout(timer); state('ok'); }
+        if (!gotAudio) { gotAudio = true; clearTimeout(timer); h.kind = 'kiwi'; state('ok'); }
       };
       ws.onclose = ws.onerror = () => {
         clearInterval(keep); clearTimeout(timer);
         ws.onclose = ws.onerror = null;
-        if (closed) return;
+        if (h.closed) return;
         if (gotAudio) { idx = 0; setTimeout(next, 1500); } else next(); // si se cortó, reintenta
       };
     }
     next();
-    return { close() { closed = true; clearInterval(keep); clearTimeout(timer); try { ws && ws.close(); } catch (e) {} } };
   }
-  window.KiwiAM = { open, webLink, canConnect, RECEIVERS };
+
+  function open(ctx, khz, dest, cb = {}) {
+    let vol = 1, yt = null;
+    const h = {
+      kind: null, closed: false, _closers: [],
+      set volume(v) { vol = v; if (yt) { try { yt.player.setVolume(Math.round(v * 100)); } catch (e) {} } },
+      get volume() { return vol; },
+      close() { h.closed = true; h._closers.forEach(f => f()); if (yt) { try { yt.player.destroy(); } catch (e) {} yt.host.remove(); yt = null; } },
+    };
+    const state = s => { if (!h.closed) cb.onState && cb.onState(s, h); };
+    (async () => {
+      state('tuning');
+      if (khz === 950) {
+        const vid = await officialVideoId();
+        const tries = (vid ? [{ videoId: vid }] : []).concat(YT_CHANNELS.map(channel => ({ channel })));
+        for (const t of tries) {
+          if (h.closed) return;
+          const p = await ytPlay(t, () => vol);
+          if (h.closed) { if (p) { try { p.player.destroy(); } catch (e) {} p.host.remove(); } return; }
+          if (p) { yt = p; h.kind = 'yt'; state('ok'); return; }
+        }
+      }
+      if (h.closed) return;
+      if (canConnect()) kiwi(ctx, khz, dest, h, state); else state('nosig');
+    })();
+    return h;
+  }
+  window.KiwiAM = { open, webLink, canConnect, RECEIVERS, _ytPlay: ytPlay };
 })();
 
 </script>
@@ -157,7 +237,7 @@ function connect(st,aire){
   disconnect();
   if(st.kiwi&&(aire||!st.url)){const g=ctx.createGain();g.connect(chainIn);
     const c={st,src:g,mode:'fx',state:'tuning',aire:true};cur=c;
-    c.kiwi=KiwiAM.open(ctx,st.f,g,{onState:x=>{if(cur===c)c.state=x;}});return;}
+    c.kiwi=KiwiAM.open(ctx,st.f,g,{onState:(x,h)=>{if(cur!==c)return;c.state=x;if(x==='ok'){c.aire=h.kind==='kiwi';if(h.kind==='yt'){c.mode='plain';c.el=h;}}}});return;}
   const c={st,el:new Audio(),src:null,mode:'fx',state:'tuning'};cur=c;
   const el=c.el;el.crossOrigin='anonymous';el.preload='none';
   try{c.src=ctx.createMediaElementSource(el);c.src.connect(chainIn);}catch(e){}

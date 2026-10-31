@@ -149,7 +149,7 @@ function connect(st,aire){
   if(st.kiwi&&(aire||!st.url)){ // AM del aire vía receptores de Buenos Aires
     const g=ctx.createGain();g.connect(chainIn);g.connect(cleanIn);
     const c={st,src:g,mode:'kiwi',state:'tuning',aire:true};cur=c;
-    c.kiwi=KiwiAM.open(ctx,st.f,g,{onState:x=>{if(cur===c)c.state=x;}});return;
+    c.kiwi=KiwiAM.open(ctx,st.f,g,{onState:(x,h)=>{if(cur!==c)return;c.state=x;if(x==='ok'){c.aire=h.kind==='kiwi';if(h.kind==='yt'){c.mode='plain';c.el=h;}}}});return;
   }
   const c={st,el:new Audio(),src:null,mode:'fx',state:'tuning'};cur=c;
   const el=c.el;el.crossOrigin='anonymous';el.preload='none';
