@@ -1,35 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="#ecebe7"/>
-  <ellipse cx="256" cy="452" rx="150" ry="18" fill="#000" opacity=".1"/>
-  <!-- cuerpo madera -->
-  <path d="M136 230 L136 410 A120 30 0 0 0 376 410 L376 230 Z" fill="#7a4628"/>
-  <g stroke-width="3" opacity=".7">
-    <path d="M160 236 L161 430" stroke="#5c3119"/><path d="M190 240 L189 436" stroke="#8b5534"/>
-    <path d="M222 240 L223 440" stroke="#6a3a1f"/><path d="M262 240 L261 440" stroke="#94603c"/>
-    <path d="M298 240 L299 438" stroke="#5c3119"/><path d="M332 238 L331 434" stroke="#8b5534"/>
-    <path d="M356 234 L357 428" stroke="#6a3a1f"/>
-  </g>
-  <rect x="136" y="200" width="22" height="210" fill="#000" opacity=".22"/>
-  <rect x="354" y="200" width="22" height="210" fill="#000" opacity=".26"/>
-  <!-- ranura volumen -->
-  <path d="M212 252 A120 30 0 0 0 300 252 L300 286 A120 30 0 0 1 212 286 Z" fill="#0c0c0c"/>
-  <path d="M222 262 A110 26 0 0 0 290 262 L290 280 A110 26 0 0 1 222 280 Z" fill="#232323"/>
-  <!-- banda cromada -->
-  <ellipse cx="256" cy="160" rx="120" ry="30" fill="#d3d5d6"/>
-  <path d="M136 160 A120 30 0 0 0 376 160 L376 230 A120 30 0 0 1 136 230 Z" fill="#c8cacb"/>
-  <path d="M136 160 L160 166 L160 252 L136 230 Z" fill="#9a9c9e"/>
-  <path d="M188 172 L214 178 L214 262 L188 256 Z" fill="#e6e7e8"/>
-  <path d="M352 166 L376 160 L376 230 L352 252 Z" fill="#97999b"/>
-  <!-- ventana del dial -->
-  <path d="M206 196 A120 30 0 0 0 306 196 L306 236 A120 30 0 0 1 206 236 Z" fill="#111"/>
-  <text x="256" y="236" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="600" font-size="34" fill="#f0f0f0">950</text>
-  <rect x="254.5" y="194" width="3" height="58" fill="#f4f4f4"/>
-  <!-- perilla -->
-  <path d="M146 112 A110 27 0 0 0 366 112 L366 150 A110 27 0 0 1 146 150 Z" fill="#141414"/>
-  <g stroke="#3d3d3d" stroke-width="3">
-    <path d="M166 122 v40 M186 128 v40 M206 132 v40 M226 135 v40 M246 136 v40 M266 136 v40 M286 135 v40 M306 132 v40 M326 128 v40 M346 122 v40"/>
-  </g>
-  <ellipse cx="256" cy="112" rx="110" ry="27" fill="#1b1b1b"/>
-  <ellipse cx="256" cy="112" rx="72" ry="17.5" fill="#c6c8ca"/>
-  <path d="M184 112 A72 17.5 0 0 1 328 112 A72 10 0 0 0 184 112 Z" fill="#dfe0e1"/>
+  <ellipse cx="256" cy="470" rx="120" ry="14" fill="#000" opacity=".1"/>
+  <g fill="#141414"><path d="M168 440 h22 l-4 26 h-14z"/><path d="M226 448 h24 l-3 24 h-18z"/><path d="M262 448 h24 l-3 24 h-18z"/><path d="M322 440 h22 l-4 26 h-14z"/></g>
+  <path d="M166 160 L166 430 A90 30.6 0 0 0 346 430 L346 160 Z" fill="#c9542b"/>
+  <rect x="166" y="150" width="14" height="282" fill="#000" opacity=".2"/>
+  <rect x="332" y="150" width="14" height="282" fill="#000" opacity=".24"/>
+  <rect x="198" y="150" width="14" height="300" fill="#fff" opacity=".07"/>
+  <path d="M222 190 A90 30.6 0 0 0 290 190 L290 206 A90 30.6 0 0 1 222 206 Z" fill="#0c0c0c"/>
+  <ellipse cx="256" cy="110" rx="90" ry="30.6" fill="#d3d5d6"/>
+  <path d="M166 110 A90 30.6 0 0 0 346 110 L346 160 A90 30.6 0 0 1 166 160 Z" fill="#c8cacb"/>
+  <path d="M166 110 L180 118 L180 176 L166 160 Z" fill="#9a9c9e"/>
+  <path d="M196 125 L212 129 L212 186 L196 182 Z" fill="#e6e7e8"/>
+  <path d="M332 118 L346 110 L346 160 L332 176 Z" fill="#97999b"/>
+  <path d="M222 138 A90 30.6 0 0 0 290 138 L290 164 A90 30.6 0 0 1 222 164 Z" fill="#111"/>
+  <text x="256" y="160" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="600" font-size="24" fill="#f0f0f0">950</text>
+  <rect x="255" y="140" width="2" height="28" fill="#f4f4f4"/>
+  <path d="M174 98 A82 27.9 0 0 0 338 98 L338 108 A82 27.9 0 0 1 174 108 Z" fill="#141414"/>
+  <ellipse cx="256" cy="98" rx="82" ry="27.9" fill="#1b1b1b"/>
+  <ellipse cx="256" cy="98" rx="50" ry="17" fill="#c6c8ca"/>
+  <path d="M206 98 A50 17 0 0 1 306 98 A50 9 0 0 0 206 98 Z" fill="#dfe0e1"/>
 </svg>
