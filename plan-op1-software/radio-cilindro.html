@@ -128,11 +128,19 @@ const side=(r,yc1,yc2)=>`M${CX-r} ${yc1} A${r} ${r*K} 0 0 0 ${CX+r} ${yc1} L${CX
 const defs=mk('defs',{});
 const clip=(id,d)=>{const c=mk('clipPath',{id},defs);mk('path',{d},c);};
 clip('cBody',side(R,YBODY,YBOT));clip('cBand',side(R,YBAND,YBODY));clip('cCap',side(RC,YCAP,YCAP+14));
-// franjas de sombreado planas (sin degradé) según el ángulo
+// degradés suaves en perspectiva cilíndrica
 function shade(group,r,yTop,yBot,strength=1){
-  const bands=[[-1.57,-1.25,.30],[-1.25,-.95,.17],[-.95,-.62,.07],[.55,.85,.06],[.85,1.15,.15],[1.15,1.57,.30]];
-  bands.forEach(([a,b,o])=>mk('rect',{x:f2(CX+r*Math.sin(a)),y:yTop-60,width:f2(r*(Math.sin(b)-Math.sin(a))),height:yBot-yTop+120,fill:'#000',opacity:o*strength},group));
-  mk('rect',{x:f2(CX+r*Math.sin(-.5)),y:yTop-60,width:f2(r*(Math.sin(-.3)-Math.sin(-.5))),height:yBot-yTop+120,fill:'#fff',opacity:.07*strength},group);
+  const gId='shade-'+Math.random().toString(36).slice(2);
+  const g=mk('defs',{},group.parentNode),grad=mk('linearGradient',{id:gId,x1:'0%',y1:'0%',x2:'100%',y2:'0%'},g);
+  mk('stop',{offset:'0%','stop-color':'#000','stop-opacity':(.30*strength).toFixed(2)},grad);
+  mk('stop',{offset:'18%','stop-color':'#000','stop-opacity':(.15*strength).toFixed(2)},grad);
+  mk('stop',{offset:'35%','stop-color':'#000','stop-opacity':(.05*strength).toFixed(2)},grad);
+  mk('stop',{offset:'50%','stop-color':'#000','stop-opacity':'0'},grad);
+  mk('stop',{offset:'65%','stop-color':'#000','stop-opacity':(.05*strength).toFixed(2)},grad);
+  mk('stop',{offset:'82%','stop-color':'#000','stop-opacity':(.15*strength).toFixed(2)},grad);
+  mk('stop',{offset:'100%','stop-color':'#000','stop-opacity':(.30*strength).toFixed(2)},grad);
+  mk('rect',{x:0,y:yTop-60,width:400,height:yBot-yTop+120,fill:`url(#${gId})`},group);
+  mk('rect',{x:CX-40,y:yTop-60,width:80,height:yBot-yTop+120,fill:'#fff',opacity:(.07*strength).toFixed(2)},group);
 }
 
 // sombra y base
