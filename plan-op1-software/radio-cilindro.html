@@ -129,18 +129,12 @@ const defs=mk('defs',{});
 const clip=(id,d)=>{const c=mk('clipPath',{id},defs);mk('path',{d},c);};
 clip('cBody',side(R,YBODY,YBOT));clip('cBand',side(R,YBAND,YBODY));clip('cCap',side(RC,YCAP,YCAP+14));
 // degradés suaves en perspectiva cilíndrica
+const shadeGrad=mk('radialGradient',{id:'shadeGrad',cx:'50%',cy:'50%',r:'50%'},defs);
+mk('stop',{offset:'0%','stop-color':'#000','stop-opacity':'0'},shadeGrad);
+mk('stop',{offset:'70%','stop-color':'#000','stop-opacity':'0.1'},shadeGrad);
+mk('stop',{offset:'100%','stop-color':'#000','stop-opacity':'0.3'},shadeGrad);
 function shade(group,r,yTop,yBot,strength=1){
-  const gId='shade-'+Math.random().toString(36).slice(2);
-  const g=mk('defs',{},group.parentNode),grad=mk('linearGradient',{id:gId,x1:'0%',y1:'0%',x2:'100%',y2:'0%'},g);
-  mk('stop',{offset:'0%','stop-color':'#000','stop-opacity':(.30*strength).toFixed(2)},grad);
-  mk('stop',{offset:'18%','stop-color':'#000','stop-opacity':(.15*strength).toFixed(2)},grad);
-  mk('stop',{offset:'35%','stop-color':'#000','stop-opacity':(.05*strength).toFixed(2)},grad);
-  mk('stop',{offset:'50%','stop-color':'#000','stop-opacity':'0'},grad);
-  mk('stop',{offset:'65%','stop-color':'#000','stop-opacity':(.05*strength).toFixed(2)},grad);
-  mk('stop',{offset:'82%','stop-color':'#000','stop-opacity':(.15*strength).toFixed(2)},grad);
-  mk('stop',{offset:'100%','stop-color':'#000','stop-opacity':(.30*strength).toFixed(2)},grad);
-  mk('rect',{x:0,y:yTop-60,width:400,height:yBot-yTop+120,fill:`url(#${gId})`},group);
-  mk('rect',{x:CX-40,y:yTop-60,width:80,height:yBot-yTop+120,fill:'#fff',opacity:(.07*strength).toFixed(2)},group);
+  mk('rect',{x:0,y:yTop-60,width:400,height:yBot-yTop+120,fill:'url(#shadeGrad)',opacity:strength},group);
 }
 
 // sombra y base
