@@ -523,7 +523,10 @@ async function ensureMic() {
   if (mic === false) return false;
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { msg('micrófono no disponible: abrila por https en Chrome o Safari', 5000); return false; }
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: false, noiseSuppression: false, autoGainControl: false}});
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: false, noiseSuppression: false, autoGainControl: false}}); }
+    catch (e1) { if (e1 && e1.name === 'NotAllowedError') throw e1; stream = await navigator.mediaDevices.getUserMedia({audio: true}); }
+    if (ctx.state !== 'running') await ctx.resume();
     const src = ctx.createMediaStreamSource(stream);
     const proc = ctx.createScriptProcessor(2048, 1, 1);
     const z = ctx.createGain(); z.gain.value = 0;
@@ -540,7 +543,12 @@ async function ensureMic() {
     mic = {stream, src, proc, z};
     return true;
   } catch (err) {
-    msg('sin permiso de micrófono (' + (err && err.name || 'error') + ')', 6000); return false;
+    const n = err && err.name;
+    if (n === 'NotAllowedError' || n === 'SecurityError') msg('micrófono bloqueado: tocá el candado junto a la dirección → Permisos → Micrófono', 7000);
+    else if (n === 'NotFoundError') msg('no se encontró ningún micrófono', 5000);
+    else if (n === 'NotReadableError') msg('otra app está usando el micrófono', 5000);
+    else msg('no se pudo abrir el micrófono (' + (n || 'error') + ')', 6000);
+    return false;
   }
 }
 function scheduleMicClose() {
