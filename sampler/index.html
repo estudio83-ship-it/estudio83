@@ -544,7 +544,8 @@ async function ensureMic() {
     return true;
   } catch (err) {
     const n = err && err.name;
-    if (n === 'NotAllowedError' || n === 'SecurityError') msg('micrófono bloqueado: tocá el candado junto a la dirección → Permisos → Micrófono', 7000);
+    if (!/^https:$/.test(location.protocol) && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) msg('abierto como archivo: el micrófono solo anda desde la página web (https)', 8000);
+    else if (n === 'NotAllowedError' || n === 'SecurityError') msg('micrófono bloqueado: tocá el candado junto a la dirección → Permisos → Micrófono', 7000);
     else if (n === 'NotFoundError') msg('no se encontró ningún micrófono', 5000);
     else if (n === 'NotReadableError') msg('otra app está usando el micrófono', 5000);
     else msg('no se pudo abrir el micrófono (' + (n || 'error') + ')', 6000);
@@ -897,7 +898,8 @@ function draw() {
   footer(SH - fh, fh, pad);
 
   if (performance.now() < msgUntil && msgText) {
-    const px = clamp(SH * .065, 9, 13); c.font = font(px, 500);
+    let px = clamp(SH * .065, 9, 13); c.font = font(px, 500);
+    while (px > 7 && c.measureText(msgText).width > SW - 24) { px -= .5; c.font = font(px, 500); }
     const w = c.measureText(msgText).width + 14, x = SW / 2 - w / 2, y = area.y + area.h - px - 8;
     c.fillStyle = 'rgba(0,0,0,.85)'; c.fillRect(x, y, w, px + 8);
     c.strokeStyle = '#333'; c.strokeRect(x + .5, y + .5, w - 1, px + 7);
