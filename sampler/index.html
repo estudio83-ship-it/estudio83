@@ -1110,7 +1110,7 @@ async function boot() {
     const r = stored.get(i);
     if (r && r.empty) setSlotData(i, null);
     else if (r && r.data) setSlotData(i, r.data, r.sr, false);
-    else setSlotData(i, factorySound(i, sr), sr, true);
+    else setSlotData(i, null);
   }
   applyGlobals(); buildKb(); updateUI();
   msg('tocá ◯ (parlante) para ver la ayuda', 3500);
