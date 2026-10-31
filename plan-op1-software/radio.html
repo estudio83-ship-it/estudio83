@@ -52,6 +52,7 @@
     .right{grid-template-columns:auto auto;justify-content:center;align-items:center;gap:28px}
   }
 </style>
+<script src="kiwi-am.js"></script>
 </head>
 <body>
 <div class="radio">
@@ -80,7 +81,7 @@ const STATIONS=[
   {f:630, name:'RIVADAVIA', url:'https://playerservices.streamtheworld.com/api/livestream-redirect/RIVADAVIA.mp3'},
   {f:790, name:'MITRE',     url:'https://playerservices.streamtheworld.com/api/livestream-redirect/AM790_56AAC.aac'},
   {f:870, name:'NACIONAL',  url:'https://sa.mp3.icecast.magma.edge-access.net/sc_rad1'},
-  {f:950, name:'STREAM 950',url:'https://redirector.dps.live/cnn-ar/aac/icecast.audio'},
+  {f:950, name:'STREAM 950',url:'https://redirector.dps.live/cnn-ar/aac/icecast.audio',kiwi:true}, // señal oficial (solo desde Argentina); si falla, del aire vía KiwiSDR
 ];
 const FMIN=530, FMAX=1710, CAPTURE=12; // kHz alrededor de cada emisora donde se "engancha"
 let freq=950, vol=.7, on=false;
@@ -118,8 +119,14 @@ function initAudio(){
 
 function nearest(){let best=null,bd=1e9;for(const s of STATIONS){const d=Math.abs(s.f-freq);if(d<bd){bd=d;best=s;}}return {st:best,d:bd};}
 
-function connect(st){
+function connect(st,aire){
   disconnect();
+  if(st.kiwi&&(aire||!st.url)){ // AM real: el audio llega del receptor (ya es AM, va directo)
+    const g=ctx.createGain();g.connect(chainIn);
+    const c={st,el:null,src:g,mode:'fx',state:'conectando'};cur=c;
+    c.kiwi=KiwiAM.open(ctx,st.f,g,{onState:x=>{if(cur===c)c.state=x==='ok'?'ok':x==='nosig'?'sin señal':'conectando';}});
+    return;
+  }
   const el=new Audio(); el.preload='none';
   const c={st,el,src:null,mode:'fx',state:'conectando'}; cur=c;
   const tryPlay=mode=>{
@@ -137,13 +144,13 @@ function connect(st){
       // un elemento conectado a Web Audio no puede volver a sonar directo; creamos otro
       const el2=new Audio(); el2.preload='none'; c.el.pause(); c.el=el2; c.src=null;
       el2.addEventListener('playing',()=>{if(cur===c)c.state='ok';});
-      el2.addEventListener('error',()=>{if(cur===c)c.state='sin señal';});
-      c.mode='plain'; el2.src=st.url; el2.play().catch(()=>{if(cur===c)c.state='sin señal';});
-    } else c.state='sin señal';
+      el2.addEventListener('error',()=>{if(cur===c){if(st.kiwi)connect(st,true); else c.state='sin señal';}});
+      c.mode='plain'; el2.src=st.url; el2.play().catch(()=>{if(cur===c){if(st.kiwi)connect(st,true); else c.state='sin señal';}});
+    } else if(st.kiwi)connect(st,true); else c.state='sin señal';
   });
   tryPlay('fx');
 }
-function disconnect(){ if(!cur) return; try{cur.el.pause();cur.el.removeAttribute('src');cur.el.load();}catch(e){} try{cur.src&&cur.src.disconnect();}catch(e){} cur=null; }
+function disconnect(){ if(!cur) return; if(cur.kiwi){cur.kiwi.close();try{cur.src.disconnect();}catch(e){}cur=null;return;} try{cur.el.pause();cur.el.removeAttribute('src');cur.el.load();}catch(e){} try{cur.src&&cur.src.disconnect();}catch(e){} cur=null; }
 
 let connectTimer=null, pendingSt=null;
 function update(){
@@ -192,7 +199,7 @@ function goTo(target){cancelAnimationFrame(sweep);const from=freq,t0=performance
   const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);setFreq(from+(target-from)*e);if(k<1)sweep=requestAnimationFrame(step);};sweep=requestAnimationFrame(step);}
 const pre=document.getElementById('presets');
 STATIONS.forEach((s,i)=>{const b=document.createElement('button');b.className='btn';b.dataset.f=s.f;b.innerHTML=`${s.f}<small>${s.name}</small>`;
-  b.onclick=()=>{ensureOn();goTo(s.f);};pre.appendChild(b);});
+  b.onclick=()=>{ensureOn();if(s.kiwi&&cur&&cur.st===s&&cur.state==='sin señal'){window.open(KiwiAM.webLink(s.f),'_blank');return;}goTo(s.f);};pre.appendChild(b);});
 
 const led=document.getElementById('led');
 function ensureOn(){ if(!ctx){initAudio();} ctx.resume(); if(!on){on=true;led.classList.add('on');update();} }
@@ -219,7 +226,7 @@ function draw(now){
   // nombre de emisora
   const n=nearest(); g.font=F(14,700);
   if(on&&n.d<=CAPTURE&&signal>.35){g.fillStyle=`rgba(255,255,255,${Math.min(1,signal*1.3)})`;g.fillText(n.st.name,10*s,84*s);}
-  else if(on&&cur&&cur.state==='sin señal'){g.font=F(10);g.fillStyle='#fff8';g.fillText('la señal no responde · probá más tarde o desde Argentina',10*s,86*s);}
+  else if(on&&cur&&cur.state==='sin señal'){g.font=F(10);g.fillStyle='#fff8';g.fillText(cur.st.kiwi?'receptor ocupado · tocá 950 otra vez para abrirlo aparte':'la señal no responde · probá más tarde',10*s,86*s);}
   else if(on){g.fillStyle='#fff3';g.fillText('— — —',10*s,84*s);}
   // barras de señal
   const bx=W-80*s, by=34*s; for(let i=0;i<5;i++){const h=(6+i*6)*s; g.fillStyle=(on&&signal>i/5+.05)?'#3a7bff':'#fff1'; g.fillRect(bx+i*13*s,by+36*s-h,9*s,h);}
