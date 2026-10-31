@@ -521,7 +521,7 @@ const REC_MAX = 15;
 async function ensureMic() {
   if (mic) return true;
   if (mic === false) return false;
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { msg('este navegador no deja usar el micrófono'); return false; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { msg('micrófono no disponible: abrila por https en Chrome o Safari', 5000); return false; }
   try {
     const stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: false, noiseSuppression: false, autoGainControl: false}});
     const src = ctx.createMediaStreamSource(stream);
