@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>abrir e83 · sampler</title>
+<style>
+  html,body{margin:0;height:100%;background:#e4e4e2;font-family:"Helvetica Neue",Helvetica,Roboto,Arial,sans-serif}
+  body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+  a{display:grid;place-items:center;width:min(70vw,260px);aspect-ratio:1;border-radius:22%;text-decoration:none;color:#fff;
+    background:radial-gradient(circle at 40% 32%,#ff7a52,#e2471d 60%,#b8320f);
+    box-shadow:0 10px 24px rgba(0,0,0,.22),inset 0 2px 0 rgba(255,255,255,.35);font-size:24px;letter-spacing:.04em}
+  p{margin:0;color:#777;font-size:14px}
+</style>
+</head>
+<body>
+<a id="go" href="https://estudio83-ship-it.github.io/estudio83/sampler/">ABRIR</a>
+<p>abre la última versión del sampler (con micrófono)</p>
+<script>
+  const u = 'https://estudio83-ship-it.github.io/estudio83/sampler/?v=' + Date.now();
+  document.getElementById('go').href = u;
+  setTimeout(() => location.href = u, 600);
+</script>
+</body>
+</html>
