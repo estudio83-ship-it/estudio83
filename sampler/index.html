@@ -540,7 +540,7 @@ async function ensureMic() {
     mic = {stream, src, proc, z};
     return true;
   } catch (err) {
-    msg('sin permiso para el micrófono'); return false;
+    msg('sin permiso de micrófono (' + (err && err.name || 'error') + ')', 6000); return false;
   }
 }
 function scheduleMicClose() {
