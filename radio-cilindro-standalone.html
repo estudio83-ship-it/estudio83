@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Radio cilindro AM</title>
+<meta name="theme-color" content="#ecebe7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Radio">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;min-height:100%;font-family:Inter,system-ui,sans-serif;user-select:none;-webkit-user-select:none}
+  body{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:18px;background:#ecebe7;color:#2a2a2a}
+  svg#radio{width:min(380px,86vw);height:auto;display:block;touch-action:none}
+  #capHit,#wheelHit{cursor:ew-resize}
+  .bar{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:520px}
+  .chip{border:1px solid #cfcdc7;border-radius:999px;padding:7px 12px;font:500 12px Inter,sans-serif;background:#f7f6f3;color:#333;cursor:pointer}
+  .chip.on{background:#222;border-color:#222;color:#fff}
+  .chip small{opacity:.55;margin-left:4px}
+  .status{font-size:12px;letter-spacing:.08em;color:#666;height:16px;text-align:center}
+  .hint{font-size:11px;color:#8a8a86;text-align:center;max-width:420px;line-height:1.5}
+</style>
+</head>
+<body>
+<svg id="radio" viewBox="0 0 400 575" aria-label="Radio AM cilíndrica"></svg>
+<div class="status" id="status">tocá la ruedita para encender</div>
+<div class="bar" id="stations"></div>
+<div class="bar" id="finish"></div>
+<div class="hint">Arrastrá la perilla negra de arriba hacia la derecha para subir de frecuencia (o rueda del mouse / flechas). La ruedita con números es el volumen: en OFF se apaga.</div>
+<script>
+// =================== KiwiAM: receptores y YouTube ===================
+(function(){
+  const RECEIVERS = [
+    { name: 'RAMOS MEJIA (LU4EEC)',          host: 'lu4eec.ddns.net',          port: 8073 },
+    { name: 'RADIO CLUB ARGENTINO (LU4AA)',  host: 'lu4aa.proxy.kiwisdr.com',  port: null },
+    { name: 'MONTEVIDEO (CX8BIT)',           host: 'cx8bit.proxy.kiwisdr.com', port: null },
+  ];
+  const YT_CHANNELS = ['UCrVXrl6-YV40UD9cNI5nsgA'];
+  const OFFICIAL_API = 'https://stream950.com.ar/api/live-stream';
+  const base = r => `${r.host}${r.port ? ':' + r.port : ''}`;
+  const webLink = (khz, r = RECEIVERS[0]) => `http://${base(r)}/?f=${khz}am`;
+  const canConnect = () => location.protocol !== 'https:';
+
+  let ytReady = null;
+  function loadYT() {
+    if (ytReady) return ytReady;
+    ytReady = new Promise(res => {
+      if (window.YT && YT.Player) return res(true);
+      const prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => { prev && prev(); res(true); };
+      const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api';
+      s.onerror = () => res(false); document.head.appendChild(s);
+      setTimeout(() => res(!!(window.YT && YT.Player)), 8000);
+    });
+    return ytReady;
+  }
+  async function officialVideoId() {
+    const urls = [OFFICIAL_API,
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent(OFFICIAL_API + '?t=' + Date.now()),
+      'https://corsproxy.io/?url=' + encodeURIComponent(OFFICIAL_API)];
+    for (const u of urls) {
+      try {
+        const ac = new AbortController(); const t = setTimeout(() => ac.abort(), 5000);
+        const r = await fetch(u, { signal: ac.signal, cache: 'no-store' }); clearTimeout(t);
+        const j = await r.json(); if (j && j.videoId) return j.videoId;
+        if (j && 'videoId' in j) return null;
+      } catch (e) {}
+    }
+    return null;
+  }
+  function ytPlay(opts, vol) {
+    return new Promise(async resolve => {
+      if (!(await loadYT())) return resolve(null);
+      const host = document.createElement('div');
+      host.style.cssText = 'position:fixed;left:0;bottom:0;width:200px;height:113px;opacity:.01;pointer-events:none;z-index:-1';
+      const inner = document.createElement('div'); host.appendChild(inner); document.body.appendChild(host);
+      let done = false;
+      const finish = p => { if (done) return; done = true; clearTimeout(t); if (!p) { try { player.destroy(); } catch (e) {} host.remove(); } resolve(p ? { player, host } : null); };
+      const player = new YT.Player(inner, {
+        width: 200, height: 113,
+        videoId: opts.videoId || 'live_stream',
+        playerVars: Object.assign({ autoplay: 1, controls: 0, playsinline: 1, rel: 0 }, opts.channel ? { channel: opts.channel } : {}),
+        events: {
+          onReady: e => { try { e.target.unMute(); e.target.setVolume(Math.round(vol() * 100)); e.target.playVideo(); } catch (x) {} },
+          onStateChange: e => { if (e.data === 1) finish(true); if (e.data === 0) finish(false); },
+          onError: () => finish(false),
+        },
+      });
+      const t = setTimeout(() => finish(false), 12000);
+    });
+  }
+
+  function kiwi(ctx, khz, dest, h, state) {
+    let ws = null, idx = 0, keep = null, playAt = 0, rate = 12000, gotAudio = false, timer = null;
+    h._closers.push(() => { clearInterval(keep); clearTimeout(timer); try { ws && ws.close(); } catch (e) {} });
+    function next() {
+      if (h.closed) return;
+      if (idx >= RECEIVERS.length) { state('nosig'); return; }
+      const r = RECEIVERS[idx++];
+      state('tuning'); gotAudio = false;
+      try { ws = new WebSocket(`ws://${base(r)}/${Date.now()}/SND`); } catch (e) { next(); return; }
+      ws.binaryType = 'arraybuffer';
+      const send = m => { try { ws.send(m); } catch (e) {} };
+      const setup = () => {
+        send(`SET mod=am low_cut=-4900 high_cut=4900 freq=${khz.toFixed(3)}`);
+        send('SET agc=1 hang=0 thresh=-100 slope=6 decay=1000 manGain=50');
+        send('SET squelch=0 max=0');
+        send('SET keepalive');
+      };
+      clearTimeout(timer);
+      timer = setTimeout(() => { if (!gotAudio) { try { ws.close(); } catch (e) {} } }, 10000);
+      ws.onopen = () => {
+        send('SET auth t=kiwi p=');
+        send('SET ident_user=E83-radio');
+        send('SET compression=0');
+        setup();
+        keep = setInterval(() => send('SET keepalive'), 4000);
+      };
+      ws.onmessage = ev => {
+        if (typeof ev.data === 'string') return;
+        const u8 = new Uint8Array(ev.data);
+        const tag = String.fromCharCode(u8[0], u8[1], u8[2]);
+        if (tag === 'MSG') {
+          const txt = new TextDecoder().decode(u8.subarray(4));
+          const ar = txt.match(/audio_rate=(\d+)/);
+          if (ar) { rate = +ar[1]; send(`SET AR OK in=${rate} out=44100`); }
+          if (/sample_rate=/.test(txt)) { send('SET compression=0'); setup(); }
+          if (/too_busy|badp=1|down|inactivity_timeout/.test(txt)) { try { ws.close(); } catch (e) {} }
+          return;
+        }
+        if (tag !== 'SND') return;
+        const dv = new DataView(ev.data, 3);
+        if (dv.getUint8(0) & 0x10) return;
+        const n = (dv.byteLength - 7) >> 1;
+        if (n <= 0) return;
+        const buf = ctx.createBuffer(1, n, rate), ch = buf.getChannelData(0);
+        for (let i = 0; i < n; i++) ch[i] = dv.getInt16(7 + i * 2, false) / 32768;
+        const src = ctx.createBufferSource(); src.buffer = buf; src.connect(dest);
+        const now = ctx.currentTime;
+        if (playAt < now + 0.05 || playAt > now + 1.5) playAt = now + 0.35;
+        src.start(playAt); playAt += buf.duration;
+        if (!gotAudio) { gotAudio = true; clearTimeout(timer); h.kind = 'kiwi'; state('ok'); }
+      };
+      ws.onclose = ws.onerror = () => {
+        clearInterval(keep); clearTimeout(timer);
+        ws.onclose = ws.onerror = null;
+        if (h.closed) return;
+        if (gotAudio) { idx = 0; setTimeout(next, 1500); } else next();
+      };
+    }
+    next();
+  }
+
+  function open(ctx, khz, dest, cb = {}) {
+    let vol = 1, yt = null;
+    const h = {
+      kind: null, closed: false, _closers: [],
+      set volume(v) { vol = v; if (yt) { try { yt.player.setVolume(Math.round(v * 100)); } catch (e) {} } },
+      get volume() { return vol; },
+      close() { h.closed = true; h._closers.forEach(f => f()); if (yt) { try { yt.player.destroy(); } catch (e) {} yt.host.remove(); yt = null; } },
+    };
+    const state = s => { if (!h.closed) cb.onState && cb.onState(s, h); };
+    (async () => {
+      state('tuning');
+      if (khz === 950) {
+        const vid = await officialVideoId();
+        const tries = (vid ? [{ videoId: vid }] : []).concat(YT_CHANNELS.map(channel => ({ channel })));
+        for (const t of tries) {
+          if (h.closed) return;
+          const p = await ytPlay(t, () => vol);
+          if (h.closed) { if (p) { try { p.player.destroy(); } catch (e) {} p.host.remove(); } return; }
+          if (p) { yt = p; h.kind = 'yt'; state('ok'); return; }
+        }
+      }
+      if (h.closed) return;
+      if (canConnect()) kiwi(ctx, khz, dest, h, state); else state('nosig');
+    })();
+    return h;
+  }
+  window.KiwiAM = { open, webLink, canConnect, RECEIVERS, _ytPlay: ytPlay };
+})();
+
+// =================== RADIO ===================
+(()=>{
+const SL='https://playerservices.streamtheworld.com/api/livestream-redirect/';
+const STATIONS=[
+  {f:630,name:'RIVADAVIA',url:SL+'RIVADAVIA.mp3'},
+  {f:790,name:'MITRE',url:SL+'AM790_56AAC.aac'},
+  {f:870,name:'NACIONAL',url:'https://sa.mp3.icecast.magma.edge-access.net/sc_rad1'},
+  {f:910,name:'LA RED',url:SL+'LA_RED_AM910AAC.aac'},
+  {f:950,name:'ORIGEN 950',url:'https://stream.audiostreamhub.com/am950',kiwi:true},
+  {f:990,name:'SPLENDID',url:SL+'AM990.mp3'},
+];
+const FMIN=530,FMAX=1610,CAPTURE=10;
+let freq=950,vol=0,ctx,master,noiseG,whistle,whistleG,chainIn,fadeG,cur=null,signal=0;
+
+function initAudio(){
+  if(ctx)return;
+  ctx=new (window.AudioContext||window.webkitAudioContext)();
+  master=ctx.createGain();master.gain.value=0;master.connect(ctx.destination);
+  const len=ctx.sampleRate*2,b=ctx.createBuffer(1,len,ctx.sampleRate),d=b.getChannelData(0);
+  let l=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;l=.97*l+.03*w;d[i]=(w*.35+l*2.2)*(Math.random()<.002?3:1);}
+  const n=ctx.createBufferSource();n.buffer=b;n.loop=true;
+  const nf=ctx.createBiquadFilter();nf.type='bandpass';nf.frequency.value=1600;nf.Q.value=.6;
+  noiseG=ctx.createGain();noiseG.gain.value=0;n.connect(nf).connect(noiseG).connect(master);n.start();
+  whistle=ctx.createOscillator();whistleG=ctx.createGain();whistleG.gain.value=0;whistle.connect(whistleG).connect(master);whistle.start();
+  chainIn=ctx.createGain();chainIn.gain.value=0;
+  const hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=280;
+  const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3000;lp.Q.value=.9;
+  const body=ctx.createBiquadFilter();body.type='peaking';body.frequency.value=900;body.gain.value=4;
+  const sat=ctx.createWaveShaper();const c=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/511.5-1;c[i]=Math.tanh(x*2.4)/Math.tanh(2.4);}sat.curve=c;
+  const comp=ctx.createDynamicsCompressor();comp.threshold.value=-22;comp.ratio.value=5;
+  fadeG=ctx.createGain();fadeG.gain.value=1;
+  const lfo=ctx.createOscillator();lfo.frequency.value=.06;const lg=ctx.createGain();lg.gain.value=.16;lfo.connect(lg).connect(fadeG.gain);lfo.start();
+  chainIn.connect(hp).connect(lp).connect(body).connect(sat).connect(comp).connect(fadeG).connect(master);
+}
+const nearest=()=>{let best=null,bd=1e9;for(const s of STATIONS){const d=Math.abs(s.f-freq);if(d<bd){bd=d;best=s;}}return{st:best,d:bd};};
+function disconnect(){if(!cur)return;
+  if(cur.kiwi){cur.kiwi.close();try{cur.src.disconnect();}catch(e){}cur=null;return;}
+  try{cur.el.pause();cur.el.removeAttribute('src');cur.el.load();}catch(e){}try{cur.src&&cur.src.disconnect();}catch(e){}cur=null;}
+function connect(st,aire){
+  disconnect();
+  if(st.kiwi&&(aire||!st.url)){const g=ctx.createGain();g.connect(chainIn);
+    const c={st,src:g,mode:'fx',state:'tuning',aire:true};cur=c;
+    c.kiwi=KiwiAM.open(ctx,st.f,g,{onState:(x,h)=>{if(cur!==c)return;c.state=x;if(x==='ok'){c.aire=h.kind==='kiwi';if(h.kind==='yt'){c.mode='plain';c.el=h;}}}});return;}
+  const c={st,el:new Audio(),src:null,mode:'fx',state:'tuning'};cur=c;
+  const el=c.el;el.crossOrigin='anonymous';el.preload='none';
+  try{c.src=ctx.createMediaElementSource(el);c.src.connect(chainIn);}catch(e){}
+  const fail=()=>{if(cur!==c)return;if(st.kiwi)connect(st,true);else c.state='nosig';};
+  el.addEventListener('playing',()=>{if(cur===c)c.state='ok';});
+  el.addEventListener('waiting',()=>{if(cur===c)c.state='tuning';});
+  el.addEventListener('error',()=>{if(cur!==c)return;
+    if(c.mode==='fx'){const e2=new Audio();c.el=e2;c.mode='plain';c.src=null;
+      e2.addEventListener('playing',()=>{if(cur===c)c.state='ok';});e2.addEventListener('error',fail);e2.src=st.url;e2.play().catch(fail);}
+    else fail();});
+  el.src=st.url+(st.url.includes('?')?'&':'?')+'t='+Date.now();el.play().catch(()=>{});
+}
+let pend=null,pendT=null;
+function update(){
+  if(!ctx)return;const t=ctx.currentTime,on=vol>0.02;
+  master.gain.setTargetAtTime(on?vol:0,t,.05);
+  if(!on){if(cur)disconnect();signal=0;return;}
+  const {st,d}=nearest(),inR=d<=CAPTURE;
+  if(inR&&(!cur||cur.st!==st)&&pend!==st){clearTimeout(pendT);pend=st;
+    pendT=setTimeout(()=>{pend=null;const n=nearest();if(vol>0.02&&n.d<=CAPTURE&&(!cur||cur.st!==n.st))connect(n.st);},250);}
+  if(!inR){if(pend){clearTimeout(pendT);pend=null;}if(cur&&d>CAPTURE*2.5)disconnect();}
+  const sig=inR?Math.max(0,1-Math.pow(d/CAPTURE,1.4)):0, ok=cur&&cur.state==='ok', s=ok?sig:0;
+  if(cur){if(cur.mode==='plain')cur.el.volume=Math.min(1,s*vol);else chainIn.gain.setTargetAtTime(s*1.4,t,.04);}
+  noiseG.gain.setTargetAtTime(.035+(1-s)*.3,t,.04);
+  whistle.frequency.setTargetAtTime(110+d*330,t,.03);
+  whistleG.gain.setTargetAtTime((inR&&ok&&d>.5)?(d/CAPTURE)*(1-d/CAPTURE)*.16:0,t,.04);
+  signal=s;
+}
+
+const NS='http://www.w3.org/2000/svg', svg=document.getElementById('radio'), $=id=>document.getElementById(id);
+const mk=(tag,a,parent=svg)=>{const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);parent.appendChild(e);return e;};
+const CX=200, K=.34;
+const R=140, RC=128;
+const YCAP=60, YBAND=68, YBODY=145, YBOT=458;
+const P=(r,u,yc)=>[CX+r*Math.sin(u), yc+r*K*Math.cos(u)];
+const f2=n=>n.toFixed(2);
+function curvedBand(r,u0,u1,yc1,yc2,steps=24){let d='';
+  for(let i=0;i<=steps;i++){const u=u0+(u1-u0)*i/steps,[x,y]=P(r,u,yc1);d+=(i?'L':'M')+f2(x)+' '+f2(y);}
+  for(let i=steps;i>=0;i--){const u=u0+(u1-u0)*i/steps,[x,y]=P(r,u,yc2);d+='L'+f2(x)+' '+f2(y);}
+  return d+'Z';}
+const side=(r,yc1,yc2)=>`M${CX-r} ${yc1} A${r} ${r*K} 0 0 0 ${CX+r} ${yc1} L${CX+r} ${yc2} A${r} ${r*K} 0 0 1 ${CX-r} ${yc2} Z`;
+const defs=mk('defs',{});
+const clip=(id,d)=>{const c=mk('clipPath',{id},defs);mk('path',{d},c);};
+clip('cBody',side(R,YBODY,YBOT));clip('cBand',side(R,YBAND,YBODY));clip('cCap',side(RC,YCAP,YCAP+14));
+const shadeGrad=mk('radialGradient',{id:'shadeGrad',cx:'50%',cy:'50%',r:'50%'},defs);
+mk('stop',{offset:'0%','stop-color':'#000','stop-opacity':'0'},shadeGrad);
+mk('stop',{offset:'70%','stop-color':'#000','stop-opacity':'0.1'},shadeGrad);
+mk('stop',{offset:'100%','stop-color':'#000','stop-opacity':'0.3'},shadeGrad);
+function shade(group,r,yTop,yBot,strength=1){
+  mk('rect',{x:0,y:yTop-60,width:400,height:yBot-yTop+120,fill:'url(#shadeGrad)',opacity:strength},group);
+}
+
+mk('ellipse',{cx:203,cy:YBOT+78,rx:160,ry:22,fill:'#000',opacity:.1});
+const legs=mk('g',{fill:'#141414'});
+[-1.25,-.75,-.25,.25,.75,1.25].forEach(u=>{const[x,y]=P(132,u,YBOT+10),w=26*Math.cos(u)+6;mk('path',{d:`M${f2(x-w/2)} ${f2(y-6)} L${f2(x+w/2)} ${f2(y-6)} L${f2(x+w/2-5)} ${f2(y+22)} L${f2(x-w/2+5)} ${f2(y+22)} Z`},legs);});
+mk('path',{d:side(132,YBOT-4,YBOT+10),fill:'#1a1a1a'});
+
+const body=mk('g',{'clip-path':'url(#cBody)'});
+const bodyFill=mk('rect',{x:50,y:YBODY-30,width:300,height:YBOT-YBODY+100,fill:'#7a4628'},body);
+const grain=mk('g',{},body);
+let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+for(let i=0;i<80;i++){const u=-1.45+rnd()*2.9,amp=.004+rnd()*.012,per=30+rnd()*90,ph=rnd()*6.3,w=(.5+rnd()*2)*Math.cos(u);
+  let d='';for(let y=YBODY-20;y<=YBOT+60;y+=6){const x=CX+R*Math.sin(u+Math.sin(y/per+ph)*amp);d+=(d?'L':'M')+f2(x)+' '+y;}
+  mk('path',{d,fill:'none','stroke-width':f2(w),stroke:['#5c3119','#6a3a1f','#8b5534','#94603c'][i%4],opacity:f2(.5+rnd()*.4)},grain);}
+const bodyShade=mk('g',{},body);shade(bodyShade,R,YBODY,YBOT);
+const SU=.43;
+mk('path',{d:curvedBand(R,-SU,SU,YBAND+73,YBAND+100),fill:'#0b0b0b'},body);
+const RW=72, WY=YBODY+21.5;
+const wy=(a,off)=>WY+off+RW*K*Math.cos(a);
+const wheelClipD=(()=>{let d='';const a0=Math.asin(57/RW);
+  for(let i=0;i<=20;i++){const a=-a0+2*a0*i/20;d+=(i?'L':'M')+f2(CX+RW*Math.sin(a))+' '+f2(wy(a,2));}
+  for(let i=20;i>=0;i--){const a=-a0+2*a0*i/20;d+='L'+f2(CX+RW*Math.sin(a))+' '+f2(wy(a,22));}return d+'Z';})();
+clip('cWheel',wheelClipD);
+const wheelG=mk('g',{'clip-path':'url(#cWheel)'});
+mk('path',{d:wheelClipD,fill:'#202020'},wheelG);
+const wTeeth=mk('g',{},wheelG), wNums=mk('g',{},wheelG), wShade=mk('g',{},wheelG);
+[[-1,-.62,.55],[-.62,-.4,.25],[.4,.62,.25],[.62,1,.55]].forEach(([a,b,o])=>mk('rect',{x:f2(CX+RW*Math.sin(a)),y:YBODY,width:f2(RW*(Math.sin(b)-Math.sin(a))),height:80,fill:'#000',opacity:o},wShade));
+const STEP=.42,MAXA=10*STEP,nums=[],teeth=[];
+['OFF','1','2','3','4','5','6','7','8','9','10'].forEach((t,i)=>{const g=mk('g',{},wNums);
+  const tx=mk('text',{x:0,y:0,'text-anchor':'middle','font-family':'Inter','font-weight':600,'font-size':t==='OFF'?8.5:10,fill:'#ececec','letter-spacing':t==='OFF'?1:0},g);tx.textContent=t;
+  mk('rect',{x:-.5,y:2,width:1,height:2,fill:'#9a9a9a'},g);nums.push({i,g});});
+for(let i=0;i<80;i++)teeth.push(mk('line',{stroke:'#4a4a4a'},wTeeth),mk('line',{stroke:'#4a4a4a'},wTeeth));
+
+mk('ellipse',{cx:CX,cy:YBAND,rx:R,ry:R*K,fill:'#d3d5d6',stroke:'#9a9c9e','stroke-width':1});
+const band=mk('g',{'clip-path':'url(#cBand)'});
+mk('rect',{x:50,y:10,width:300,height:240,fill:'#c8cacb'},band);
+[[-1.57,-1.2,'#9a9c9e'],[-1.2,-.95,'#b3b5b7'],[-.62,-.38,'#e6e7e8'],[-.38,-.3,'#d6d7d8'],[.7,1.05,'#b5b7b9'],[1.05,1.57,'#97999b']]
+  .forEach(([a,b,c])=>mk('rect',{x:f2(CX+R*Math.sin(a)),y:10,width:f2(R*(Math.sin(b)-Math.sin(a))),height:240,fill:c},band));
+const brush=mk('g',{opacity:.07},band);
+for(let v=2;v<77;v+=2+Math.floor(rnd()*3))mk('path',{d:curvedBand(R,-1.57,1.57,YBAND+v,YBAND+v+.6,40),fill:rnd()>.5?'#fff':'#666'},brush);
+mk('path',{d:`M${CX-R} ${YBODY} A${R} ${R*K} 0 0 0 ${CX+R} ${YBODY}`,fill:'none',stroke:'#7f8183','stroke-width':1.5});
+{const[x,y]=P(R,0,YBODY);mk('path',{d:`M${x-5} ${y} L${x+5} ${y} L${x} ${y+6} Z`,fill:'#7f8183'});}
+const WU=.37;
+mk('path',{d:curvedBand(R,-WU-.03,WU+.03,YBAND+20,YBAND+65),fill:'#3a3b3c'});
+mk('path',{d:curvedBand(R,-WU-.015,WU+.015,YBAND+22,YBAND+61),fill:'#0f0f0f'});
+clip('cWin',curvedBand(R,-WU,WU,YBAND+24,YBAND+61));
+const win=mk('g',{'clip-path':'url(#cWin)'});
+mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+61),fill:'#1a1a1a'},win);
+const drum=mk('g',{},win);
+mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+29),fill:'#000',opacity:.55},win);
+mk('path',{d:curvedBand(R,-WU,WU,YBAND+56,YBAND+61),fill:'#000',opacity:.55},win);
+[[-WU,-.27,.45],[.27,WU,.45]].forEach(([a,b,o])=>mk('path',{d:curvedBand(R,a,b,YBAND+24,YBAND+61),fill:'#000',opacity:o},win));
+{const[,y1]=P(R,0,YBAND+24),[,y2]=P(R,0,YBAND+61);mk('rect',{x:199.3,y:y1,width:1.4,height:y2-y1,fill:'#f4f4f4'},win);}
+mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+32),fill:'#fff',opacity:.05},win);
+const KD=.0034,labels=[],ticks=[];
+for(let f=530;f<=1610;f+=10){const big=f%100===0&&f<=1600;
+  ticks.push({f,big,e:mk('line',{stroke:'#cfcfcf'},drum)});
+  if(big){const t=mk('text',{x:0,y:0,'text-anchor':'middle','font-family':'Inter','font-weight':500,'font-size':17,fill:'#eeeeee'},drum);t.textContent=f;labels.push({f,e:t});}}
+
+const capG=mk('g',{});
+mk('path',{d:side(RC,YCAP,YCAP+14),fill:'#141414'},capG);
+const ridgeG=mk('g',{'clip-path':'url(#cCap)'},capG), ridges=[];
+const CAPN=150;for(let i=0;i<CAPN;i++)ridges.push(mk('line',{},ridgeG));
+const capShade=mk('g',{'clip-path':'url(#cCap)'},capG);shade(capShade,RC,YCAP,YCAP+14,.9);
+mk('ellipse',{cx:CX,cy:YCAP,rx:RC,ry:RC*K,fill:'#1b1b1b'},capG);
+const topRidges=mk('ellipse',{cx:CX,cy:YCAP,rx:RC-6,ry:(RC-6)*K,fill:'none',stroke:'#2c2c2c','stroke-width':7,'stroke-dasharray':'2.2 2.6'},capG);
+mk('ellipse',{cx:CX,cy:YCAP,rx:104,ry:104*K,fill:'#0e0e0e'},capG);
+mk('ellipse',{cx:CX,cy:YCAP,rx:78,ry:78*K,fill:'#c6c8ca',stroke:'#76787a','stroke-width':1},capG);
+mk('path',{d:`M${CX-78} ${YCAP} A78 ${78*K} 0 0 1 ${CX+78} ${YCAP} A78 ${78*K*.55} 0 0 0 ${CX-78} ${YCAP} Z`,fill:'#dfe0e1'},capG);
+const capHit=mk('rect',{id:'capHit',x:60,y:5,width:280,height:YCAP+14+RC*K-5,fill:'transparent'});
+const wheelHit=mk('path',{id:'wheelHit',d:curvedBand(R,-.5,.5,YBAND+70,YBAND+112),fill:'transparent'});
+
+let capRot=0,wheelA=0;
+function drawCap(){for(let i=0;i<CAPN;i++){const a=i/CAPN*Math.PI*2+capRot,c=Math.cos(a),e=ridges[i];
+  if(c<=.03){e.setAttribute('stroke-width',0);continue;}
+  const[x,y1]=P(RC,a,YCAP),[,y2]=P(RC,a,YCAP+14);
+  e.setAttribute('x1',f2(x));e.setAttribute('x2',f2(x));e.setAttribute('y1',f2(y1));e.setAttribute('y2',f2(y2));
+  e.setAttribute('stroke-width',f2(1.7*c));e.setAttribute('stroke',c>.8?'#555':c>.5?'#3e3e3e':c>.25?'#2e2e2e':'#232323');}
+  topRidges.setAttribute('stroke-dashoffset',f2(-capRot*RC*.5));}
+function drawDrum(){
+  for(const t of ticks){const u=(t.f-freq)*KD;if(Math.abs(u)>WU+.05){t.e.setAttribute('stroke-width',0);continue;}
+    const[x,y1]=P(R,u,YBAND+(t.big?51:54)),[,y2]=P(R,u,YBAND+58);
+    t.e.setAttribute('x1',f2(x));t.e.setAttribute('x2',f2(x));t.e.setAttribute('y1',f2(y1));t.e.setAttribute('y2',f2(y2));t.e.setAttribute('stroke-width',f2(Math.cos(u)));}
+  for(const l of labels){const u=(l.f-freq)*KD;if(Math.abs(u)>WU+.15){l.e.setAttribute('opacity',0);continue;}
+    const[x,y]=P(R,u,YBAND+48),ang=Math.atan2(-R*K*Math.sin(u),R*Math.cos(u))*180/Math.PI;
+    l.e.setAttribute('opacity',1);l.e.setAttribute('transform',`translate(${f2(x)} ${f2(y)}) rotate(${f2(ang)}) scale(${f2(Math.cos(u))} 1)`);}
+}
+function drawWheel(){
+  nums.forEach(n=>{const a=-n.i*STEP+wheelA,c=Math.cos(a);if(c<.15||Math.abs(a)>1.4){n.g.setAttribute('opacity',0);return;}
+    const x=CX+RW*Math.sin(a),y=wy(a,16),ang=Math.atan2(-RW*K*Math.sin(a),RW*c)*180/Math.PI;
+    n.g.setAttribute('opacity',f2(Math.min(1,c*1.15)));n.g.setAttribute('transform',`translate(${f2(x)} ${f2(y)}) rotate(${f2(ang)}) scale(${f2(c)} 1)`);});
+  for(let i=0;i<80;i++){const a=i/80*Math.PI*2+wheelA,c=Math.cos(a),x=f2(CX+RW*Math.sin(a));
+    [[teeth[2*i],2,5],[teeth[2*i+1],19,22]].forEach(([e,o1,o2])=>{if(c<=.05){e.setAttribute('stroke-width',0);return;}
+      e.setAttribute('x1',x);e.setAttribute('x2',x);e.setAttribute('y1',f2(wy(a,o1)));e.setAttribute('y2',f2(wy(a,o2)));e.setAttribute('stroke-width',f2(1.5*c));});}
+}
+function render(){
+  drawCap();drawDrum();drawWheel();
+  const {st,d}=nearest(),on=vol>0.02,status=$('status');
+  if(!on)status.textContent='apagada · girá la ruedita hacia la derecha';
+  else if(d<=CAPTURE&&cur&&cur.st===st)status.textContent=st.name+' · '+(cur.state==='ok'?(cur.aire?'EN EL AIRE':'EN VIVO'):cur.state==='nosig'?(st.kiwi?'SIN SEÑAL · TOCÁ 950 OTRA VEZ':'SIN SEÑAL'):'SINTONIZANDO…');
+  else status.textContent=Math.round(freq)+' kHz · estática';
+  document.querySelectorAll('#stations .chip').forEach(b=>b.classList.toggle('on',on&&Math.abs(+b.dataset.f-freq)<3));
+}
+function loop(){update();render();requestAnimationFrame(loop);}
+
+const sx=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse()).x;};
+const KF=100;
+function turnCap(rad){capRot+=rad;freq=Math.max(FMIN,Math.min(FMAX,freq+rad*KF));}
+function wake(){initAudio();ctx.resume();}
+let cId=null,cx0=0;
+capHit.addEventListener('pointerdown',e=>{wake();cId=e.pointerId;capHit.setPointerCapture(cId);cx0=sx(e);cancelAnimationFrame(sweep);});
+capHit.addEventListener('pointermove',e=>{if(e.pointerId!==cId)return;const x=sx(e);turnCap((x-cx0)/RC);cx0=x;});
+capHit.addEventListener('pointerup',()=>cId=null);capHit.addEventListener('pointercancel',()=>cId=null);
+capHit.addEventListener('wheel',e=>{e.preventDefault();const d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:-e.deltaY);turnCap(Math.sign(d)*(e.shiftKey?10:2)/KF);},{passive:false});
+let wId=null,wx0=0,moved=0;
+const setWheel=a=>{wheelA=Math.max(0,Math.min(MAXA,a));vol=wheelA/MAXA;};
+wheelHit.addEventListener('pointerdown',e=>{wake();wId=e.pointerId;wheelHit.setPointerCapture(wId);wx0=sx(e);moved=0;});
+wheelHit.addEventListener('pointermove',e=>{if(e.pointerId!==wId)return;const x=sx(e);moved+=Math.abs(x-wx0);setWheel(wheelA+(x-wx0)/RW);wx0=x;});
+wheelHit.addEventListener('pointerup',()=>{wId=null;if(moved<3)animWheel(vol>0.02?0:5*STEP);});
+wheelHit.addEventListener('pointercancel',()=>wId=null);
+wheelHit.addEventListener('wheel',e=>{e.preventDefault();wake();setWheel(wheelA-Math.sign(e.deltaY)*STEP/2);},{passive:false});
+function animWheel(t){const a0=wheelA,t0=performance.now();const st=now=>{const k=Math.min(1,(now-t0)/350),e=1-Math.pow(1-k,3);setWheel(a0+(t-a0)*e);if(k<1)requestAnimationFrame(st);};requestAnimationFrame(st);}
+addEventListener('keydown',e=>{if(e.key==='ArrowRight')turnCap((e.shiftKey?10:1)/KF);if(e.key==='ArrowLeft')turnCap(-(e.shiftKey?10:1)/KF);
+  if(e.key==='ArrowUp')setWheel(wheelA+STEP/2);if(e.key==='ArrowDown')setWheel(wheelA-STEP/2);});
+let sweep=null;
+function goTo(t){cancelAnimationFrame(sweep);const f0=freq,t0=performance.now(),dur=Math.min(1100,250+Math.abs(t-f0)*2.2);
+  const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3),nf=f0+(t-f0)*e;turnCap((nf-freq)/KF);if(k<1)sweep=requestAnimationFrame(step);};sweep=requestAnimationFrame(step);}
+STATIONS.forEach(s=>{const b=document.createElement('button');b.className='chip';b.dataset.f=s.f;b.innerHTML=`${s.f}<small>${s.name}</small>`;
+  b.onclick=()=>{wake();if(vol<=0.02)animWheel(5*STEP);
+    if(s.kiwi&&cur&&cur.st===s&&cur.state==='nosig'){window.open(KiwiAM.webLink(s.f),'_blank');return;}goTo(s.f);};$('stations').appendChild(b);});
+const FIN={madera:{fill:'#7a4628',grain:1,sh:1},blanco:{fill:'#f1efe9',grain:0,sh:.45},naranja:{fill:'#c9542b',grain:0,sh:.8}};
+function setFinish(k){const o=FIN[k];bodyFill.setAttribute('fill',o.fill);grain.style.display=o.grain?'':'none';bodyShade.setAttribute('opacity',o.sh);
+  document.querySelectorAll('#finish .chip').forEach(b=>b.classList.toggle('on',b.dataset.k===k));try{localStorage.setItem('e83-cil',k);}catch(e){}}
+Object.keys(FIN).forEach(k=>{const b=document.createElement('button');b.className='chip';b.dataset.k=k;b.textContent=k[0].toUpperCase()+k.slice(1);b.onclick=()=>setFinish(k);$('finish').appendChild(b);});
+let saved='madera';try{saved=localStorage.getItem('e83-cil')||'madera';}catch(e){}setFinish(FIN[saved]?saved:'madera');
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
