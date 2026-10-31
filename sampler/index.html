@@ -915,15 +915,32 @@ function release(el, e) {
   el.classList.remove('down');
   const act = A[el.dataset.act]; if (act && act.up) act.up(el, e);
 }
+/* cada dedo (pointerId) tiene su tecla actual; en el teclado, al deslizar se suelta una tecla y se toca la nueva */
+const ptrs = new Map();
 document.addEventListener('pointerdown', e => {
   unlock();
   const el = e.target.closest('[data-act]'); if (!el || el.closest('dialog')) return;
   e.preventDefault();
   try { el.setPointerCapture(e.pointerId); } catch (_) {}
   el._pid = e.pointerId;
+  ptrs.set(e.pointerId, {cur: el, glide: el.dataset.act === 'note'});
   press(el, e);
 }, {passive: false});
-const up = e => { const el = e.target.closest && e.target.closest('[data-act]'); if (el && el._pid === e.pointerId) release(el, e); };
+document.addEventListener('pointermove', e => {
+  const p = ptrs.get(e.pointerId);
+  if (!p || !p.glide) return;
+  const hit = document.elementFromPoint(e.clientX, e.clientY);
+  const nel = hit && hit.closest ? hit.closest('[data-act="note"]') : null;
+  if (nel === p.cur) return;
+  if (p.cur) release(p.cur, e);
+  p.cur = nel;
+  if (nel) { nel._pid = e.pointerId; press(nel, e); }
+});
+const up = e => {
+  const p = ptrs.get(e.pointerId); if (!p) return;
+  ptrs.delete(e.pointerId);
+  if (p.cur) { p.cur._pid = null; release(p.cur, e); }
+};
 document.addEventListener('pointerup', up);
 document.addEventListener('pointercancel', up);
 document.addEventListener('contextmenu', e => e.preventDefault());
