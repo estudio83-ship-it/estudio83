@@ -28,6 +28,7 @@
 <div class="status" id="status">tocá la ruedita para encender</div>
 <div class="bar" id="stations"></div>
 <div class="bar" id="finish"></div>
+<div class="bar" id="soundmode"></div>
 <div class="hint">Arrastrá la perilla negra de arriba hacia la derecha para subir de frecuencia (o rueda del mouse / flechas). La ruedita con números es el volumen: en OFF se apaga.</div>
 <script>
 // =================== KiwiAM: receptores y YouTube ===================
@@ -194,7 +195,7 @@ const STATIONS=[
   {f:990,name:'SPLENDID',url:SL+'AM990.mp3'},
 ];
 const FMIN=530,FMAX=1610,CAPTURE=10;
-let freq=950,vol=0,ctx,master,noiseG,whistle,whistleG,chainIn,fadeG,cur=null,signal=0;
+let freq=950,vol=0,ctx,master,noiseG,whistle,whistleG,chainIn,cleanIn,fadeG,cur=null,signal=0,classic=true;
 
 function initAudio(){
   if(ctx)return;
@@ -207,6 +208,7 @@ function initAudio(){
   noiseG=ctx.createGain();noiseG.gain.value=0;n.connect(nf).connect(noiseG).connect(master);n.start();
   whistle=ctx.createOscillator();whistleG=ctx.createGain();whistleG.gain.value=0;whistle.connect(whistleG).connect(master);whistle.start();
   chainIn=ctx.createGain();chainIn.gain.value=0;
+  cleanIn=ctx.createGain();cleanIn.gain.value=0;cleanIn.connect(master);
   const hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=280;
   const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3000;lp.Q.value=.9;
   const body=ctx.createBiquadFilter();body.type='peaking';body.frequency.value=900;body.gain.value=4;
@@ -222,12 +224,12 @@ function disconnect(){if(!cur)return;
   try{cur.el.pause();cur.el.removeAttribute('src');cur.el.load();}catch(e){}try{cur.src&&cur.src.disconnect();}catch(e){}cur=null;}
 function connect(st,aire){
   disconnect();
-  if(st.kiwi&&(aire||!st.url)){const g=ctx.createGain();g.connect(chainIn);
+  if(st.kiwi&&(aire||!st.url)){const g=ctx.createGain();g.connect(chainIn);g.connect(cleanIn);
     const c={st,src:g,mode:'fx',state:'tuning',aire:true};cur=c;
     c.kiwi=KiwiAM.open(ctx,st.f,g,{onState:(x,h)=>{if(cur!==c)return;c.state=x;if(x==='ok'){c.aire=h.kind==='kiwi';if(h.kind==='yt'){c.mode='plain';c.el=h;}}}});return;}
   const c={st,el:new Audio(),src:null,mode:'fx',state:'tuning'};cur=c;
   const el=c.el;el.crossOrigin='anonymous';el.preload='none';
-  try{c.src=ctx.createMediaElementSource(el);c.src.connect(chainIn);}catch(e){}
+  try{c.src=ctx.createMediaElementSource(el);c.src.connect(chainIn);c.src.connect(cleanIn);}catch(e){}
   const fail=()=>{if(cur!==c)return;if(st.kiwi)connect(st,true);else c.state='nosig';};
   el.addEventListener('playing',()=>{if(cur===c)c.state='ok';});
   el.addEventListener('waiting',()=>{if(cur===c)c.state='tuning';});
@@ -247,7 +249,7 @@ function update(){
     pendT=setTimeout(()=>{pend=null;const n=nearest();if(vol>0.02&&n.d<=CAPTURE&&(!cur||cur.st!==n.st))connect(n.st);},250);}
   if(!inR){if(pend){clearTimeout(pendT);pend=null;}if(cur&&d>CAPTURE*2.5)disconnect();}
   const sig=inR?Math.max(0,1-Math.pow(d/CAPTURE,1.4)):0, ok=cur&&cur.state==='ok', s=ok?sig:0;
-  if(cur){if(cur.mode==='plain')cur.el.volume=Math.min(1,s*vol);else chainIn.gain.setTargetAtTime(s*1.4,t,.04);}
+  if(cur){if(cur.mode==='plain')cur.el.volume=Math.min(1,s*vol);else {chainIn.gain.setTargetAtTime(classic?s*1.4:0,t,.04);cleanIn.gain.setTargetAtTime(classic?0:s,t,.04);}}
   noiseG.gain.setTargetAtTime(.035+(1-s)*.3,t,.04);
   whistle.frequency.setTargetAtTime(110+d*330,t,.03);
   whistleG.gain.setTargetAtTime((inR&&ok&&d>.5)?(d/CAPTURE)*(1-d/CAPTURE)*.16:0,t,.04);
@@ -416,6 +418,7 @@ function setFinish(k){const o=FIN[k];bodyFill.setAttribute('fill',o.fill);grain.
   document.querySelectorAll('#finish .chip').forEach(b=>b.classList.toggle('on',b.dataset.k===k));try{localStorage.setItem('e83-cil',k);}catch(e){}}
 Object.keys(FIN).forEach(k=>{const b=document.createElement('button');b.className='chip';b.dataset.k=k;b.textContent=k[0].toUpperCase()+k.slice(1);b.onclick=()=>setFinish(k);$('finish').appendChild(b);});
 let saved='madera';try{saved=localStorage.getItem('e83-cil')||'madera';}catch(e){}setFinish(FIN[saved]?saved:'madera');
+['CLÁSICO','LIMPIO'].forEach((t,i)=>{const b=document.createElement('button');b.className='chip';if(i===0)b.classList.add('on');b.textContent=t;b.onclick=()=>{classic=i===0;document.querySelectorAll('#soundmode .chip').forEach(x=>x.classList.toggle('on'));};$('soundmode').appendChild(b);});
 requestAnimationFrame(loop);
 })();
 </script>
