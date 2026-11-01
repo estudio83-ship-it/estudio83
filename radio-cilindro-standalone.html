@@ -462,8 +462,7 @@ wheelHit.addEventListener('wheel',e=>{e.preventDefault();wake();setWheel(wheelA-
 function animWheel(t){const a0=wheelA,t0=performance.now();const st=now=>{const k=Math.min(1,(now-t0)/350),e=1-Math.pow(1-k,3);setWheel(a0+(t-a0)*e);if(k<1)requestAnimationFrame(st);};requestAnimationFrame(st);}
 const dialHit=mk('path',{d:curvedBand(R,-WU-.03,WU+.03,YBAND+18,YBAND+66),fill:'transparent',style:'cursor:pointer'});
 dialHit.addEventListener('click',e=>{const x=sx(e);
-  if(Math.abs(x-CX)<10){classic=!classic;return;}
-  nextStation(x<CX?-1:1);});
+  if(Math.abs(x-CX)<10)classic=!classic;});
 let bodyDown={t:0,x:0,y:0,id:null};
 bodyFill.parentElement.addEventListener('pointerdown',e=>{bodyDown={t:performance.now(),x:e.clientX,y:e.clientY,id:e.pointerId};});
 svg.addEventListener('pointerup',e=>{if(e.pointerId!==bodyDown.id)return;const moved=Math.abs(e.clientX-bodyDown.x)+Math.abs(e.clientY-bodyDown.y),time=performance.now()-bodyDown.t;
@@ -475,7 +474,7 @@ function goTo(t){cancelAnimationFrame(sweep);const f0=freq,t0=performance.now(),
   const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3),nf=f0+(t-f0)*e;turnCap((nf-freq)/KF);if(k<1)sweep=requestAnimationFrame(step);};sweep=requestAnimationFrame(step);}
 function nextStation(dir){wake();if(vol<=0.02)animWheel(5*STEP);
   const eps=CAPTURE/2,list=dir>0?STATIONS.filter(s=>s.f>freq+eps):STATIONS.filter(s=>s.f<freq-eps).reverse();
-  const t=list.length?list[0]:STATIONS[dir>0?0:STATIONS.length-1];goTo(t.f);}
+  if(list.length)goTo(list[0].f);}
 const FIN={madera:{fill:'#7a4628',grain:1,sh:1},blanco:{fill:'#f1efe9',grain:0,sh:.45},naranja:{fill:'#c9542b',grain:0,sh:.8}};
 const finKeys=Object.keys(FIN);let finIdx=0;
 function setFinish(k){const o=FIN[k];bodyFill.setAttribute('fill',o.fill);grain.style.display=o.grain?'':'none';bodyShade.setAttribute('opacity',o.sh);finIdx=finKeys.indexOf(k);try{localStorage.setItem('e83-cil',k);}catch(e){}}
