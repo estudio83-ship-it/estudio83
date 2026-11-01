@@ -21,13 +21,9 @@
   .chip small{opacity:.55;margin-left:4px}
   .status{font-size:12px;letter-spacing:.08em;color:#666;height:16px;text-align:center}
   .hint{font-size:11px;color:#8a8a86;text-align:center;max-width:420px;line-height:1.5}
-  #bandIndicators{display:flex;justify-content:center;gap:8px;font-size:14px;letter-spacing:2px}
-  .band-dot{width:12px;height:12px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.2s}
-  .band-dot.am{background:#f4f4f4;border-color:#666}
-  .band-dot.fm{background:#c9542b}
-  .band-dot.oc{background:#4a7c59}
-  .band-dot.active{transform:scale(1.2);border-width:3px}
-  .band-label{font-size:9px;text-align:center;margin-top:-4px;color:#666;min-width:20px}
+  #bandIndicators{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+  #bandDot{width:16px;height:16px;border-radius:50%;transition:background-color 0.2s;background:#f4f4f4}
+  #bandLabel{font-size:11px;font-weight:600;letter-spacing:1px;color:#666;height:14px}
   #stations,#finish,#soundmode{display:none}
 </style>
 </head>
@@ -39,9 +35,8 @@
 <div class="bar" id="soundmode"></div>
 <div class="hint">
   <div id="bandIndicators">
-    <div><div class="band-dot am active" data-band="0"></div><div class="band-label">AM</div></div>
-    <div><div class="band-dot fm" data-band="1"></div><div class="band-label">FM</div></div>
-    <div><div class="band-dot oc" data-band="2"></div><div class="band-label">SW</div></div>
+    <div id="bandDot"></div>
+    <div id="bandLabel">AM</div>
   </div>
 </div>
 <script>
@@ -478,20 +473,19 @@ function cycleFinish(){finIdx=(finIdx+1)%finKeys.length;setFinish(finKeys[finIdx
 let saved='madera';try{saved=localStorage.getItem('e83-cil')||'madera';}catch(e){}setFinish(FIN[saved]?saved:'madera');
 function updateBandIndicators(){
   const b=BANDS[bandIdx];
-  document.querySelectorAll('.band-dot').forEach((dot,i)=>{
-    dot.classList.toggle('active',i===bandIdx);
-  });
+  const dot=$('bandDot'),label=$('bandLabel');
+  const colors={0:'#f4f4f4',1:'#c9542b',2:'#4a7c59'};
+  const labels={0:'AM',1:'FM',2:'SW'};
+  dot.style.backgroundColor=colors[bandIdx];
+  label.textContent=labels[bandIdx];
   if(window.dialLine)window.dialLine.setAttribute('fill',b.lineColor);
   generateDial();
 }
-document.querySelectorAll('.band-dot').forEach(dot=>{
-  dot.addEventListener('click',e=>{
-    e.stopPropagation();
-    const band=parseInt(dot.dataset.band);
-    setBand(band);
-    if(band===0)freq=950;
-    wake();
-  });
+$('bandIndicators').addEventListener('click',e=>{
+  e.stopPropagation();
+  setBand((bandIdx+1)%3);
+  if(bandIdx===0)freq=950;
+  wake();
 });
 updateBandIndicators();
 requestAnimationFrame(loop);
