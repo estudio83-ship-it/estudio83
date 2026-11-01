@@ -194,25 +194,35 @@
 
 // =================== RADIO ===================
 (()=>{
-const SL='https://playerservices.streamtheworld.com/api/livestream-redirect/';
 const BANDS=[
   {name:'AM',min:530,max:1710,default:950,color:'#f4f4f4',lineColor:'#f4f4f4',stations:[
-    {f:630,name:'RIVADAVIA',url:SL+'RIVADAVIA.mp3'},{f:720,name:'MILENIO',url:SL+'MILENIO.mp3'},{f:790,name:'MITRE',url:SL+'AM790_56AAC.aac'},
-    {f:870,name:'NACIONAL',url:'https://sa.mp3.icecast.magma.edge-access.net/sc_rad1'},{f:910,name:'LA RED',url:SL+'LA_RED_AM910AAC.aac'},
-    {f:950,name:'ORIGEN 950',url:'https://stream.audiostreamhub.com/am950',kiwi:true},{f:990,name:'SPLENDID',url:SL+'AM990.mp3'},
-    {f:1070,name:'ASPEN',url:SL+'ASPEN.mp3'},{f:1110,name:'BAIRES',url:SL+'BAIRES.mp3'},{f:1160,name:'AM1160',url:SL+'AM1160.mp3'},
-    {f:1270,name:'RADIO 10',url:SL+'RADIO10.mp3'},{f:1540,name:'C5N',url:SL+'C5N.mp3'}
+    {f:630,name:'RIVADAVIA',url:'https://edge-live-02-us-east.cdn.mdstrm.com/live-stream/6224f84e56575e4a54c8fc44/publish/media_128aae2e_2f97_427b_8edb_35a05e2a7331/2.m3u8',kiwi:true},
+    {f:720,name:'MILENIO',url:'https://live.radios.com.ar/milenio.m3u8',kiwi:true},
+    {f:790,name:'MITRE',url:'https://live.radios.com.ar/mitre.m3u8',kiwi:true},
+    {f:870,name:'NACIONAL',url:'https://live.radios.com.ar/nacional.m3u8',kiwi:true},
+    {f:910,name:'LA RED',url:'https://live.radios.com.ar/lared.m3u8',kiwi:true},
+    {f:950,name:'ORIGEN 950',url:'https://stream.audiostreamhub.com/am950',kiwi:true},
+    {f:990,name:'SPLENDID',url:'https://live.radios.com.ar/splendid.m3u8',kiwi:true},
+    {f:1070,name:'ASPEN',url:'https://live.radios.com.ar/aspen.m3u8',kiwi:true},
+    {f:1110,name:'BAIRES',url:'https://live.radios.com.ar/baires.m3u8',kiwi:true},
+    {f:1270,name:'RADIO 10',url:'https://live.radios.com.ar/radio10.m3u8',kiwi:true}
   ]},
   {name:'FM',min:87.5,max:108,default:101.1,color:'#c9542b',lineColor:'#c9542b',stations:[
-    {f:89.9,name:'FM 90',url:SL+'FM90.mp3'},{f:92.7,name:'FM METRO',url:SL+'METRO.mp3'},{f:94.7,name:'POP RADIO',url:SL+'POP_RADIO.mp3'},
-    {f:97.1,name:'DISNEY',url:SL+'DISNEY.mp3'},{f:100.3,name:'LA 100',url:SL+'LA100.mp3'},{f:101.1,name:'ASPEN FM',url:SL+'ASPEN_FM.mp3'},
-    {f:102.5,name:'FM 102.5',url:SL+'FM102.5.mp3'},{f:104.3,name:'VALE FM',url:SL+'VALEFM.mp3'},{f:106.9,name:'FM PLUS',url:SL+'FMPLUS.mp3'},
-    {f:107.9,name:'ROCK &POP',url:SL+'ROCKPOP.mp3'}
+    {f:89.9,name:'FM 90',url:'https://live.radios.com.ar/fm90.m3u8',kiwi:true},
+    {f:92.7,name:'FM METRO',url:'https://live.radios.com.ar/metrofm.m3u8',kiwi:true},
+    {f:94.7,name:'POP RADIO',url:'https://live.radios.com.ar/pop.m3u8',kiwi:true},
+    {f:97.1,name:'DISNEY',url:'https://live.radios.com.ar/disney.m3u8',kiwi:true},
+    {f:100.3,name:'LA 100',url:'https://live.radios.com.ar/la100.m3u8',kiwi:true},
+    {f:101.1,name:'ASPEN FM',url:'https://live.radios.com.ar/aspen_fm.m3u8',kiwi:true},
+    {f:104.3,name:'VALE FM',url:'https://live.radios.com.ar/valefm.m3u8',kiwi:true},
+    {f:107.9,name:'ROCK &POP',url:'https://live.radios.com.ar/rockpop.m3u8',kiwi:true}
   ]},
   {name:'OC',min:5.8,max:26,default:15,color:'#22b14c',lineColor:'#22b14c',stations:[
-    {f:6.0,name:'R VATICANO',url:'https://www.vaticannews.va/'},{f:9.5,name:'BBC',url:'https://www.bbc.com/'},{f:11.7,name:'DEUTCHE',url:'https://www.dw.com/'},
-    {f:15.0,name:'VOA',url:'https://www.voa.gov/'},{f:17.7,name:'RFI',url:'https://www.rfi.fr/'},{f:21.6,name:'CHN INTL',url:'https://english.cri.cn/'},
-    {f:25.0,name:'KOREA',url:'https://world.kbs.co.kr/'}
+    {f:6.0,name:'BBC',url:'https://bbcwssc.akamaized.net/manifest/audio/format/m3u8/bitrate/96000'},
+    {f:9.5,name:'DEUTCHE',url:'https://dwdw-a.akamaized.net/dwstream106_ais.m3u8'},
+    {f:15.0,name:'VOA',url:'https://voa-lh.akamaized.net/media/voa_english_1.m3u8'},
+    {f:17.7,name:'RFI',url:'https://rfi.live.opencdn.media/live/rfien/inet_all/256k.m3u8'},
+    {f:21.6,name:'FRANCE24',url:'https://francemonde-lh.akamaized.net/i/francemonde_en@326487/index_3_av-p.m3u8'}
   ]}
 ];
 let bandIdx=0,STATIONS=BANDS[0].stations,FMIN=BANDS[0].min,FMAX=BANDS[0].max,CAPTURE=10;
