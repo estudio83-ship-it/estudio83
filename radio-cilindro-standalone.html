@@ -389,8 +389,14 @@ capHit.addEventListener('pointerdown',e=>{wake();cId=e.pointerId;capHit.setPoint
 capHit.addEventListener('pointermove',e=>{if(e.pointerId!==cId)return;const x=sx(e);turnCap((x-cx0)/RC);cx0=x;});
 capHit.addEventListener('pointerup',()=>cId=null);capHit.addEventListener('pointercancel',()=>cId=null);
 capHit.addEventListener('wheel',e=>{e.preventDefault();const d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:-e.deltaY);turnCap(Math.sign(d)*(e.shiftKey?10:2)/KF);},{passive:false});
-let wId=null,wx0=0,moved=0;
-const setWheel=a=>{wheelA=Math.max(0,Math.min(MAXA,a));vol=wheelA/MAXA;};
+let wId=null,wx0=0,moved=0,wakeLock=null;
+async function updateWakeLock(){
+  try{
+    if(vol>0.02&&!wakeLock){wakeLock=await navigator.wakeLock.request('screen');}
+    else if(vol<=0.02&&wakeLock){wakeLock.release();wakeLock=null;}
+  }catch(e){}
+}
+const setWheel=a=>{wheelA=Math.max(0,Math.min(MAXA,a));vol=wheelA/MAXA;updateWakeLock();};
 wheelHit.addEventListener('pointerdown',e=>{wake();wId=e.pointerId;wheelHit.setPointerCapture(wId);wx0=sx(e);moved=0;});
 wheelHit.addEventListener('pointermove',e=>{if(e.pointerId!==wId)return;const x=sx(e);moved+=Math.abs(x-wx0);setWheel(wheelA+(x-wx0)/RW);wx0=x;});
 wheelHit.addEventListener('pointerup',()=>{wId=null;if(moved<3)animWheel(vol>0.02?0:5*STEP);});

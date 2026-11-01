@@ -442,8 +442,15 @@ function present(now){
 }
 function loop(now){mix();if(now-lastDraw>66){lastDraw=now;drawFrame(now);present(now);}requestAnimationFrame(loop);}
 
+let wakeLock=null;
+async function updateWakeLock(){
+  try{
+    if(S.on&&!wakeLock){wakeLock=await navigator.wakeLock.request('screen');}
+    else if(!S.on&&wakeLock){wakeLock.release();wakeLock=null;}
+  }catch(e){}
+}
 function ensureAudio(){if(!ctx)initAudio();ctx.resume();}
-function power(v){ensureAudio();S.on=v??!S.on;
+function power(v){ensureAudio();S.on=v??!S.on;updateWakeLock();
   if(S.on){S.boot=performance.now()+2600;setTimeout(retune,600);}else{stopScan();disconnect();}}
 function setFreq(x){const b=B();x=Math.round(x/b.step)*b.step;if(x>b.max)x=b.min;if(x<b.min)x=b.max;S.freq[S.band]=+x.toFixed(1);retune();}
 function stepTune(dir){if(!S.on)return;stopScan();setFreq(F()+dir*B().step);}
