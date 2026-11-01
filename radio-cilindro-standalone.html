@@ -21,6 +21,13 @@
   .chip small{opacity:.55;margin-left:4px}
   .status{font-size:12px;letter-spacing:.08em;color:#666;height:16px;text-align:center}
   .hint{font-size:11px;color:#8a8a86;text-align:center;max-width:420px;line-height:1.5}
+  #bandIndicators{display:flex;justify-content:center;gap:8px;font-size:14px;letter-spacing:2px}
+  .band-dot{width:12px;height:12px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.2s}
+  .band-dot.am{background:#f4f4f4;border-color:#666}
+  .band-dot.fm{background:#c9542b}
+  .band-dot.oc{background:#4a7c59}
+  .band-dot.active{transform:scale(1.2);border-width:3px}
+  .band-label{font-size:9px;text-align:center;margin-top:-4px;color:#666;min-width:20px}
   #stations,#finish,#soundmode{display:none}
 </style>
 </head>
@@ -30,7 +37,13 @@
 <div class="bar" id="stations"></div>
 <div class="bar" id="finish"></div>
 <div class="bar" id="soundmode"></div>
-<div class="hint"><span id="bandIndicators" style="letter-spacing:6px">● ○ ○</span></div>
+<div class="hint">
+  <div id="bandIndicators">
+    <div><div class="band-dot am active" data-band="0"></div><div class="band-label">AM</div></div>
+    <div><div class="band-dot fm" data-band="1"></div><div class="band-label">FM</div></div>
+    <div><div class="band-dot oc" data-band="2"></div><div class="band-label">SW</div></div>
+  </div>
+</div>
 <script>
 // =================== KiwiAM: receptores y YouTube ===================
 (function(){
@@ -350,9 +363,16 @@ mk('path',{d:curvedBand(R,-WU,WU,YBAND+56,YBAND+61),fill:'#000',opacity:.55},win
 {const[,y1]=P(R,0,YBAND+24),[,y2]=P(R,0,YBAND+61);const lineRect=mk('rect',{id:'dialLine',x:199.3,y:y1,width:1.4,height:y2-y1,fill:'#f4f4f4'},win);window.dialLine=lineRect;}
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+32),fill:'#fff',opacity:.05},win);
 const KD=.0034,labels=[],ticks=[];
-for(let f=530;f<=1610;f+=10){const big=f%100===0&&f<=1600;
-  ticks.push({f,big,e:mk('line',{stroke:'#cfcfcf'},drum)});
-  if(big){const t=mk('text',{x:0,y:0,'text-anchor':'middle','font-family':'Inter','font-weight':500,'font-size':17,fill:'#eeeeee'},drum);t.textContent=f;labels.push({f,e:t});}}
+function generateDial(){
+  while(drum.firstChild)drum.removeChild(drum.firstChild);
+  labels.length=0;ticks.length=0;
+  const b=BANDS[bandIdx],step=(b.max-b.min)/50,bigStep=Math.max(1,Math.round(step));
+  for(let i=0;i<=50;i++){const f=b.min+i*step;const big=Math.round(i)%(Math.round(50/10))===0;
+    ticks.push({f,big,e:mk('line',{stroke:'#cfcfcf'},drum)});
+    if(big){const t=mk('text',{x:0,y:0,'text-anchor':'middle','font-family':'Inter','font-weight':500,'font-size':17,fill:'#eeeeee'},drum);
+      t.textContent=Math.round(f*10)/10;labels.push({f,e:t});}}
+}
+generateDial();
 
 const capG=mk('g',{});
 mk('path',{d:side(RC,YCAP,YCAP+14),fill:'#141414'},capG);
@@ -457,21 +477,21 @@ function setFinish(k){const o=FIN[k];bodyFill.setAttribute('fill',o.fill);grain.
 function cycleFinish(){finIdx=(finIdx+1)%finKeys.length;setFinish(finKeys[finIdx]);}
 let saved='madera';try{saved=localStorage.getItem('e83-cil')||'madera';}catch(e){}setFinish(FIN[saved]?saved:'madera');
 function updateBandIndicators(){
-  const ind=$('bandIndicators'),b=BANDS[bandIdx];
-  let dots=['○','○','○'];dots[bandIdx]='●';
-  ind.textContent=dots.join(' ');
-  ind.style.color=b.lineColor;
+  const b=BANDS[bandIdx];
+  document.querySelectorAll('.band-dot').forEach((dot,i)=>{
+    dot.classList.toggle('active',i===bandIdx);
+  });
   if(window.dialLine)window.dialLine.setAttribute('fill',b.lineColor);
+  generateDial();
 }
-$('bandIndicators').parentElement.addEventListener('click',e=>{
-  const x=e.clientX-$('bandIndicators').parentElement.getBoundingClientRect().left;
-  const w=$('bandIndicators').parentElement.getBoundingClientRect().width;
-  const section=Math.floor((x/w)*3);
-  if(section>=0&&section<3){
-    setBand(section);
-    if(section===0)freq=950;
+document.querySelectorAll('.band-dot').forEach(dot=>{
+  dot.addEventListener('click',e=>{
+    e.stopPropagation();
+    const band=parseInt(dot.dataset.band);
+    setBand(band);
+    if(band===0)freq=950;
     wake();
-  }
+  });
 });
 updateBandIndicators();
 requestAnimationFrame(loop);
