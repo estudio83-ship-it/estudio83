@@ -196,7 +196,7 @@ const STATIONS=[
   {f:990,name:'SPLENDID',url:SL+'AM990.mp3'},
 ];
 const FMIN=530,FMAX=1610,CAPTURE=10;
-let freq=950,vol=0,ctx,master,noiseG,whistle,whistleG,chainIn,cleanIn,fadeG,cur=null,signal=0,classic=true;
+let freq=950,vol=0.05,ctx,master,noiseG,whistle,whistleG,chainIn,cleanIn,fadeG,cur=null,signal=0,classic=true;
 
 function initAudio(){
   if(ctx)return;
@@ -355,7 +355,7 @@ mk('path',{d:`M${CX-78} ${YCAP} A78 ${78*K} 0 0 1 ${CX+78} ${YCAP} A78 ${78*K*.5
 const capHit=mk('rect',{id:'capHit',x:60,y:5,width:280,height:YCAP+14+RC*K-5,fill:'transparent'});
 const wheelHit=mk('path',{id:'wheelHit',d:curvedBand(R,-.5,.5,YBAND+70,YBAND+112),fill:'transparent'});
 
-let capRot=0,wheelA=0;
+let capRot=0,wheelA=0.21;
 function drawCap(){for(let i=0;i<CAPN;i++){const a=i/CAPN*Math.PI*2+capRot,c=Math.cos(a),e=ridges[i];
   if(c<=.03){e.setAttribute('stroke-width',0);continue;}
   const[x,y1]=P(RC,a,YCAP),[,y2]=P(RC,a,YCAP+14);
