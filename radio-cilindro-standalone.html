@@ -209,7 +209,10 @@ const BANDS=[
     {f:93.7,name:'NACIONAL ROCK',url:'https://sa.mp3.icecast.magma.edge-access.net/sc_rad2'},
     {f:95.1,name:'METRO',url:SL+'METRO.mp3'},
     {f:95.9,name:'ROCK & POP',url:SL+'ROCKANDPOPAAC.aac'},
-    {f:102.3,name:'ASPEN',url:SL+'ASPEN.mp3'}
+    {f:100.7,name:'BLUE',url:SL+'BLUE_FM_100_7AAC.aac'},
+    {f:102.3,name:'ASPEN',url:SL+'ASPEN.mp3'},
+    {f:103.7,name:'RADIO ONE',url:'https://one.stweb.tv/one/live/playlist.m3u8'},
+    {f:106.7,name:'MILENIUM',url:'https://sonicpanel.hostradios.com/8002/stream'}
   ]},
   {name:'SW',min:5.8,max:26,default:9.4,lineColor:'#4a7c59',kd:.17,kf:2,cap:.2,tick:.2,label:2,stations:[
     {f:9.4,name:'BBC WORLD',url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service'},
@@ -254,7 +257,11 @@ function setupAudioEl(){
   audioEl.addEventListener('error',()=>{if(!cur||cur.el!==audioEl||!audioEl.getAttribute('src'))return;
     if(cur.st.kiwi)connect(cur.st,true);else cur.state='nosig';});
 }
-function disconnect(){if(!cur)return;
+let hls=null,hlsP=null;
+function loadHls(){if(hlsP)return hlsP;hlsP=new Promise(r=>{if(window.Hls)return r(true);
+  const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js';
+  sc.onload=()=>r(!!(window.Hls&&Hls.isSupported()));sc.onerror=()=>r(false);document.head.appendChild(sc);});return hlsP;}
+function disconnect(){if(hls){try{hls.destroy();}catch(e){}hls=null;}if(!cur)return;
   if(cur.kiwi){cur.kiwi.close();try{cur.src.disconnect();}catch(e){}cur=null;return;}
   try{audioEl.pause();audioEl.removeAttribute('src');audioEl.load();}catch(e){}cur=null;}
 function connect(st,aire){
@@ -263,7 +270,13 @@ function connect(st,aire){
     const c={st,src:g,mode:'fx',state:'tuning',aire:true};cur=c;
     c.kiwi=KiwiAM.open(ctx,st.f,g,{onState:(x,h)=>{if(cur!==c)return;c.state=x;if(x==='ok'){c.aire=h.kind==='kiwi';if(h.kind==='yt'){c.mode='plain';c.el=h;}}}});return;}
   if(!st.url){cur={st,state:'nosig'};return;}
-  cur={st,el:audioEl,mode:'fx',state:'tuning'};
+  const c={st,el:audioEl,mode:'fx',state:'tuning'};cur=c;
+  if(/\.m3u8/.test(st.url)&&!audioEl.canPlayType('application/vnd.apple.mpegurl')){
+    loadHls().then(ok=>{if(cur!==c)return;if(!ok){c.state='nosig';return;}
+      hls=new Hls();hls.loadSource(st.url);hls.attachMedia(audioEl);
+      hls.on(Hls.Events.MANIFEST_PARSED,()=>audioEl.play().catch(()=>{}));
+      hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal&&cur===c)c.state='nosig';});});
+    return;}
   audioEl.src=st.url+(st.url.includes('?')?'&':'?')+'t='+Date.now();audioEl.play().catch(()=>{});
 }
 let pend=null,pendT=null;
@@ -416,7 +429,7 @@ function render(){
   drawCap();drawDrum();drawWheel();
   const {st,d}=nearest(),on=vol>0.02,status=$('status');
   if(!on)status.textContent='apagada · girá la ruedita hacia la derecha';
-  else if(d<=CAPTURE&&cur&&cur.st===st)status.textContent=st.name+' · '+(cur.state==='ok'?(cur.aire?'EN EL AIRE':'EN VIVO'):cur.state==='nosig'?(st.kiwi?'SIN SEÑAL · TOCÁ 950 OTRA VEZ':'SIN SEÑAL'):'SINTONIZANDO…');
+  else if(d<=CAPTURE&&cur&&cur.st===st)status.textContent=st.name+' · '+(cur.state==='ok'?(cur.aire?'EN EL AIRE':'EN VIVO')+(classic?' · AM CLÁSICO':' · NATURAL'):cur.state==='nosig'?(st.kiwi?'SIN SEÑAL · TOCÁ 950 OTRA VEZ':'SIN SEÑAL'):'SINTONIZANDO…');
   else status.textContent=Math.round(freq)+' kHz · estática';
   document.querySelectorAll('#stations .chip').forEach(b=>b.classList.toggle('on',on&&Math.abs(+b.dataset.f-freq)<3));
 }
@@ -462,7 +475,7 @@ wheelHit.addEventListener('wheel',e=>{e.preventDefault();wake();setWheel(wheelA-
 function animWheel(t){const a0=wheelA,t0=performance.now();const st=now=>{const k=Math.min(1,(now-t0)/350),e=1-Math.pow(1-k,3);setWheel(a0+(t-a0)*e);if(k<1)requestAnimationFrame(st);};requestAnimationFrame(st);}
 const dialHit=mk('path',{d:curvedBand(R,-WU-.03,WU+.03,YBAND+18,YBAND+66),fill:'transparent',style:'cursor:pointer'});
 dialHit.addEventListener('click',e=>{const x=sx(e);
-  if(Math.abs(x-CX)<10)classic=!classic;});
+  classic=!classic;});
 let bodyDown={t:0,x:0,y:0,id:null};
 bodyFill.parentElement.addEventListener('pointerdown',e=>{bodyDown={t:performance.now(),x:e.clientX,y:e.clientY,id:e.pointerId};});
 svg.addEventListener('pointerup',e=>{if(e.pointerId!==bodyDown.id)return;const moved=Math.abs(e.clientX-bodyDown.x)+Math.abs(e.clientY-bodyDown.y),time=performance.now()-bodyDown.t;
