@@ -428,7 +428,7 @@ function turnCap(rad){
 function wake(){initAudio();ctx.resume();}
 let cId=null,cx0=0;
 capHit.addEventListener('pointerdown',e=>{wake();cId=e.pointerId;capHit.setPointerCapture(cId);cx0=sx(e);cancelAnimationFrame(sweep);});
-capHit.addEventListener('pointermove',e=>{if(e.pointerId!==cId)return;const x=sx(e);turnCap((x-cx0)/RC);cx0=x;});
+capHit.addEventListener('pointermove',e=>{if(e.pointerId!==cId)return;const x=sx(e);turnCap((cx0-x)/RC);cx0=x;});
 capHit.addEventListener('pointerup',()=>cId=null);capHit.addEventListener('pointercancel',()=>cId=null);
 capHit.addEventListener('wheel',e=>{e.preventDefault();const d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:-e.deltaY);turnCap(Math.sign(d)*(e.shiftKey?10:2)/KF);},{passive:false});
 let wId=null,wx0=0,moved=0,wakeLock=null;
