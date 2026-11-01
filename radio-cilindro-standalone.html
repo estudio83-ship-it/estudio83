@@ -30,7 +30,7 @@
 <div class="bar" id="stations"></div>
 <div class="bar" id="finish"></div>
 <div class="bar" id="soundmode"></div>
-<div class="hint">Arrastrá la perilla negra de arriba hacia la derecha para subir de frecuencia (o rueda del mouse / flechas). La ruedita con números es el volumen: en OFF se apaga.</div>
+<div class="hint"><span id="bandIndicators" style="letter-spacing:6px">● ○ ○</span></div>
 <script>
 // =================== KiwiAM: receptores y YouTube ===================
 (function(){
@@ -187,15 +187,27 @@
 // =================== RADIO ===================
 (()=>{
 const SL='https://playerservices.streamtheworld.com/api/livestream-redirect/';
-const STATIONS=[
-  {f:630,name:'RIVADAVIA',url:SL+'RIVADAVIA.mp3'},
-  {f:790,name:'MITRE',url:SL+'AM790_56AAC.aac'},
-  {f:870,name:'NACIONAL',url:'https://sa.mp3.icecast.magma.edge-access.net/sc_rad1'},
-  {f:910,name:'LA RED',url:SL+'LA_RED_AM910AAC.aac'},
-  {f:950,name:'ORIGEN 950',url:'https://stream.audiostreamhub.com/am950',kiwi:true},
-  {f:990,name:'SPLENDID',url:SL+'AM990.mp3'},
+const BANDS=[
+  {name:'AM',min:530,max:1710,default:950,color:'#f4f4f4',lineColor:'#f4f4f4',stations:[
+    {f:630,name:'RIVADAVIA',url:SL+'RIVADAVIA.mp3'},{f:720,name:'MILENIO',url:SL+'MILENIO.mp3'},{f:790,name:'MITRE',url:SL+'AM790_56AAC.aac'},
+    {f:870,name:'NACIONAL',url:'https://sa.mp3.icecast.magma.edge-access.net/sc_rad1'},{f:910,name:'LA RED',url:SL+'LA_RED_AM910AAC.aac'},
+    {f:950,name:'ORIGEN 950',url:'https://stream.audiostreamhub.com/am950',kiwi:true},{f:990,name:'SPLENDID',url:SL+'AM990.mp3'},
+    {f:1070,name:'ASPEN',url:SL+'ASPEN.mp3'},{f:1110,name:'BAIRES',url:SL+'BAIRES.mp3'},{f:1160,name:'AM1160',url:SL+'AM1160.mp3'},
+    {f:1270,name:'RADIO 10',url:SL+'RADIO10.mp3'},{f:1540,name:'C5N',url:SL+'C5N.mp3'}
+  ]},
+  {name:'FM',min:87.5,max:108,default:101.1,color:'#c9542b',lineColor:'#c9542b',stations:[
+    {f:89.9,name:'FM 90',url:SL+'FM90.mp3'},{f:92.7,name:'FM METRO',url:SL+'METRO.mp3'},{f:94.7,name:'POP RADIO',url:SL+'POP_RADIO.mp3'},
+    {f:97.1,name:'DISNEY',url:SL+'DISNEY.mp3'},{f:100.3,name:'LA 100',url:SL+'LA100.mp3'},{f:101.1,name:'ASPEN FM',url:SL+'ASPEN_FM.mp3'},
+    {f:102.5,name:'FM 102.5',url:SL+'FM102.5.mp3'},{f:104.3,name:'VALE FM',url:SL+'VALEFM.mp3'},{f:106.9,name:'FM PLUS',url:SL+'FMPLUS.mp3'},
+    {f:107.9,name:'ROCK &POP',url:SL+'ROCKPOP.mp3'}
+  ]},
+  {name:'OC',min:5.8,max:26,default:15,color:'#22b14c',lineColor:'#22b14c',stations:[
+    {f:6.0,name:'R VATICANO',url:'https://www.vaticannews.va/'},{f:9.5,name:'BBC',url:'https://www.bbc.com/'},{f:11.7,name:'DEUTCHE',url:'https://www.dw.com/'},
+    {f:15.0,name:'VOA',url:'https://www.voa.gov/'},{f:17.7,name:'RFI',url:'https://www.rfi.fr/'},{f:21.6,name:'CHN INTL',url:'https://english.cri.cn/'},
+    {f:25.0,name:'KOREA',url:'https://world.kbs.co.kr/'}
+  ]}
 ];
-const FMIN=530,FMAX=1610,CAPTURE=10;
+let bandIdx=0,STATIONS=BANDS[0].stations,FMIN=BANDS[0].min,FMAX=BANDS[0].max,CAPTURE=10;
 let freq=950,vol=0.05,ctx,master,noiseG,whistle,whistleG,chainIn,cleanIn,fadeG,cur=null,signal=0,classic=true;
 
 function initAudio(){
@@ -335,7 +347,7 @@ const drum=mk('g',{},win);
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+29),fill:'#000',opacity:.55},win);
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+56,YBAND+61),fill:'#000',opacity:.55},win);
 [[-WU,-.27,.45],[.27,WU,.45]].forEach(([a,b,o])=>mk('path',{d:curvedBand(R,a,b,YBAND+24,YBAND+61),fill:'#000',opacity:o},win));
-{const[,y1]=P(R,0,YBAND+24),[,y2]=P(R,0,YBAND+61);mk('rect',{x:199.3,y:y1,width:1.4,height:y2-y1,fill:'#f4f4f4'},win);}
+{const[,y1]=P(R,0,YBAND+24),[,y2]=P(R,0,YBAND+61);const lineRect=mk('rect',{id:'dialLine',x:199.3,y:y1,width:1.4,height:y2-y1,fill:'#f4f4f4'},win);window.dialLine=lineRect;}
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+32),fill:'#fff',opacity:.05},win);
 const KD=.0034,labels=[],ticks=[];
 for(let f=530;f<=1610;f+=10){const big=f%100===0&&f<=1600;
@@ -390,7 +402,17 @@ function loop(){update();render();requestAnimationFrame(loop);}
 
 const sx=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse()).x;};
 const KF=100;
-function turnCap(rad){capRot+=rad;freq=Math.max(FMIN,Math.min(FMAX,freq+rad*KF));}
+function setBand(idx){
+  bandIdx=Math.max(0,Math.min(BANDS.length-1,idx));
+  const b=BANDS[bandIdx];STATIONS=b.stations;FMIN=b.min;FMAX=b.max;freq=b.default;
+  updateBandIndicators();
+}
+function turnCap(rad){
+  capRot+=rad;const nextFreq=freq+rad*KF;
+  if(nextFreq<FMIN){setBand(bandIdx-1);freq=FMAX;}
+  else if(nextFreq>FMAX){setBand(bandIdx+1);freq=FMIN;}
+  else freq=nextFreq;
+}
 function wake(){initAudio();ctx.resume();}
 let cId=null,cx0=0;
 capHit.addEventListener('pointerdown',e=>{wake();cId=e.pointerId;capHit.setPointerCapture(cId);cx0=sx(e);cancelAnimationFrame(sweep);});
@@ -434,6 +456,24 @@ const finKeys=Object.keys(FIN);let finIdx=0;
 function setFinish(k){const o=FIN[k];bodyFill.setAttribute('fill',o.fill);grain.style.display=o.grain?'':'none';bodyShade.setAttribute('opacity',o.sh);finIdx=finKeys.indexOf(k);try{localStorage.setItem('e83-cil',k);}catch(e){}}
 function cycleFinish(){finIdx=(finIdx+1)%finKeys.length;setFinish(finKeys[finIdx]);}
 let saved='madera';try{saved=localStorage.getItem('e83-cil')||'madera';}catch(e){}setFinish(FIN[saved]?saved:'madera');
+function updateBandIndicators(){
+  const ind=$('bandIndicators'),b=BANDS[bandIdx];
+  let dots=['○','○','○'];dots[bandIdx]='●';
+  ind.textContent=dots.join(' ');
+  ind.style.color=b.lineColor;
+  if(window.dialLine)window.dialLine.setAttribute('fill',b.lineColor);
+}
+$('bandIndicators').parentElement.addEventListener('click',e=>{
+  const x=e.clientX-$('bandIndicators').parentElement.getBoundingClientRect().left;
+  const w=$('bandIndicators').parentElement.getBoundingClientRect().width;
+  const section=Math.floor((x/w)*3);
+  if(section>=0&&section<3){
+    setBand(section);
+    if(section===0)freq=950;
+    wake();
+  }
+});
+updateBandIndicators();
 requestAnimationFrame(loop);
 })();
 </script>
