@@ -194,25 +194,32 @@
 
 // =================== RADIO ===================
 (()=>{
+const SL='https://playerservices.streamtheworld.com/api/livestream-redirect/';
 const BANDS=[
-  {name:'AM',min:530,max:1710,default:950,color:'#f4f4f4',lineColor:'#f4f4f4',stations:[
-    {f:630,name:'RIVADAVIA',url:'',kiwi:true},{f:720,name:'MILENIO',url:'',kiwi:true},{f:790,name:'MITRE',url:'',kiwi:true},
-    {f:870,name:'NACIONAL',url:'',kiwi:true},{f:910,name:'LA RED',url:'',kiwi:true},
-    {f:950,name:'ORIGEN 950',url:'https://stream.audiostreamhub.com/am950',kiwi:true},{f:990,name:'SPLENDID',url:'',kiwi:true},
-    {f:1070,name:'ASPEN',url:'',kiwi:true},{f:1110,name:'BAIRES',url:'',kiwi:true},{f:1270,name:'RADIO 10',url:'',kiwi:true}
+  {name:'AM',min:530,max:1710,default:950,lineColor:'#f4f4f4',kd:.0034,kf:100,cap:10,tick:10,label:100,stations:[
+    {f:630,name:'RIVADAVIA',url:SL+'RIVADAVIA.mp3'},
+    {f:710,name:'RADIO 10',url:SL+'RADIO10.mp3'},
+    {f:790,name:'MITRE',url:SL+'AM790_56AAC.aac'},
+    {f:870,name:'NACIONAL',url:'https://sa.mp3.icecast.magma.edge-access.net/sc_rad1'},
+    {f:910,name:'LA RED',url:SL+'LA_RED_AM910AAC.aac'},
+    {f:950,name:'ORIGEN 950',url:'https://stream.audiostreamhub.com/am950',kiwi:true},
+    {f:990,name:'SPLENDID',url:SL+'AM990.mp3'}
   ]},
-  {name:'FM',min:87.5,max:108,default:101.1,color:'#c9542b',lineColor:'#c9542b',stations:[
-    {f:89.9,name:'FM 90',url:'',fm:true},{f:92.7,name:'FM METRO',url:'',fm:true},{f:94.7,name:'POP RADIO',url:'',fm:true},
-    {f:97.1,name:'DISNEY',url:'',fm:true},{f:100.3,name:'LA 100',url:'',fm:true},{f:101.1,name:'ASPEN FM',url:'',fm:true},
-    {f:104.3,name:'VALE FM',url:'',fm:true},{f:107.9,name:'ROCK &POP',url:'',fm:true}
+  {name:'FM',min:87.5,max:108,default:95.1,lineColor:'#c9542b',kd:.17,kf:2,cap:.2,tick:.2,label:2,stations:[
+    {f:93.7,name:'NACIONAL ROCK',url:'https://sa.mp3.icecast.magma.edge-access.net/sc_rad2'},
+    {f:95.1,name:'METRO',url:SL+'METRO.mp3'},
+    {f:95.9,name:'ROCK & POP',url:SL+'ROCKANDPOPAAC.aac'},
+    {f:102.3,name:'ASPEN',url:SL+'ASPEN.mp3'}
   ]},
-  {name:'OC',min:5.8,max:26,default:15,color:'#22b14c',lineColor:'#22b14c',stations:[
-    {f:6.0,name:'BBC',url:'',oc:true},{f:9.5,name:'DEUTCHE',url:'',oc:true},{f:15.0,name:'VOA',url:'',oc:true},
-    {f:17.7,name:'RFI',url:'',oc:true},{f:21.6,name:'FRANCE24',url:'',oc:true}
+  {name:'SW',min:5.8,max:26,default:9.4,lineColor:'#4a7c59',kd:.17,kf:2,cap:.2,tick:.2,label:2,stations:[
+    {f:9.4,name:'BBC WORLD',url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service'},
+    {f:11.8,name:'NTS LONDON',url:'https://stream-relay-geo.ntslive.net/stream'},
+    {f:15.3,name:'VRT BÉLGICA',url:'https://icecast.vrtcdn.be/radio1-high.mp3'},
+    {f:17.6,name:'NPO HOLANDA',url:'https://icecast.omroep.nl/radio1-bb-mp3'}
   ]}
 ];
-let bandIdx=0,STATIONS=BANDS[0].stations,FMIN=BANDS[0].min,FMAX=BANDS[0].max,CAPTURE=10;
-let freq=950,vol=0.05,ctx,master,noiseG,whistle,whistleG,chainIn,cleanIn,fadeG,cur=null,signal=0,classic=true;
+let bandIdx=0,STATIONS=BANDS[0].stations,FMIN=BANDS[0].min,FMAX=BANDS[0].max,CAPTURE=10,KD=.0034,KF=100;
+let freq=950,vol=0,ctx,master,noiseG,whistle,whistleG,chainIn,cleanIn,fadeG,cur=null,signal=0,classic=true;
 
 function initAudio(){
   if(ctx)return;
@@ -269,8 +276,8 @@ function update(){
   const sig=inR?Math.max(0,1-Math.pow(d/CAPTURE,1.4)):0, ok=cur&&cur.state==='ok', s=ok?sig:0;
   if(cur){if(cur.mode==='plain')cur.el.volume=Math.min(1,s*vol);else {chainIn.gain.setTargetAtTime(classic?s*1.4:0,t,.04);cleanIn.gain.setTargetAtTime(classic?0:s,t,.04);}}
   noiseG.gain.setTargetAtTime(.035+(1-s)*.3,t,.04);
-  whistle.frequency.setTargetAtTime(110+d*330,t,.03);
-  whistleG.gain.setTargetAtTime((inR&&ok&&d>.5)?(d/CAPTURE)*(1-d/CAPTURE)*.16:0,t,.04);
+  whistle.frequency.setTargetAtTime(110+d/CAPTURE*3300,t,.03);
+  whistleG.gain.setTargetAtTime((inR&&ok&&d>CAPTURE*.05)?(d/CAPTURE)*(1-d/CAPTURE)*.16:0,t,.04);
   signal=s;
 }
 
@@ -354,15 +361,16 @@ mk('path',{d:curvedBand(R,-WU,WU,YBAND+56,YBAND+61),fill:'#000',opacity:.55},win
 [[-WU,-.27,.45],[.27,WU,.45]].forEach(([a,b,o])=>mk('path',{d:curvedBand(R,a,b,YBAND+24,YBAND+61),fill:'#000',opacity:o},win));
 {const[,y1]=P(R,0,YBAND+24),[,y2]=P(R,0,YBAND+61);const lineRect=mk('rect',{id:'dialLine',x:199.3,y:y1,width:1.4,height:y2-y1,fill:'#f4f4f4'},win);window.dialLine=lineRect;}
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+32),fill:'#fff',opacity:.05},win);
-const KD=.0034,labels=[],ticks=[];
+const labels=[],ticks=[];
 function generateDial(){
   while(drum.firstChild)drum.removeChild(drum.firstChild);
   labels.length=0;ticks.length=0;
-  const b=BANDS[bandIdx],step=(b.max-b.min)/50,bigStep=Math.max(1,Math.round(step));
-  for(let i=0;i<=50;i++){const f=b.min+i*step;const big=Math.round(i)%(Math.round(50/10))===0;
+  const b=BANDS[bandIdx],per=Math.round(b.label/b.tick);
+  const start=Math.ceil(b.min/b.tick),end=Math.floor(b.max/b.tick);
+  for(let i=start;i<=end;i++){const f=+(i*b.tick).toFixed(2),big=i%per===0;
     ticks.push({f,big,e:mk('line',{stroke:'#cfcfcf'},drum)});
     if(big){const t=mk('text',{x:0,y:0,'text-anchor':'middle','font-family':'Inter','font-weight':500,'font-size':17,fill:'#eeeeee'},drum);
-      t.textContent=Math.round(f*10)/10;labels.push({f,e:t});}}
+      t.textContent=Math.round(f);labels.push({f,e:t});}}
 }
 generateDial();
 
@@ -379,7 +387,7 @@ mk('path',{d:`M${CX-78} ${YCAP} A78 ${78*K} 0 0 1 ${CX+78} ${YCAP} A78 ${78*K*.5
 const capHit=mk('rect',{id:'capHit',x:60,y:5,width:280,height:YCAP+14+RC*K-5,fill:'transparent'});
 const wheelHit=mk('path',{id:'wheelHit',d:curvedBand(R,-.5,.5,YBAND+70,YBAND+112),fill:'transparent'});
 
-let capRot=0,wheelA=0.21;
+let capRot=0,wheelA=0;
 function drawCap(){for(let i=0;i<CAPN;i++){const a=i/CAPN*Math.PI*2+capRot,c=Math.cos(a),e=ridges[i];
   if(c<=.03){e.setAttribute('stroke-width',0);continue;}
   const[x,y1]=P(RC,a,YCAP),[,y2]=P(RC,a,YCAP+14);
@@ -413,10 +421,10 @@ function render(){
 function loop(){update();render();requestAnimationFrame(loop);}
 
 const sx=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse()).x;};
-const KF=100;
 function setBand(idx){
   bandIdx=Math.max(0,Math.min(BANDS.length-1,idx));
-  const b=BANDS[bandIdx];STATIONS=b.stations;FMIN=b.min;FMAX=b.max;freq=b.default;
+  const b=BANDS[bandIdx];STATIONS=b.stations;FMIN=b.min;FMAX=b.max;freq=b.default;KD=b.kd;KF=b.kf;CAPTURE=b.cap;
+  if(cur)disconnect();
   updateBandIndicators();
 }
 function turnCap(rad){
@@ -445,24 +453,22 @@ wheelHit.addEventListener('pointerup',()=>{wId=null;if(moved<3)animWheel(vol>0.0
 wheelHit.addEventListener('pointercancel',()=>wId=null);
 wheelHit.addEventListener('wheel',e=>{e.preventDefault();wake();setWheel(wheelA-Math.sign(e.deltaY)*STEP/2);},{passive:false});
 function animWheel(t){const a0=wheelA,t0=performance.now();const st=now=>{const k=Math.min(1,(now-t0)/350),e=1-Math.pow(1-k,3);setWheel(a0+(t-a0)*e);if(k<1)requestAnimationFrame(st);};requestAnimationFrame(st);}
-let dialDown={t:0,x:0,id:null};
-win.addEventListener('pointerdown',e=>{if(wId!==null||cId!==null)return;dialDown={t:performance.now(),x:sx(e),id:e.pointerId};});
-win.addEventListener('pointerup',e=>{if(e.pointerId!==dialDown.id)return;const moved=Math.abs(sx(e)-dialDown.x),time=performance.now()-dialDown.t;
-  if(moved<8&&time<200){wake();const x=sx(e);if(x<CX-R/2)nextStation(-1);else if(x>CX+R/2)nextStation(1);}dialDown.id=null;});
+const dialHit=mk('path',{d:curvedBand(R,-WU-.03,WU+.03,YBAND+18,YBAND+66),fill:'transparent',style:'cursor:pointer'});
+dialHit.addEventListener('click',e=>{const x=sx(e);
+  if(Math.abs(x-CX)<10){classic=!classic;return;}
+  nextStation(x<CX?-1:1);});
 let bodyDown={t:0,x:0,y:0,id:null};
 bodyFill.parentElement.addEventListener('pointerdown',e=>{bodyDown={t:performance.now(),x:e.clientX,y:e.clientY,id:e.pointerId};});
 svg.addEventListener('pointerup',e=>{if(e.pointerId!==bodyDown.id)return;const moved=Math.abs(e.clientX-bodyDown.x)+Math.abs(e.clientY-bodyDown.y),time=performance.now()-bodyDown.t;
   if(moved<15&&time<200&&e.clientY>200)cycleFinish();bodyDown.id=null;});
-let winTap={last:0,id:null};
-win.addEventListener('pointerdown',e=>{if(wId!==null)return;winTap.id=e.pointerId;},{capture:true});
-win.addEventListener('pointerup',e=>{if(e.pointerId!==winTap.id)return;const now=performance.now();
-  if(now-winTap.last<300){classic=!classic;winTap.last=0;}else winTap.last=now;winTap.id=null;},{capture:true});
 addEventListener('keydown',e=>{if(e.key==='ArrowRight')turnCap((e.shiftKey?10:1)/KF);if(e.key==='ArrowLeft')turnCap(-(e.shiftKey?10:1)/KF);
   if(e.key==='ArrowUp')setWheel(wheelA+STEP/2);if(e.key==='ArrowDown')setWheel(wheelA-STEP/2);});
 let sweep=null;
 function goTo(t){cancelAnimationFrame(sweep);const f0=freq,t0=performance.now(),dur=Math.min(1100,250+Math.abs(t-f0)*2.2);
   const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3),nf=f0+(t-f0)*e;turnCap((nf-freq)/KF);if(k<1)sweep=requestAnimationFrame(step);};sweep=requestAnimationFrame(step);}
-function nextStation(dir){const idx=STATIONS.findIndex(s=>s.f===nearest().st.f);const next=Math.max(0,Math.min(STATIONS.length-1,idx+dir));goTo(STATIONS[next].f);wake();if(vol<=0.02)animWheel(5*STEP);}
+function nextStation(dir){wake();if(vol<=0.02)animWheel(5*STEP);
+  const eps=CAPTURE/2,list=dir>0?STATIONS.filter(s=>s.f>freq+eps):STATIONS.filter(s=>s.f<freq-eps).reverse();
+  const t=list.length?list[0]:STATIONS[dir>0?0:STATIONS.length-1];goTo(t.f);}
 const FIN={madera:{fill:'#7a4628',grain:1,sh:1},blanco:{fill:'#f1efe9',grain:0,sh:.45},naranja:{fill:'#c9542b',grain:0,sh:.8}};
 const finKeys=Object.keys(FIN);let finIdx=0;
 function setFinish(k){const o=FIN[k];bodyFill.setAttribute('fill',o.fill);grain.style.display=o.grain?'':'none';bodyShade.setAttribute('opacity',o.sh);finIdx=finKeys.indexOf(k);try{localStorage.setItem('e83-cil',k);}catch(e){}}
