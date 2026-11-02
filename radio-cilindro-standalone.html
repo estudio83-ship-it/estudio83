@@ -622,7 +622,7 @@ function updateBandIndicators(){
     el.style.transform=`translate(${(150*Math.sin(a)).toFixed(1)}px,${(150*(1-Math.cos(a))).toFixed(1)}px) rotate(${d*17}deg)`;
     el.style.opacity=Math.max(.2,1-Math.abs(d)*.3);});
   sub.innerHTML='';
-  sub.style.display=EB.name==='WT'?'none':'';
+  sub.style.visibility=EB.name==='WT'?'hidden':'';
   if(EB.subs)EB.subs.forEach((x,k)=>{const d=document.createElement('span');d.className='sd'+(k===subIdx?' on':'');d.style.setProperty('--c',EB.lineColor);d.innerHTML='<i></i>'+x.name;d.onclick=e=>{e.stopPropagation();setBand(bandIdx,k);wake();};sub.appendChild(d);});
   if(window.dialLine)window.dialLine.setAttribute('fill',EB.lineColor);
   generateDial();
