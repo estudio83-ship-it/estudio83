@@ -24,7 +24,7 @@
   .chip small{opacity:.55;margin-left:4px}
   .status{font-size:12px;letter-spacing:.08em;color:#666;height:16px;text-align:center}
   .hint{font-size:11px;color:#8a8a86;text-align:center;max-width:420px;line-height:1.5}
-  #bandRow{position:relative;width:260px;height:78px;margin:4px auto 0;touch-action:none;overflow:hidden}
+  #bandRow{position:relative;width:260px;height:78px;margin:4px auto 0;touch-action:none}
   #bandRow:after{content:'';position:absolute;left:50%;top:16px;width:300px;height:300px;margin-left:-151px;border:1px solid rgba(0,0,0,.14);border-radius:50%;pointer-events:none}
   body.dark #bandRow:after{border-color:rgba(255,255,255,.16)}
   #bandRow:before{content:'';position:absolute;left:50%;top:3px;margin-left:-3px;border-left:3px solid transparent;border-right:3px solid transparent;border-top:4px solid #9a9a96}
@@ -265,7 +265,7 @@ const BANDS=[
     {name:'PODCAST',url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service'}
   ]},
   {name:'WT',min:1,max:1,default:1,lineColor:'#e8e0c8',kd:.12,kf:6,cap:.4,tick:1,label:1,win:2,subs:[
-    {name:'WT',proc:'white'}
+    {name:'WT',proc:'static'}
   ]}
 ];
 let bandIdx=0,subIdx=0,EB=BANDS[0],STATIONS=BANDS[0].stations,FMIN=BANDS[0].min,FMAX=BANDS[0].max,CAPTURE=10,KD=.0034,KF=100;
@@ -339,7 +339,8 @@ function update(){
   if(!inR){if(pend){clearTimeout(pendT);pend=null;}if(cur&&d>CAPTURE*2.5)disconnect();}
   const sig=inR?Math.max(0,1-Math.pow(d/CAPTURE,1.4)):0, ok=cur&&cur.state==='ok', s=ok?sig:0;
   if(cur){if(cur.mode==='plain')cur.el.volume=Math.min(1,s*vol);else {const cl=classic&&EB.name==='AM';chainIn.gain.setTargetAtTime(cl?s*0.8:0,t,.04);cleanIn.gain.setTargetAtTime(cl?0:s,t,.04);}}
-  noiseG.gain.setTargetAtTime(.035+(1-s)*.3,t,.04);
+  const stat=!!cur&&cur.mode==='proc'&&cur.st.proc==='static';
+  noiseG.gain.setTargetAtTime(stat?.4:.035+(1-s)*.3,t,.04);
   whistle.frequency.setTargetAtTime(110+d/CAPTURE*3300,t,.03);
   whistleG.gain.setTargetAtTime((inR&&ok&&d>CAPTURE*.05)?(d/CAPTURE)*(1-d/CAPTURE)*.16:0,t,.04);
   signal=s;
@@ -490,6 +491,7 @@ function notifyNative(){if(!window.Android)return;
   const on=vol>0.02&&cur&&cur.state==='ok',k=on?cur.st.name+' '+EB.name:'';
   if(k!==lastNative){lastNative=k;try{Android.playing(on,on?cur.st.name:'',EB.name);}catch(e){}}}
 function startProc(c,type){
+  if(type==='static')return;
   const len=ctx.sampleRate*4,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);
   const brown=type==='fire'||type==='water'||type==='wind';let last=0;
   for(let i=0;i<len;i++){const w=Math.random()*2-1;if(brown){last=(last+.02*w)/1.02;d[i]=last*3.5;}else d[i]=w*.5;}
@@ -527,7 +529,7 @@ function loop(){update();render();notifyNative();renderScale();ledDot();requestA
 const LEDS=[{c:'#ffb040',g:7},{c:'#ff7a1a',g:11},{c:'#33ff66',g:11},{c:'#3a8cff',g:13},{c:'#a77df0',g:10}];
 function ledDot(){const lit=vol>0.02,on=!!cur&&cur.state==='ok'&&lit,row=$('bandRow').children;
   backlight.style.opacity=lit?.75:0;
-  const wt=on&&EB.name==='WT';document.body.classList.toggle('wt',wt);$('topName').textContent=wt?'WHITE NOISE':'';
+  document.body.classList.remove('wt');
   window.dialLine.setAttribute('fill',lit?'#ffa23a':'#151515');
   drum.style.opacity=lit?1:0;
   if(document.body.classList.contains('off')===lit){document.body.classList.toggle('off',!lit);if(!lit&&sleepEnd){sleepEnd=0;updateZzz();}}
@@ -614,7 +616,7 @@ function cycleFinish(){finIdx=(finIdx+1)%finKeys.length;setFinish(finKeys[finIdx
 let saved='madera';try{saved=localStorage.getItem('e83-cil')||'madera';}catch(e){}setFinish(FIN[saved]?saved:'madera');
 function updateBandIndicators(){
   const row=$('bandRow'),sub=$('subdots');
-  if(!row.children.length)BANDS.forEach((b,k)=>{const el=document.createElement('div');el.className='bi';el.innerHTML='<i></i><span>'+b.name+'</span>';
+  if(!row.children.length)BANDS.forEach((b,k)=>{const el=document.createElement('div');el.className='bi';el.innerHTML='<i></i><span>'+(b.name==='WT'?'WHITE NOISE':b.name)+'</span>';
     el.onclick=e=>{e.stopPropagation();if(k===bandIdx)return;setBand(k);if(k===0)freq=950;wake();};row.appendChild(el);});
   [...row.children].forEach((el,k)=>{const d=k-bandIdx;
     const a=d*17*Math.PI/180;
