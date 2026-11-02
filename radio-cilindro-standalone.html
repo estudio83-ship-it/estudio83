@@ -488,7 +488,7 @@ let bodyDown={t:0,x:0,y:0,id:null};
 bodyFill.parentElement.addEventListener('pointerdown',e=>{bodyDown={t:performance.now(),x:e.clientX,y:e.clientY,id:e.pointerId};});
 svg.addEventListener('pointerup',e=>{if(e.pointerId!==bodyDown.id)return;const moved=Math.abs(e.clientX-bodyDown.x)+Math.abs(e.clientY-bodyDown.y),time=performance.now()-bodyDown.t;
   if(moved<15&&time<200&&e.clientY>200)cycleFinish();bodyDown.id=null;});
-addEventListener('keydown',e=>{if(e.key==='ArrowRight')turnCap((e.shiftKey?10:1)/KF);if(e.key==='ArrowLeft')turnCap(-(e.shiftKey?10:1)/KF);
+addEventListener('keydown',e=>{if(e.key==='p'||e.key==='P'){wake();animWheel(vol>0.02?0:5*STEP);}if(e.key==='ArrowRight')turnCap((e.shiftKey?10:1)/KF);if(e.key==='ArrowLeft')turnCap(-(e.shiftKey?10:1)/KF);
   if(e.key==='ArrowUp')setWheel(wheelA+STEP/2);if(e.key==='ArrowDown')setWheel(wheelA-STEP/2);});
 let sweep=null;
 function goTo(t){cancelAnimationFrame(sweep);const f0=freq,t0=performance.now(),dur=Math.min(1100,250+Math.abs(t-f0)*2.2);
