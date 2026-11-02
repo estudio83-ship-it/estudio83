@@ -326,7 +326,7 @@ function update(){
     pendT=setTimeout(()=>{pend=null;const n=nearest();if(vol>0.02&&n.d<=CAPTURE&&(!cur||cur.st!==n.st))connect(n.st);},250);}
   if(!inR){if(pend){clearTimeout(pendT);pend=null;}if(cur&&d>CAPTURE*2.5)disconnect();}
   const sig=inR?Math.max(0,1-Math.pow(d/CAPTURE,1.4)):0, ok=cur&&cur.state==='ok', s=ok?sig:0;
-  if(cur){if(cur.mode==='plain')cur.el.volume=Math.min(1,s*vol);else {chainIn.gain.setTargetAtTime(classic?s*0.8:0,t,.04);cleanIn.gain.setTargetAtTime(classic?0:s,t,.04);}}
+  if(cur){if(cur.mode==='plain')cur.el.volume=Math.min(1,s*vol);else {const cl=classic&&EB.name==='AM';chainIn.gain.setTargetAtTime(cl?s*0.8:0,t,.04);cleanIn.gain.setTargetAtTime(cl?0:s,t,.04);}}
   noiseG.gain.setTargetAtTime(.035+(1-s)*.3,t,.04);
   whistle.frequency.setTargetAtTime(110+d/CAPTURE*3300,t,.03);
   whistleG.gain.setTargetAtTime((inR&&ok&&d>CAPTURE*.05)?(d/CAPTURE)*(1-d/CAPTURE)*.16:0,t,.04);
@@ -466,7 +466,7 @@ function render(){
   drawCap();drawDrum();drawWheel();
   const {st,d}=nearest(),on=vol>0.02,status=$('status');
   if(!on)status.textContent='apagada · girá la ruedita hacia la derecha';
-  else if(d<=CAPTURE&&cur&&cur.st===st)status.textContent=st.name+' · '+(cur.state==='ok'?(cur.aire?'EN EL AIRE':'EN VIVO')+(EB.subs?'':(classic?' · AM CLÁSICO':' · NATURAL')):cur.state==='nosig'?(st.kiwi?'SIN SEÑAL · TOCÁ 950 OTRA VEZ':'SIN SEÑAL'):'SINTONIZANDO…');
+  else if(d<=CAPTURE&&cur&&cur.st===st)status.textContent=st.name+' · '+(cur.state==='ok'?(cur.aire?'EN EL AIRE':'EN VIVO'):cur.state==='nosig'?(st.kiwi?'SIN SEÑAL · TOCÁ 950 OTRA VEZ':'SIN SEÑAL'):'SINTONIZANDO…');
   else status.textContent=Math.round(freq)+' kHz · estática';
   document.querySelectorAll('#stations .chip').forEach(b=>b.classList.toggle('on',on&&Math.abs(+b.dataset.f-freq)<3));
 }
