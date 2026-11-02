@@ -371,13 +371,16 @@ function shade(group,r,yTop,yBot,strength=1){
 
 {const fg=mk('radialGradient',{id:'floorG',cx:'50%',cy:'50%',r:'50%'},defs);
   [[0,.34],[.45,.2],[.75,.07],[1,0]].forEach(([o,a])=>mk('stop',{offset:o,'stop-color':'#000','stop-opacity':a},fg));}
-mk('ellipse',{cx:CX,cy:YBOT+30,rx:200,ry:40,fill:'url(#floorG)'});
-mk('path',{d:side(118,YBOT-4,YBOT+12),fill:'#0c0c0c'});
+mk('ellipse',{cx:CX,cy:YBOT+44,rx:190,ry:38,fill:'url(#floorG)'});
+mk('path',{d:side(96,YBOT-4,YBOT+6),fill:'#101215'});
 const legs=mk('g',{});
-{const NF=16,fins=[];for(let k=0;k<NF;k++){const u=(k+.5)/NF*2*Math.PI,c=Math.cos(u);if(c>-.02)fins.push({u,c});}
-  fins.sort((a,b)=>a.c-b.c).forEach(({u,c})=>{const yt=YBOT+3,yb=YBOT+22,fill=c>.6?'#1c1c1c':c>.2?'#151515':'#0e0e0e';
-    const[xa,ya]=P(112,u,yt),[xb,yb1]=P(143,u,yt),[xc,yc]=P(138,u,yb),[xd,yd]=P(112,u,yb);
-    mk('path',{d:`M${f2(xa)} ${f2(ya)}L${f2(xb)} ${f2(yb1)}L${f2(xc)} ${f2(yc)}L${f2(xd)} ${f2(yd)}Z`,fill,stroke:fill,'stroke-width':1.6,'stroke-linejoin':'round'},legs);});}
+{const NF=10,fins=[];for(let k=0;k<NF;k++){const u=k/NF*2*Math.PI,c=Math.cos(u);if(c>-.02)fins.push({u,c});}
+  fins.sort((a,b)=>a.c-b.c).forEach(({u,c})=>{const yt=YBOT-8,yb=YBOT+36,fill=c>.6?'#1d2027':c>.2?'#16181e':'#101216';
+    const plate=w=>{const[xa,ya]=P(70,w,yt),[xb,yb1]=P(132,w,yt),[xc,yc]=P(122,w,yb),[xd,yd]=P(70,w,yb);
+      mk('path',{d:`M${f2(xa)} ${f2(ya)}L${f2(xb)} ${f2(yb1)}L${f2(xc)} ${f2(yc)}L${f2(xd)} ${f2(yd)}Z`,fill,stroke:fill,'stroke-width':1.2,'stroke-linejoin':'round'},legs);};
+    const dl=4.5/132;plate(u-dl);plate(u+dl);
+    const[e1x,e1y]=P(132,u-dl,yt),[e2x,e2y]=P(132,u+dl,yt),[e3x,e3y]=P(122,u+4.5/122,yb),[e4x,e4y]=P(122,u-4.5/122,yb);
+    mk('path',{d:`M${f2(e1x)} ${f2(e1y)}L${f2(e2x)} ${f2(e2y)}L${f2(e3x)} ${f2(e3y)}L${f2(e4x)} ${f2(e4y)}Z`,fill:'#2a2e37'},legs);});}
 
 const body=mk('g',{'clip-path':'url(#cBody)'});
 const bodyFill=mk('rect',{x:50,y:YBODY-30,width:300,height:YBOT-YBODY+100,fill:'#7a4628'},body);
