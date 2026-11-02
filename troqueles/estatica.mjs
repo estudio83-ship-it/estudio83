@@ -29,9 +29,11 @@ export async function prerender(pagina) {
     const a = doc.indexOf("<main>") + 6, b = doc.indexOf("</main>");
     const molde = doc.slice(a, b);
     // El script empieza devolviendo la página a su molde y la arma de nuevo, interactiva.
-    const arranque = '<script>\ndocument.querySelector("main").innerHTML = document.getElementById("molde-pagina").innerHTML;\n';
-    const i = doc.indexOf("<script>", b);
-    return doc.slice(0, a) + dibujada + "</main>\n<template id=\"molde-pagina\">" + molde + "</template>\n" + arranque + doc.slice(i + "<script>\n".length);
+    // Si algo falla al rearmarla (un navegador viejo), vuelve a mostrar la página ya dibujada.
+    const arranque = '<script>\nvar dibujoInicial = document.querySelector("main").innerHTML;\ndocument.querySelector("main").innerHTML = document.getElementById("molde-pagina").innerHTML;\ntry {\n';
+    const cierre = '\n} catch (err) {\n  document.querySelector("main").innerHTML = dibujoInicial;\n  if (window.console) console.error(err);\n}\n';
+    const i = doc.indexOf("<script>", b), j = doc.lastIndexOf("</script>");
+    return doc.slice(0, a) + dibujada + "</main>\n<template id=\"molde-pagina\">" + molde + "</template>\n" + arranque + doc.slice(i + "<script>\n".length, j) + cierre + doc.slice(j);
   } finally {
     await browser.close();
   }

@@ -56,7 +56,7 @@ La página sale encriptada (AES-GCM 256, clave derivada con PBKDF2-SHA256 de 600
 | `estilos` | Opcional. CSS propio del diseño (los colores de sus dibujos). |
 | `formulas` | `{ h: { nombre: ["L + e", (P) => P.L + P.e] }, v: { ... } }`: la fórmula de cada cota. |
 | `simple` | Cotas de la vista simple: `{ "h:largo": "L", "h:plano total": "" }` (la letra que se muestra). |
-| `letras` | Expresión regular con las letras de las variables en las fórmulas. |
+| `letras` | Lista de los nombres de variable que aparecen en las fórmulas (`["A", "Dc", ...]`). |
 | `toca` | `{ variable: [letras] }`: qué cotas se marcan en naranja al tocar cada variable. |
 | `llamadas(model)` | Opcional. Notas sobre el plano: `[[punto, texto, visibleEnSimple]]`. |
 | `resumen(model)` | Las cinco tarjetas: `[[título, valor, detalle]]`. |

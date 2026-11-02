@@ -53,7 +53,7 @@ export function crearDiseno(PLANTILLA) {
     // Vista simple: sólo las cotas de las variables que se cargan (con su letra) y los totales de la plancha.
     simple: { "h:costado": "A", "h:contrafrente": "L", "v:frente": "H", "v:puente": "t", "v:compartimento": "", "v:lomo": "", "h:plano total": "", "v:plano total": "" },
     // Letras del plano y qué letras mueve cada variable del panel.
-    letras: "Dc|Dn|(?<![A-Za-zÀ-ÿ])[LAHte](?![A-Za-zÀ-ÿ])",
+    letras: ["Dc", "Dn", "L", "A", "H", "t", "e"],
     toca: { Lb: ["L"], Dc: ["Dc", "A", "H"], Dn: ["Dn"], n: ["Dc", "Dn", "H"], A: ["A"], H: ["H"], t: ["t"], e: ["e"] },
     // Notas sueltas sobre el plano: [punto, texto, visible en la vista simple].
     llamadas(model) {

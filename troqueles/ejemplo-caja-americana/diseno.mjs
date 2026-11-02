@@ -70,7 +70,7 @@ export function crearDiseno() {
       v: { alto: ["H + e", (P) => P.H + P.e], solapa: ["(A + e)/2", (P) => Math.round((P.A + P.e) / 2)] },
     },
     simple: { "h:largo": "L", "h:ancho": "A", "v:alto": "H", "h:plano total": "", "v:plano total": "" },
-    letras: "(?<![A-Za-zÀ-ÿ])[LAHe](?![A-Za-zÀ-ÿ])",
+    letras: ["L", "A", "H", "e"],
     toca: { L: ["L"], A: ["A"], H: ["H"], e: ["e"] },
     resumen(model) {
       const P = model.P, b = model.info.bounds, x3 = (a) => a.map(mmEntero).join(" × "), onda = ondaDe(P.e);

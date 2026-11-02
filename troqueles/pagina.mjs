@@ -65,7 +65,7 @@ h2{font:700 20px/1.15 var(--display);letter-spacing:-.02em;margin:0}
 .plan-sheet{grid-template-rows:auto minmax(0,1fr)}
 /* El plano ocupa todo el alto que deja el recuadro (que se estira al alto del panel de variables). */
 .plan-sheet #plan{display:block;position:relative;min-height:560px;overflow:hidden;margin-bottom:44px}
-.plan-sheet #plan svg{position:absolute;inset:0}
+.plan-sheet #plan svg{position:absolute;top:0;right:0;bottom:0;left:0}
 @media (max-width:860px){.plan-sheet #plan{height:420px;min-height:0}}
 form{display:grid;gap:9px}
 .var{display:grid;grid-template-columns:30px minmax(0,1fr) 84px;gap:2px 10px;align-items:center}
@@ -309,8 +309,10 @@ function arrow(x0, y0, x1, y1) {
   return h(x0, y0, ux, uy) + h(x1, y1, -ux, -uy);
 }
 // Letras de variables que aparecen en una fórmula o llamada ("A − 4e/3" → A e).
-const LETRAS = new RegExp(DESIGN.letras, "g");
-const lettersOf = (txt) => (txt.match(LETRAS) || []).join(" ");
+// DESIGN.letras es la lista de nombres de variable ("A", "Dc"...): se separa el texto en palabras
+// (números y signos cortan) y se quedan las que son variables. Sin búsquedas hacia atrás en expresiones
+// regulares, que el Safari de iOS anterior al 16.4 no entiende.
+const lettersOf = (txt) => txt.replace(/[^A-Za-zÀ-ÿ]+/g, " ").trim().split(" ").filter((w) => DESIGN.letras.indexOf(w) >= 0).join(" ");
 const formulaOf = (d) => (DESIGN.formulas[d.src] && DESIGN.formulas[d.src][d.name]) || null;
 let activeVar = null;
 function applyActive() {
