@@ -1,3 +1,10 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
 <title>Caja americana</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,6 +55,8 @@ form{gap:14px}
 h3.group{font:700 20px/1.15 var(--display);letter-spacing:-.02em;color:var(--ink);margin:0}
 .grupo .presets{margin-top:2px}
 .grupo .presets .tag{flex-basis:100%}
+/* En pantallas táctiles los campos van a 16 px: con menos, Safari del iPhone hace zoom al tocarlos. */
+@media (pointer:coarse),(max-width:860px){input[type=number]{font-size:16px!important}}
 .var.off{opacity:.38}
 .var.off input{cursor:not-allowed}
 button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--flash);font-weight:600}
@@ -174,6 +183,35 @@ svg.plan{display:block;width:100%;height:100%}
 
   <div class="desk">
     <section class="sheet side" aria-label="Variables">
+      <form id="form" autocomplete="off"><section class="grupo" data-group="Caja"><h3 class="group">Caja</h3><div class="var" data-key="L"><b>L</b><label for="v-L">Largo interior</label><input id="v-L" type="number" inputmode="numeric" min="100" max="800" step="1" value="300"><input id="r-L" type="range" aria-label="Largo interior" min="0" max="1000" step="1" value="500"></div><div class="var" data-key="A"><b>A</b><label for="v-A">Ancho interior</label><input id="v-A" type="number" inputmode="numeric" min="80" max="600" step="1" value="200"><input id="r-A" type="range" aria-label="Ancho interior" min="0" max="1000" step="1" value="500"></div><div class="var" data-key="H"><b>H</b><label for="v-H">Alto interior</label><input id="v-H" type="number" inputmode="numeric" min="80" max="800" step="1" value="250"><input id="r-H" type="range" aria-label="Alto interior" min="0" max="1000" step="1" value="500"></div></section><section class="grupo" data-group="Cartón"><h3 class="group">Cartón</h3><div class="var" data-key="e"><b>e</b><label for="v-e">Espesor del cartón</label><input id="v-e" type="number" inputmode="numeric" min="1" max="6" step="1" value="3"><input id="r-e" type="range" aria-label="Espesor del cartón" min="0" max="1000" step="1" value="500"></div><div class="presets" role="group" aria-label="Onda"><span class="tag">Onda</span><button type="button" data-atajo="2" data-key="e" data-nombre="E" aria-label="Onda E" aria-pressed="false">E</button><button type="button" data-atajo="3" data-key="e" data-nombre="B" aria-label="Onda B" aria-pressed="true">B</button><button type="button" data-atajo="4" data-key="e" data-nombre="C" aria-label="Onda C" aria-pressed="false">C</button></div></section></form>
+      <button type="button" class="reset" id="reset">Reset</button>
+    </section>
+    <div class="right">
+    <section class="sheet plan-sheet" aria-labelledby="t-plano">
+      <div class="head"><h2 id="t-plano">Plano</h2><button type="button" id="formulas" aria-pressed="false">Ver fórmulas</button></div>
+      <div id="plan"><svg class="plan simple" viewBox="-180 0 1292 607" role="img" aria-label="Caja americana 300 × 200 × 250 mm, con las cotas de las variables"><path class="k" d="M300.5 20L0 20L0 122L300.5 122ZM300.5 122L0 122L0 375L300.5 375L303 375L303 122ZM305.5 122L303 122L303 375L305.5 375L503.5 375L506 375L506 122L503.5 122ZM503.5 20L305.5 20L305.5 122L503.5 122ZM508.5 122L506 122L506 375L508.5 375L806.5 375L809 375L809 122L806.5 122ZM806.5 20L508.5 20L508.5 122L806.5 122ZM811.5 122L809 122L809 375L811.5 375L1012 375L1012 122ZM1012 20L811.5 20L811.5 122L1012 122ZM0 477L300.5 477L300.5 375L0 375ZM305.5 477L503.5 477L503.5 375L305.5 375ZM508.5 477L806.5 477L806.5 375L508.5 375ZM811.5 477L1012 477L1012 375L811.5 375ZM0 375L0 122L-30 132L-30 365Z"></path><path class="c" d="M0 20L300.5 20M0 122L0 20M300.5 122L300.5 20M300.5 122L305.5 122M305.5 20L503.5 20M305.5 122L305.5 20M503.5 122L503.5 20M503.5 122L508.5 122M508.5 20L806.5 20M508.5 122L508.5 20M806.5 122L806.5 20M806.5 122L811.5 122M811.5 20L1012 20M811.5 122L811.5 20M1012 122L1012 20M0 477L300.5 477M0 375L0 477M300.5 375L300.5 477M300.5 375L305.5 375M305.5 477L503.5 477M305.5 375L305.5 477M503.5 375L503.5 477M503.5 375L508.5 375M508.5 477L806.5 477M508.5 375L508.5 477M806.5 375L806.5 477M806.5 375L811.5 375M811.5 477L1012 477M811.5 375L811.5 477M1012 375L1012 477M1012 375L1012 122M0 122L-30 132M-30 132L-30 365M-30 365L0 375"></path><path class="h" d="M0 122L300.5 122M305.5 122L503.5 122M508.5 122L806.5 122M811.5 122L1012 122M0 375L300.5 375M305.5 375L503.5 375M508.5 375L806.5 375M811.5 375L1012 375M0 375L0 122M303 375L303 122M506 375L506 122M809 375L809 122"></path><path class="p" d=""></path><g class="dim" data-vars="L e"><path d="M0 509V525M303 509V525M0 517H303"></path><path class="ar" d="M0 517L9 520.2L9 513.9ZM303 517L294 513.9L294 520.2Z"></path><text x="151.5" y="510"><tspan class="fx">L</tspan><tspan class="val"> = 303</tspan></text></g><g class="dim" data-vars="A e"><path d="M303 509V525M506 509V525M303 517H506"></path><path class="ar" d="M303 517L312 520.2L312 513.9ZM506 517L497 513.9L497 520.2Z"></path><text x="404.5" y="510"><tspan class="fx">A</tspan><tspan class="val"> = 203</tspan></text></g><g class="dim" data-vars="H e"><path d="M-88 375H-72M-88 122H-72M-80 375V122"></path><path class="ar" d="M-80 375L-76.8 366L-83.1 366ZM-80 122L-83.1 131L-76.8 131Z"></path><text x="-87" y="248.5" transform="rotate(-90 -87 248.5)"><tspan class="fx">H</tspan><tspan class="val"> = 253</tspan></text></g><g class="dim" data-vars=""><path d="M-30 569V585M1012 569V585M-30 577H1012"></path><path class="ar" d="M-30 577L-21 580.2L-21 573.9ZM1012 577L1003 573.9L1003 580.2Z"></path><text x="491" y="570"><tspan class="val">1042</tspan></text></g><g class="dim" data-vars=""><path d="M-148 477H-132M-148 20H-132M-140 477V20"></path><path class="ar" d="M-140 477L-136.8 468L-143.1 468ZM-140 20L-143.1 29L-136.8 29Z"></path><text x="-147" y="248.5" transform="rotate(-90 -147 248.5)"><tspan class="val">457</tspan></text></g></svg></div>
+      <div class="descargas">
+        <p class="status" id="status" role="status"></p>
+        <button type="button" class="primary" id="dl-dxf">Descargar DXF</button>
+        <button type="button" class="primary" id="dl-cf2">Descargar CF2</button>
+      </div>
+    </section>
+    <section class="sheet summary" aria-labelledby="t-res">
+      <div class="head"><h2 id="t-res">Resumen</h2></div>
+      <dl class="facts" id="facts"><div class="row"><dt>Tipo de cartón</dt><dd><strong>Onda B</strong><span>espesor 3 mm</span></dd></div><div class="row"><dt>Medidas internas</dt><dd><strong>300 × 200 × 250</strong><span>L × A × H</span></dd></div><div class="row"><dt>Medidas externas</dt><dd><strong>306 × 206 × 256</strong><span>aproximadas</span></dd></div><div class="row"><dt>Solapas</dt><dd><strong>102</strong><span>se tocan al centro</span></dd></div><div class="row"><dt>Plancha total</dt><dd><strong>1042 × 457</strong><span>ancho × alto</span></dd></div></dl>
+    </section>
+    </div>
+  </div>
+
+</main>
+<template id="molde-pagina">
+  <header>
+    <span class="tag">Troquel paramétrico para ArtiosCAD</span>
+    <h1>Caja americana</h1>
+  </header>
+
+  <div class="desk">
+    <section class="sheet side" aria-label="Variables">
       <form id="form" autocomplete="off"></form>
       <button type="button" class="reset" id="reset">Reset</button>
     </section>
@@ -194,8 +232,9 @@ svg.plan{display:block;width:100%;height:100%}
     </div>
   </div>
 
-</main>
+</template>
 <script>
+document.querySelector("main").innerHTML = document.getElementById("molde-pagina").innerHTML;
 // Salidas para ArtiosCAD, comunes a todos los diseños: DXF R12 por capas y CF2.
 // Un modelo trae entities: { t: "L", k, a, b } o { t: "A", k, c, r, a0, a1 } (grados, antihorario),
 // con k = "c" corte, "h" hendido, "p" perforado; y dims: { dir, x0, x1, y0, y1, at, value }.
@@ -753,3 +792,5 @@ document.getElementById("reset").addEventListener("click", () => {
 });
 render();
 </script>
+</body>
+</html>

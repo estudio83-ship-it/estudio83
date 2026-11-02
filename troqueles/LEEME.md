@@ -24,6 +24,10 @@ Diseños hechos con la plantilla: `ejemplo-caja-americana/` y `../caja-galeno/pa
 - Tamaños fijos: Variables, Plano y Resumen no cambian de tamaño al mover nada; el dibujo se escala adentro.
 - Nada aparece entre Reset y las descargas.
 
+## Archivo para compartir (iPhone)
+
+`pagina.mjs` y `guia.mjs` escriben por defecto el archivo para compartir: documento HTML completo, con la línea `viewport` para que el celular use su ancho, y **ya dibujado** con los valores iniciales (con `estatica.mjs`, que usa el Chromium de Playwright). La vista previa del iPhone (WhatsApp, Mail, Archivos) no ejecuta JavaScript: así igual muestra el plano, las variables y el resumen; abierto en un navegador, la página es interactiva. Para publicar en claude.ai, `--fragmento` deja sólo el contenido.
+
 ## Proteger una página con clave
 
 ```bash

@@ -81,6 +81,8 @@ form{gap:14px}
 h3.group{font:700 20px/1.15 var(--display);letter-spacing:-.02em;color:var(--ink);margin:0}
 .grupo .presets{margin-top:2px}
 .grupo .presets .tag{flex-basis:100%}
+/* En pantallas táctiles los campos van a 16 px: con menos, Safari del iPhone hace zoom al tocarlos. */
+@media (pointer:coarse),(max-width:860px){input[type=number]{font-size:16px!important}}
 .var.off{opacity:.38}
 .var.off input{cursor:not-allowed}
 button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--flash);font-weight:600}
