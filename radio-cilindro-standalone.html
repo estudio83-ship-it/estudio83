@@ -35,7 +35,7 @@
   .sd i{width:6px;height:6px;border-radius:50%;border:1px solid #9a9a96;display:inline-block}
   .sd.on{color:#222;font-weight:600}.sd.on i{background:var(--c);border-color:var(--c)}
   body.dark .sd{color:#888}body.dark .sd.on{color:#eee}
-  #zzz{font:600 10px Inter,sans-serif;letter-spacing:.12em;background:none;border:1px solid #cfcdc7;border-radius:999px;padding:4px 12px;color:#666;margin-top:8px;cursor:pointer}
+  #zzz{font:600 10px Inter,sans-serif;letter-spacing:.12em;background:none;border:1px solid #cfcdc7;border-radius:999px;padding:4px 12px;color:#666;margin:0;cursor:pointer}
   #zzz.on{color:#c9542b;border-color:#c9542b}
   body.dark #zzz{border-color:#444;color:#999}
   body.dark{background:#000;color:#bbb}body.dark .status{color:#888}body.dark .hint{color:#666}
@@ -50,6 +50,7 @@
 </style>
 </head>
 <body>
+<button id="zzz">ZZZ</button>
 <svg id="radio" viewBox="0 0 400 575" aria-label="Radio AM cilíndrica"></svg>
 <div class="status" id="status">tocá la ruedita para encender</div>
 <div class="bar" id="stations"></div>
@@ -61,7 +62,6 @@
     <div id="bandLabel">AM</div>
   </div>
   <div id="subdots"></div>
-  <button id="zzz">ZZZ</button>
 </div>
 <div id="scale"><div id="scLine"></div><div id="scNow"></div></div>
 <script>
