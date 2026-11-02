@@ -28,8 +28,7 @@
   #bandDot{width:16px;height:16px;border-radius:50%;transition:background-color 0.2s;background:#f4f4f4}
   #bandLabel{font-size:11px;font-weight:600;letter-spacing:1px;color:#666;height:14px}
   #bandDot{box-shadow:0 0 0 1px rgba(0,0,0,.2)}
-  #bandDot.pulse{animation:pulseDot 2.4s ease-in-out infinite}
-  @keyframes pulseDot{0%,100%{opacity:.35}50%{opacity:1}}
+  #bandDot{transition:background-color .25s,box-shadow .25s,opacity .25s}
   #subdots{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;min-height:14px;margin-top:6px}
   .sd{font-size:9px;letter-spacing:.08em;color:#8a8a86;cursor:pointer;display:flex;align-items:center;gap:4px}
   .sd i{width:6px;height:6px;border-radius:50%;border:1px solid #9a9a96;display:inline-block}
@@ -508,8 +507,10 @@ function renderScale(){
     const major=Math.abs(Math.round(f/b.label)*b.label-f)<1e-6;
     t.d.className='tk'+(major?' m':' n');t.d.style.transform='translateY('+y.toFixed(1)+'px)';t.d.style.opacity=op.toFixed(3);
     t.l.textContent=major&&!b.subs?(b.name==='AM'?Math.round(f):f.toFixed(1)):'';});}
-function loop(){update();render();notifyNative();renderScale();pulseDot();requestAnimationFrame(loop);}
-function pulseDot(){$('bandDot').classList.toggle('pulse',EB.name==='SAT'&&!!cur&&cur.state==='ok'&&vol>0.02);}
+function loop(){update();render();notifyNative();renderScale();ledDot();requestAnimationFrame(loop);}
+const LEDS=[{c:'#ffb040',g:3,o:.7},{c:'#ff7a1a',g:9,o:1},{c:'#33ff66',g:9,o:1},{c:'#3a8cff',g:11,o:1},{c:'#e8e0c8',g:5,o:.9}];
+function ledDot(){const d=$('bandDot'),on=!!cur&&cur.state==='ok'&&vol>0.02,L=LEDS[bandIdx];
+  d.style.background=on?L.c:'#cfcfca';d.style.boxShadow=on?`0 0 ${L.g}px ${L.c}`:'inset 0 0 0 1px rgba(0,0,0,.15)';d.style.opacity=on?L.o:.5;}
 
 const sx=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse()).x;};
 function setBand(idx,si=0){
@@ -573,8 +574,8 @@ function setFinish(k){const o=FIN[k];bodyFill.setAttribute('fill',o.fill);grain.
 function cycleFinish(){finIdx=(finIdx+1)%finKeys.length;setFinish(finKeys[finIdx]);}
 let saved='madera';try{saved=localStorage.getItem('e83-cil')||'madera';}catch(e){}setFinish(FIN[saved]?saved:'madera');
 function updateBandIndicators(){
-  const dot=$('bandDot'),label=$('bandLabel'),sub=$('subdots');
-  dot.style.backgroundColor=EB.lineColor;label.textContent=EB.name;
+  const label=$('bandLabel'),sub=$('subdots');
+  label.textContent=EB.name;
   if(window.dialLine)window.dialLine.setAttribute('fill',EB.lineColor);
   sub.innerHTML='';
   if(EB.subs)EB.subs.forEach((x,k)=>{const d=document.createElement('span');d.className='sd'+(k===subIdx?' on':'');d.style.setProperty('--c',EB.lineColor);d.innerHTML='<i></i>'+x.name;d.onclick=e=>{e.stopPropagation();setBand(bandIdx,k);wake();};sub.appendChild(d);});
