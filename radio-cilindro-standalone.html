@@ -529,7 +529,7 @@ function loop(){update();render();notifyNative();renderScale();ledDot();requestA
 const LEDS=[{c:'#ffb040',g:7},{c:'#ff7a1a',g:11},{c:'#33ff66',g:11},{c:'#3a8cff',g:13},{c:'#a77df0',g:10}];
 function ledDot(){const lit=vol>0.02,on=!!cur&&cur.state==='ok'&&lit,row=$('bandRow').children;
   backlight.style.opacity=lit?.75:0;
-  document.body.classList.remove('wt');
+  const wt=on&&EB.name==='WT';document.body.classList.toggle('wt',wt);$('topName').textContent=wt?'WHITE NOISE':'';
   window.dialLine.setAttribute('fill',lit?'#ffa23a':'#151515');
   drum.style.opacity=lit?1:0;
   if(document.body.classList.contains('off')===lit){document.body.classList.toggle('off',!lit);if(!lit&&sleepEnd){sleepEnd=0;updateZzz();}}
@@ -617,7 +617,7 @@ function cycleFinish(){finIdx=(finIdx+1)%finKeys.length;setFinish(finKeys[finIdx
 let saved='madera';try{saved=localStorage.getItem('e83-cil')||'madera';}catch(e){}setFinish(FIN[saved]?saved:'madera');
 function updateBandIndicators(){
   const row=$('bandRow'),sub=$('subdots');
-  if(!row.children.length)BANDS.forEach((b,k)=>{const el=document.createElement('div');el.className='bi';el.innerHTML='<i></i><span>'+(b.name==='WT'?'WHITE NOISE':b.name)+'</span>';
+  if(!row.children.length)BANDS.forEach((b,k)=>{const el=document.createElement('div');el.className='bi';el.innerHTML='<i></i><span>'+b.name+'</span>';
     el.onclick=e=>{e.stopPropagation();if(k===bandIdx)return;setBand(k);if(k===0)freq=950;wake();};row.appendChild(el);});
   [...row.children].forEach((el,k)=>{const d=k-bandIdx;
     const a=d*17*Math.PI/180;
