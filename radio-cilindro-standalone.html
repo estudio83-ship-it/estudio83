@@ -15,7 +15,7 @@
 <style>
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;min-height:100%;font-family:Inter,system-ui,sans-serif;user-select:none;-webkit-user-select:none}
-  body{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:18px;background:#ecebe7;color:#2a2a2a}
+  body{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:18px;background:#fff;color:#2a2a2a}
   svg#radio{width:min(380px,86vw);height:auto;display:block;touch-action:none}
   #capHit,#wheelHit{cursor:ew-resize}
   .bar{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:520px}
@@ -28,6 +28,13 @@
   #bandDot{width:16px;height:16px;border-radius:50%;transition:background-color 0.2s;background:#f4f4f4}
   #bandLabel{font-size:11px;font-weight:600;letter-spacing:1px;color:#666;height:14px}
   body.dark{background:#000;color:#bbb}body.dark .status{color:#888}body.dark .hint{color:#666}
+  #scale{position:fixed;right:0;top:0;width:46px;height:100vh;touch-action:none;z-index:5}
+  .tk{position:absolute;right:0;top:0;height:1px;background:#9a9a96;transform-origin:right center}
+  .tk.m{width:14px}.tk.n{width:6px}
+  .tl{position:absolute;right:18px;top:-6px;font:400 8px Inter,sans-serif;color:#9a9a96;letter-spacing:.04em;white-space:nowrap}
+  #scLine{position:absolute;right:0;top:50%;width:26px;height:2px;margin-top:-1px;box-shadow:0 0 0 1px rgba(0,0,0,.2)}
+  #scNow{position:absolute;right:32px;top:50%;margin-top:-16px;font:500 11px Inter,sans-serif;color:#555;letter-spacing:.06em}
+  body.dark .tk{background:#555}body.dark .tl{color:#666}body.dark #scNow{color:#aaa}
   #stations,#finish,#soundmode{display:none}
 </style>
 </head>
@@ -43,6 +50,7 @@
     <div id="bandLabel">AM</div>
   </div>
 </div>
+<div id="scale"><div id="scLine"></div><div id="scNow"></div></div>
 <script>
 // =================== KiwiAM: receptores y YouTube ===================
 (function(){
@@ -200,7 +208,7 @@
 (()=>{
 const SL='https://playerservices.streamtheworld.com/api/livestream-redirect/';
 const BANDS=[
-  {name:'AM',min:530,max:1710,default:950,lineColor:'#f4f4f4',kd:.0034,kf:100,cap:10,tick:10,label:100,stations:[
+  {name:'AM',min:530,max:1710,default:950,lineColor:'#f4f4f4',kd:.0034,kf:100,cap:10,tick:10,label:100,win:100,stations:[
     {f:630,name:'RIVADAVIA',url:SL+'RIVADAVIA.mp3'},
     {f:710,name:'RADIO 10',url:SL+'RADIO10.mp3'},
     {f:790,name:'MITRE',url:SL+'AM790_56AAC.aac'},
@@ -209,7 +217,7 @@ const BANDS=[
     {f:950,name:'ORIGEN 950',url:'https://stream.audiostreamhub.com/am950',kiwi:true},
     {f:990,name:'SPLENDID',url:SL+'AM990.mp3'}
   ]},
-  {name:'FM',min:87.5,max:108,default:95.1,lineColor:'#c9542b',kd:.17,kf:2,cap:.2,tick:.2,label:2,stations:[
+  {name:'FM',min:87.5,max:108,default:95.1,lineColor:'#c9542b',kd:.17,kf:2,cap:.2,tick:.2,label:2,win:2,stations:[
     {f:93.7,name:'NACIONAL ROCK',url:'https://sa.mp3.icecast.magma.edge-access.net/sc_rad2'},
     {f:95.1,name:'METRO',url:SL+'METRO.mp3'},
     {f:95.9,name:'ROCK & POP',url:SL+'ROCKANDPOPAAC.aac'},
@@ -218,7 +226,7 @@ const BANDS=[
     {f:103.7,name:'RADIO ONE',url:'https://one.stweb.tv/one/live/playlist.m3u8'},
     {f:106.7,name:'MILENIUM',url:'https://sonicpanel.hostradios.com/8002/stream'}
   ]},
-  {name:'SW',min:5.8,max:26,default:9.4,lineColor:'#4a7c59',kd:.17,kf:2,cap:.2,tick:.2,label:2,stations:[
+  {name:'SW',min:5.8,max:26,default:9.4,lineColor:'#4a7c59',kd:.17,kf:2,cap:.2,tick:.2,label:2,win:2,stations:[
     {f:9.4,name:'BBC WORLD',url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service'},
     {f:11.8,name:'NTS LONDON',url:'https://stream-relay-geo.ntslive.net/stream'},
     {f:15.3,name:'VRT BÉLGICA',url:'https://icecast.vrtcdn.be/radio1-high.mp3'},
@@ -441,7 +449,24 @@ let lastNative='';
 function notifyNative(){if(!window.Android)return;
   const on=vol>0.02&&cur&&cur.state==='ok',k=on?cur.st.name+' '+BANDS[bandIdx].name:'';
   if(k!==lastNative){lastNative=k;try{Android.playing(on,on?cur.st.name:'',BANDS[bandIdx].name);}catch(e){}}}
-function loop(){update();render();notifyNative();requestAnimationFrame(loop);}
+const ALLST=BANDS.flatMap((b,bi)=>b.stations.map(s=>({s,bi})));
+function stepStation(dir){
+  let idx=ALLST.findIndex(e=>e.bi===bandIdx&&e.s===nearest().st);
+  const n=idx+dir;if(idx<0||n<0||n>=ALLST.length)return;
+  const e=ALLST[n];if(e.bi!==bandIdx)setBand(e.bi);
+  freq=e.s.f;wake();if(vol<=0.02)animWheel(5*STEP);}
+const scale=$('scale'),scNow=$('scNow'),scLine=$('scLine');
+const tks=[];for(let i=0;i<23;i++){const d=document.createElement('div');d.className='tk';const l=document.createElement('span');l.className='tl';d.appendChild(l);scale.appendChild(d);tks.push({d,l});}
+function renderScale(){
+  const b=BANDS[bandIdx],H=innerHeight,R=H*.44,base=Math.round(freq/b.tick)*b.tick;
+  scLine.style.background=b.lineColor;scNow.textContent=(b.name==='AM'?Math.round(freq):freq.toFixed(1))+' '+b.name;
+  tks.forEach((t,k)=>{const f=+(base+(k-11)*b.tick).toFixed(2);
+    if(f<b.min||f>b.max){t.d.style.opacity=0;return;}
+    const a=(f-freq)/b.win*(Math.PI/2*.9),y=H/2+R*Math.sin(a),op=Math.pow(Math.cos(a),2);
+    const major=Math.abs(Math.round(f/b.label)*b.label-f)<1e-6;
+    t.d.className='tk'+(major?' m':' n');t.d.style.transform='translateY('+y.toFixed(1)+'px)';t.d.style.opacity=op.toFixed(3);
+    t.l.textContent=major?(b.name==='AM'?Math.round(f):f.toFixed(1)):'';});}
+function loop(){update();render();notifyNative();renderScale();requestAnimationFrame(loop);}
 
 const sx=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse()).x;};
 function setBand(idx){
@@ -518,7 +543,7 @@ $('bandIndicators').addEventListener('click',e=>{
   wake();
 });
 updateBandIndicators();
-document.body.addEventListener('click',e=>{if(e.target.closest('svg#radio,.bar'))return;document.body.classList.toggle('dark');});
+document.body.addEventListener('click',e=>{if(e.clientX<70&&e.clientY<70)document.body.classList.toggle('dark');});
 const pip={v:null,c:null,g:null,img:null};
 function drawPip(){const g=pip.g,on=vol>0.02;
   g.fillStyle='#ecebe7';g.fillRect(0,0,320,180);
@@ -542,6 +567,12 @@ function setupPip(){
   drawPip();setInterval(drawPip,500);
 }
 setupPip();
+let scY=null,scId=null;
+let scDone=false,scWheelT=0;
+scale.addEventListener('pointerdown',e=>{scId=e.pointerId;scY=e.clientY;scDone=false;scale.setPointerCapture(scId);});
+scale.addEventListener('pointermove',e=>{if(e.pointerId!==scId||scDone)return;const dy=e.clientY-scY;if(Math.abs(dy)>=28){stepStation(dy<0?1:-1);scDone=true;}});
+scale.addEventListener('pointerup',()=>scId=null);scale.addEventListener('pointercancel',()=>scId=null);
+scale.addEventListener('wheel',e=>{e.preventDefault();const t=performance.now();if(t-scWheelT<250)return;scWheelT=t;stepStation(Math.sign(e.deltaY));},{passive:false});
 requestAnimationFrame(loop);
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('radio-sw.js').catch(()=>{});
 })();
