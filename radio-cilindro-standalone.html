@@ -8,6 +8,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Radio">
+<link rel="manifest" href="radio.webmanifest">
+<link rel="icon" href="radio-icon-192.png">
+<link rel="apple-touch-icon" href="radio-icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -433,7 +436,11 @@ function render(){
   else status.textContent=Math.round(freq)+' kHz · estática';
   document.querySelectorAll('#stations .chip').forEach(b=>b.classList.toggle('on',on&&Math.abs(+b.dataset.f-freq)<3));
 }
-function loop(){update();render();requestAnimationFrame(loop);}
+let lastNative='';
+function notifyNative(){if(!window.Android)return;
+  const on=vol>0.02&&cur&&cur.state==='ok',k=on?cur.st.name+' '+BANDS[bandIdx].name:'';
+  if(k!==lastNative){lastNative=k;try{Android.playing(on,on?cur.st.name:'',BANDS[bandIdx].name);}catch(e){}}}
+function loop(){update();render();notifyNative();requestAnimationFrame(loop);}
 
 const sx=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse()).x;};
 function setBand(idx){
@@ -511,6 +518,7 @@ $('bandIndicators').addEventListener('click',e=>{
 });
 updateBandIndicators();
 requestAnimationFrame(loop);
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('radio-sw.js').catch(()=>{});
 })();
 </script>
 </body>
