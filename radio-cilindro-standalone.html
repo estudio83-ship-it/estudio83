@@ -406,6 +406,9 @@ mk('path',{d:curvedBand(R,-WU-.015,WU+.015,YBAND+22,YBAND+61),fill:'#0f0f0f'});
 clip('cWin',curvedBand(R,-WU,WU,YBAND+24,YBAND+61));
 const win=mk('g',{'clip-path':'url(#cWin)'});
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+61),fill:'#1a1a1a'},win);
+const glowF=mk('filter',{id:'glowF',x:'-30%',y:'-60%',width:'160%',height:'220%'},defs);mk('feGaussianBlur',{stdDeviation:'4'},glowF);
+const backlight=mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+61),fill:'#ffb040',opacity:0,filter:'url(#glowF)'},win);
+backlight.style.transition='opacity .6s';
 const drum=mk('g',{},win);
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+29),fill:'#000',opacity:.55},win);
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+56,YBAND+61),fill:'#000',opacity:.55},win);
@@ -510,6 +513,7 @@ function renderScale(){
 function loop(){update();render();notifyNative();renderScale();ledDot();requestAnimationFrame(loop);}
 const LEDS=[{c:'#ffb040',g:3,o:.7},{c:'#ff7a1a',g:9,o:1},{c:'#33ff66',g:9,o:1},{c:'#3a8cff',g:11,o:1},{c:'#e8e0c8',g:5,o:.9}];
 function ledDot(){const d=$('bandDot'),on=!!cur&&cur.state==='ok'&&vol>0.02,L=LEDS[bandIdx];
+  backlight.style.opacity=vol>0.02?.5:0;
   d.style.background=on?L.c:'#cfcfca';d.style.boxShadow=on?`0 0 ${L.g}px ${L.c}`:'inset 0 0 0 1px rgba(0,0,0,.15)';d.style.opacity=on?L.o:.5;}
 
 const sx=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse()).x;};
