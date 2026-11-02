@@ -250,9 +250,8 @@ const BANDS=[
     {name:'ROCK',url:'https://sa.mp3.icecast.magma.edge-access.net/sc_rad2'},
     {name:'PODCAST',url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service'}
   ]},
-  {name:'AMB',min:1,max:5,default:1,lineColor:'#9a9a8a',kd:.12,kf:6,cap:.4,tick:1,label:1,win:2,subs:[
-    {name:'LLUVIA',proc:'rain'},{name:'FUEGO',proc:'fire'},{name:'AGUA',proc:'water'},
-    {name:'WHITE NOISE',proc:'white'},{name:'VIENTO',proc:'wind'}
+  {name:'WT',min:1,max:1,default:1,lineColor:'#e8e0c8',kd:.12,kf:6,cap:.4,tick:1,label:1,win:2,subs:[
+    {name:'WT',proc:'white'}
   ]}
 ];
 let bandIdx=0,subIdx=0,EB=BANDS[0],STATIONS=BANDS[0].stations,FMIN=BANDS[0].min,FMAX=BANDS[0].max,CAPTURE=10,KD=.0034,KF=100;
@@ -514,6 +513,8 @@ function loop(){update();render();notifyNative();renderScale();ledDot();requestA
 const LEDS=[{c:'#ffb040',g:3,o:.7},{c:'#ff7a1a',g:9,o:1},{c:'#33ff66',g:9,o:1},{c:'#3a8cff',g:11,o:1},{c:'#e8e0c8',g:5,o:.9}];
 function ledDot(){const d=$('bandDot'),on=!!cur&&cur.state==='ok'&&vol>0.02,L=LEDS[bandIdx];
   backlight.style.opacity=vol>0.02?.5:0;
+  const lit=vol>0.02;window.dialLine.setAttribute('fill',lit?'#ffa23a':EB.lineColor);
+  if(lit)window.dialLine.setAttribute('filter','url(#glowF)');else window.dialLine.removeAttribute('filter');
   d.style.background=on?L.c:'#cfcfca';d.style.boxShadow=on?`0 0 ${L.g}px ${L.c}`:'inset 0 0 0 1px rgba(0,0,0,.15)';d.style.opacity=on?L.o:.5;}
 
 const sx=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse()).x;};
