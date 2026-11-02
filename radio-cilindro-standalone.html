@@ -389,12 +389,12 @@ const wheelClipD=(()=>{let d='';const a0=Math.asin(57/RW);
   for(let i=20;i>=0;i--){const a=-a0+2*a0*i/20;d+='L'+f2(CX+RW*Math.sin(a))+' '+f2(wy(a,22));}return d+'Z';})();
 clip('cWheel',wheelClipD);
 const wheelG=mk('g',{'clip-path':'url(#cWheel)'});
-mk('path',{d:wheelClipD,fill:'#202020'},wheelG);
+mk('path',{d:wheelClipD,fill:'#141414'},wheelG);
 const wTeeth=mk('g',{},wheelG), wNums=mk('g',{},wheelG), wShade=mk('g',{},wheelG);
 [[-1,-.62,.55],[-.62,-.4,.25],[.4,.62,.25],[.62,1,.55]].forEach(([a,b,o])=>mk('rect',{x:f2(CX+RW*Math.sin(a)),y:YBODY,width:f2(RW*(Math.sin(b)-Math.sin(a))),height:80,fill:'#000',opacity:o},wShade));
 const STEP=.42,MAXA=10*STEP,nums=[],teeth=[];
 ['OFF','1','2','3','4','5','6','7','8','9','10'].forEach((t,i)=>{const g=mk('g',{},wNums);
-  const tx=mk('text',{x:0,y:0,'text-anchor':'middle','font-family':'Rajdhani','font-weight':700,'font-size':t==='OFF'?9.5:11.5,fill:'#ececec','letter-spacing':t==='OFF'?1:0},g);tx.textContent=t;
+  const tx=mk('text',{x:0,y:0,'text-anchor':'middle','font-family':'Rajdhani','font-weight':700,'font-size':t==='OFF'?9.5:11.5,fill:'#ececec',stroke:'#0b0b0b','stroke-width':2.6,'stroke-linejoin':'round','paint-order':'stroke','letter-spacing':t==='OFF'?1:0},g);tx.textContent=t;
   mk('rect',{x:-.5,y:2,width:1,height:2,fill:'#9a9a9a'},g);nums.push({i,g});});
 for(let i=0;i<80;i++)teeth.push(mk('line',{stroke:'#4a4a4a'},wTeeth),mk('line',{stroke:'#4a4a4a'},wTeeth));
 
@@ -419,13 +419,16 @@ clip('cWin',curvedBand(R,-WU,WU,YBAND+24,YBAND+61));
 const win=mk('g',{'clip-path':'url(#cWin)'});
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+61),fill:'#1a1a1a'},win);
 const glowF=mk('filter',{id:'glowF',x:'-30%',y:'-60%',width:'160%',height:'220%'},defs);mk('feGaussianBlur',{stdDeviation:'4'},glowF);
+const lineGlow=mk('filter',{id:'lineGlow',x:'-400%',y:'-10%',width:'900%',height:'120%'},defs);
+mk('feGaussianBlur',{in:'SourceGraphic',stdDeviation:'1.4',result:'b'},lineGlow);
+{const fm=mk('feMerge',{},lineGlow);mk('feMergeNode',{in:'b'},fm);mk('feMergeNode',{in:'b'},fm);mk('feMergeNode',{in:'SourceGraphic'},fm);}
 const backlight=mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+61),fill:'#ffb040',opacity:0,filter:'url(#glowF)'},win);
 backlight.style.transition='opacity .6s';
 const drum=mk('g',{},win);drum.style.transition='opacity .4s';
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+29),fill:'#000',opacity:.55},win);
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+56,YBAND+61),fill:'#000',opacity:.55},win);
 [[-WU,-.27,.45],[.27,WU,.45]].forEach(([a,b,o])=>mk('path',{d:curvedBand(R,a,b,YBAND+24,YBAND+61),fill:'#000',opacity:o},win));
-{const[,y1]=P(R,0,YBAND+24),[,y2]=P(R,0,YBAND+61);const lineRect=mk('rect',{id:'dialLine',x:198.4,y:y1,width:3.2,height:y2-y1,fill:'#f4f4f4'},win);window.dialLine=lineRect;}
+{const[,y1]=P(R,0,YBAND+24),[,y2]=P(R,0,YBAND+61);const lineRect=mk('rect',{id:'dialLine',x:199.45,y:y1,width:1.1,height:y2-y1,fill:'#f4f4f4'},win);window.dialLine=lineRect;}
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+32),fill:'#fff',opacity:.05},win);
 const labels=[],ticks=[];
 function generateDial(){
@@ -436,7 +439,7 @@ function generateDial(){
   for(let i=start;i<=end;i++){const f=+(i*b.tick).toFixed(2),big=i%per===0;
     ticks.push({f,big,e:mk('line',{stroke:'#cfcfcf'},drum)});
     if(big){const t=mk('text',{x:0,y:0,'text-anchor':'middle','font-family':'Rajdhani','font-weight':600,'font-size':21,fill:'#eeeeee'},drum);
-      t.textContent=Math.round(f);labels.push({f,e:t});}}
+      t.textContent=b.name==='WT'?'WT':Math.round(f);labels.push({f,e:t});}}
 }
 generateDial();
 
@@ -448,8 +451,13 @@ const capShade=mk('g',{'clip-path':'url(#cCap)'},capG);shade(capShade,RC,YCAP,YC
 mk('ellipse',{cx:CX,cy:YCAP,rx:RC,ry:RC*K,fill:'#1b1b1b'},capG);
 const topRidges=mk('ellipse',{cx:CX,cy:YCAP,rx:RC-6,ry:(RC-6)*K,fill:'none',stroke:'#2c2c2c','stroke-width':7,'stroke-dasharray':'2.2 2.6'},capG);
 mk('ellipse',{cx:CX,cy:YCAP,rx:104,ry:104*K,fill:'#0e0e0e'},capG);
-mk('ellipse',{cx:CX,cy:YCAP,rx:78,ry:78*K,fill:'#c6c8ca',stroke:'#76787a','stroke-width':1},capG);
-mk('path',{d:`M${CX-78} ${YCAP} A78 ${78*K} 0 0 1 ${CX+78} ${YCAP} A78 ${78*K*.55} 0 0 0 ${CX-78} ${YCAP} Z`,fill:'#dfe0e1'},capG);
+{const disc=mk('g',{},capG),N=144,RD=78;
+  for(let i=0;i<N;i++){const u0=i/N*2*Math.PI,u1=(i+1.08)/N*2*Math.PI,ct=-Math.cos((u0+u1)/2);
+    const v=Math.min(1,.14+.86*Math.pow(Math.max(0,ct),12)+.55*Math.pow(Math.max(0,-ct),2)),g=Math.round(38+214*v);
+    const[x0,y0]=P(RD,u0,YCAP),[x1,y1]=P(RD,u1,YCAP);
+    mk('path',{d:`M${CX} ${YCAP}L${f2(x0)} ${f2(y0)}L${f2(x1)} ${f2(y1)}Z`,fill:`rgb(${g},${g},${g})`},disc);}
+  for(let r=2.2;r<RD;r+=2)mk('ellipse',{cx:CX,cy:YCAP,rx:f2(r),ry:f2(r*K),fill:'none',stroke:'#000','stroke-width':.5,opacity:.2},disc);
+  mk('ellipse',{cx:CX,cy:YCAP,rx:RD,ry:RD*K,fill:'none',stroke:'#2e2e2e','stroke-width':1},disc);}
 const capHit=mk('rect',{id:'capHit',x:60,y:5,width:280,height:YCAP+14+RC*K-5,fill:'transparent'});
 const wheelHit=mk('path',{id:'wheelHit',d:curvedBand(R,-.5,.5,YBAND+70,YBAND+112),fill:'transparent'});
 
@@ -473,8 +481,10 @@ function drawWheel(){
     const x=CX+RW*Math.sin(a),y=wy(a,16),ang=Math.atan2(-RW*K*Math.sin(a),RW*c)*180/Math.PI;
     n.g.setAttribute('opacity',f2(Math.min(1,c*1.15)));n.g.setAttribute('transform',`translate(${f2(x)} ${f2(y)}) rotate(${f2(ang)}) scale(${f2(c)} 1)`);});
   for(let i=0;i<80;i++){const a=i/80*Math.PI*2+wheelA,c=Math.cos(a),x=f2(CX+RW*Math.sin(a));
-    [[teeth[2*i],2,5],[teeth[2*i+1],19,22]].forEach(([e,o1,o2])=>{if(c<=.05){e.setAttribute('stroke-width',0);return;}
-      e.setAttribute('x1',x);e.setAttribute('x2',x);e.setAttribute('y1',f2(wy(a,o1)));e.setAttribute('y2',f2(wy(a,o2)));e.setAttribute('stroke-width',f2(1.5*c));});}
+    const e=teeth[2*i];teeth[2*i+1].setAttribute('stroke-width',0);
+    if(c<=.03){e.setAttribute('stroke-width',0);continue;}
+    e.setAttribute('x1',x);e.setAttribute('x2',x);e.setAttribute('y1',f2(wy(a,2)));e.setAttribute('y2',f2(wy(a,22)));
+    e.setAttribute('stroke-width',f2(1.7*c));e.setAttribute('stroke',c>.8?'#555':c>.5?'#3e3e3e':c>.25?'#2e2e2e':'#232323');}
 }
 function render(){
   drawCap();drawDrum();drawWheel();
@@ -527,11 +537,11 @@ function renderScale(){
 function loop(){update();render();notifyNative();renderScale();ledDot();requestAnimationFrame(loop);}
 const LEDS=[{c:'#ffb040',g:7},{c:'#ff7a1a',g:11},{c:'#33ff66',g:11},{c:'#3a8cff',g:13},{c:'#a77df0',g:10}];
 function ledDot(){const lit=vol>0.02,on=!!cur&&cur.state==='ok'&&lit,row=$('bandRow').children;
-  backlight.style.opacity=lit?.75:0;
-  window.dialLine.setAttribute('fill',lit?'#ffa23a':'#151515');
+  backlight.style.opacity=0;
+  window.dialLine.setAttribute('fill',lit?LEDS[bandIdx].c:'#151515');
   drum.style.opacity=lit?1:0;
   if(document.body.classList.contains('off')===lit){document.body.classList.toggle('off',!lit);if(!lit&&sleepEnd){sleepEnd=0;updateZzz();}}
-  if(lit)window.dialLine.setAttribute('filter','url(#glowF)');else window.dialLine.removeAttribute('filter');
+  if(lit)window.dialLine.setAttribute('filter','url(#lineGlow)');else window.dialLine.removeAttribute('filter');
   for(let k=0;k<row.length;k++){const it=row[k],el=it.firstChild,act=k===bandIdx,L=LEDS[k];
     it.classList.toggle('on',act);
     el.style.background=act&&on?L.c:'';
