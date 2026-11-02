@@ -49,12 +49,19 @@
   #scNow{position:absolute;right:32px;top:50%;margin-top:-16px;font:500 11px 'Rajdhani',sans-serif;color:#555;letter-spacing:.06em}
   body.dark .tk{background:#555}body.dark .tl{color:#666}body.dark #scNow{color:#aaa}
   #stations,#finish,#soundmode{display:none}
+  #pwr{display:flex;align-items:center;gap:8px;height:30px;padding:0 14px 0 10px;border-radius:999px;border:1px solid #bdbdb9;background:#ebebe8;box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(0,0,0,.18);font:600 12px 'Rajdhani',sans-serif;letter-spacing:.16em;color:#555;cursor:pointer}
+  #pwr i{width:11px;height:11px;border-radius:50%;background:#7c2019;box-shadow:inset 0 1px 1px rgba(0,0,0,.45);transition:background .25s,box-shadow .25s}
+  body:not(.off) #pwr i{background:#e0322a;box-shadow:0 0 7px #e0322a}
+  body.dark #pwr{background:#1c1c1c;border-color:#333;color:#aaa;box-shadow:none}
+  #status,#bandIndicators,#subdots,#scale,#zzz{transition:opacity .4s}
+  body.off #status,body.off #bandIndicators,body.off #subdots,body.off #scale,body.off #zzz{opacity:0;pointer-events:none}
 </style>
 </head>
-<body>
+<body class="off">
 <button id="zzz">ZZZ</button>
 <svg id="radio" viewBox="0 0 400 575" aria-label="Radio AM cilíndrica"></svg>
-<div class="status" id="status">tocá la ruedita para encender</div>
+<div class="status" id="status"></div>
+<button id="pwr"><i></i><span>OFF</span></button>
 <div class="bar" id="stations"></div>
 <div class="bar" id="finish"></div>
 <div class="bar" id="soundmode"></div>
@@ -408,7 +415,7 @@ mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+61),fill:'#1a1a1a'},win);
 const glowF=mk('filter',{id:'glowF',x:'-30%',y:'-60%',width:'160%',height:'220%'},defs);mk('feGaussianBlur',{stdDeviation:'4'},glowF);
 const backlight=mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+61),fill:'#ffb040',opacity:0,filter:'url(#glowF)'},win);
 backlight.style.transition='opacity .6s';
-const drum=mk('g',{},win);
+const drum=mk('g',{},win);drum.style.transition='opacity .4s';
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+29),fill:'#000',opacity:.55},win);
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+56,YBAND+61),fill:'#000',opacity:.55},win);
 [[-WU,-.27,.45],[.27,WU,.45]].forEach(([a,b,o])=>mk('path',{d:curvedBand(R,a,b,YBAND+24,YBAND+61),fill:'#000',opacity:o},win));
@@ -466,7 +473,7 @@ function drawWheel(){
 function render(){
   drawCap();drawDrum();drawWheel();
   const {st,d}=nearest(),on=vol>0.02,status=$('status');
-  if(!on)status.textContent='apagada · girá la ruedita hacia la derecha';
+  if(!on)status.textContent='';
   else if(d<=CAPTURE&&cur&&cur.st===st)status.textContent=cur.state==='ok'?st.name:st.name+' · '+(cur.state==='nosig'?(st.kiwi?'SIN SEÑAL · TOCÁ 950 OTRA VEZ':'SIN SEÑAL'):'SINTONIZANDO…');
   else status.textContent=Math.round(freq)+' kHz · estática';
   document.querySelectorAll('#stations .chip').forEach(b=>b.classList.toggle('on',on&&Math.abs(+b.dataset.f-freq)<3));
@@ -513,7 +520,9 @@ function loop(){update();render();notifyNative();renderScale();ledDot();requestA
 const LEDS=[{c:'#ffb040',g:7},{c:'#ff7a1a',g:11},{c:'#33ff66',g:11},{c:'#3a8cff',g:13},{c:'#f2ead2',g:8}];
 function ledDot(){const lit=vol>0.02,on=!!cur&&cur.state==='ok'&&lit,row=$('bandRow').children;
   backlight.style.opacity=lit?.75:0;
-  window.dialLine.setAttribute('fill',lit?'#ffa23a':EB.lineColor);
+  window.dialLine.setAttribute('fill',lit?'#ffa23a':'#151515');
+  drum.style.opacity=lit?1:0;
+  if(document.body.classList.contains('off')===lit){document.body.classList.toggle('off',!lit);$('pwr').lastChild.textContent=lit?'ON':'OFF';}
   if(lit)window.dialLine.setAttribute('filter','url(#glowF)');else window.dialLine.removeAttribute('filter');
   for(let k=0;k<row.length;k++){const it=row[k],el=it.firstChild,act=k===bandIdx,L=LEDS[k];
     it.classList.toggle('on',act);
@@ -572,7 +581,9 @@ dialHit.addEventListener('click',e=>{const x=sx(e);
 let bodyDown={t:0,x:0,y:0,id:null};
 bodyFill.parentElement.addEventListener('pointerdown',e=>{bodyDown={t:performance.now(),x:e.clientX,y:e.clientY,id:e.pointerId};});
 svg.addEventListener('pointerup',e=>{if(e.pointerId!==bodyDown.id)return;const moved=Math.abs(e.clientX-bodyDown.x)+Math.abs(e.clientY-bodyDown.y),time=performance.now()-bodyDown.t;
-  if(moved<15&&time<200&&e.clientY>200)cycleFinish();bodyDown.id=null;});
+  if(moved<15&&time<200){const q=svg.createSVGPoint();q.x=e.clientX;q.y=e.clientY;const m=q.matrixTransform(svg.getScreenCTM().inverse());
+    if(m.x<CX-60&&m.y>YBODY&&m.y<YBODY+110)cycleFinish();}bodyDown.id=null;});
+$('pwr').addEventListener('click',e=>{e.stopPropagation();wake();animWheel(vol>0.02?0:5*STEP);});
 addEventListener('keydown',e=>{if(e.key==='p'||e.key==='P'){wake();animWheel(vol>0.02?0:5*STEP);}if(e.key==='ArrowRight')turnCap((e.shiftKey?10:1)/KF);if(e.key==='ArrowLeft')turnCap(-(e.shiftKey?10:1)/KF);
   if(e.key==='ArrowUp')setWheel(wheelA+STEP/2);if(e.key==='ArrowDown')setWheel(wheelA-STEP/2);});
 let sweep=null;
