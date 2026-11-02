@@ -519,6 +519,29 @@ $('bandIndicators').addEventListener('click',e=>{
 });
 updateBandIndicators();
 document.body.addEventListener('click',e=>{if(e.target.closest('svg#radio,.bar'))return;document.body.classList.toggle('dark');});
+const pip={v:null,c:null,g:null,img:null};
+function drawPip(){const g=pip.g,on=vol>0.02;
+  g.fillStyle='#ecebe7';g.fillRect(0,0,320,180);
+  if(pip.img.complete&&pip.img.naturalWidth)g.drawImage(pip.img,8,8,164,164);
+  g.fillStyle='#222';g.font='600 22px Inter,sans-serif';g.fillText(on&&cur&&cur.st?cur.st.name:'APAGADA',178,84);
+  g.fillStyle='#666';g.font='14px Inter,sans-serif';g.fillText(BANDS[bandIdx].name,178,108);
+  g.fillStyle='#222';
+  if(on){g.fillRect(190,130,10,28);g.fillRect(210,130,10,28);}
+  else{g.beginPath();g.moveTo(190,128);g.lineTo(190,160);g.lineTo(218,144);g.fill();}
+  if(on&&pip.v.paused)pip.v.play().catch(()=>{});
+  if(!on&&!pip.v.paused)pip.v.pause();}
+function setupPip(){
+  pip.c=document.createElement('canvas');pip.c.width=320;pip.c.height=180;pip.g=pip.c.getContext('2d');
+  pip.img=new Image();pip.img.crossOrigin='anonymous';pip.img.src='radio-icon-192.png';
+  pip.v=document.createElement('video');pip.v.muted=true;pip.v.playsInline=true;pip.v.autoPictureInPicture=true;
+  pip.v.style.cssText='position:fixed;right:0;bottom:0;width:2px;height:2px;opacity:0;pointer-events:none';
+  pip.v.srcObject=pip.c.captureStream(4);document.body.appendChild(pip.v);
+  pip.v.onpause=()=>{if(vol>0.02)animWheel(0);};
+  pip.v.onplay=()=>{if(vol<=0.02)animWheel(5*STEP);};
+  if('mediaSession' in navigator){navigator.mediaSession.setActionHandler('play',()=>animWheel(5*STEP));navigator.mediaSession.setActionHandler('pause',()=>animWheel(0));}
+  drawPip();setInterval(drawPip,500);
+}
+setupPip();
 requestAnimationFrame(loop);
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('radio-sw.js').catch(()=>{});
 })();
