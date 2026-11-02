@@ -412,7 +412,7 @@ const drum=mk('g',{},win);
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+29),fill:'#000',opacity:.55},win);
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+56,YBAND+61),fill:'#000',opacity:.55},win);
 [[-WU,-.27,.45],[.27,WU,.45]].forEach(([a,b,o])=>mk('path',{d:curvedBand(R,a,b,YBAND+24,YBAND+61),fill:'#000',opacity:o},win));
-{const[,y1]=P(R,0,YBAND+24),[,y2]=P(R,0,YBAND+61);const lineRect=mk('rect',{id:'dialLine',x:199.3,y:y1,width:1.4,height:y2-y1,fill:'#f4f4f4'},win);window.dialLine=lineRect;}
+{const[,y1]=P(R,0,YBAND+24),[,y2]=P(R,0,YBAND+61);const lineRect=mk('rect',{id:'dialLine',x:198.4,y:y1,width:3.2,height:y2-y1,fill:'#f4f4f4'},win);window.dialLine=lineRect;}
 mk('path',{d:curvedBand(R,-WU,WU,YBAND+24,YBAND+32),fill:'#fff',opacity:.05},win);
 const labels=[],ticks=[];
 function generateDial(){
@@ -512,7 +512,7 @@ function renderScale(){
 function loop(){update();render();notifyNative();renderScale();ledDot();requestAnimationFrame(loop);}
 const LEDS=[{c:'#ffb040',g:3,o:.7},{c:'#ff7a1a',g:9,o:1},{c:'#33ff66',g:9,o:1},{c:'#3a8cff',g:11,o:1},{c:'#e8e0c8',g:5,o:.9}];
 function ledDot(){const d=$('bandDot'),on=!!cur&&cur.state==='ok'&&vol>0.02,L=LEDS[bandIdx];
-  backlight.style.opacity=vol>0.02?.5:0;
+  backlight.style.opacity=vol>0.02?.75:0;
   const lit=vol>0.02;window.dialLine.setAttribute('fill',lit?'#ffa23a':EB.lineColor);
   if(lit)window.dialLine.setAttribute('filter','url(#glowF)');else window.dialLine.removeAttribute('filter');
   d.style.background=on?L.c:'#cfcfca';d.style.boxShadow=on?`0 0 ${L.g}px ${L.c}`:'inset 0 0 0 1px rgba(0,0,0,.15)';d.style.opacity=on?L.o:.5;}
