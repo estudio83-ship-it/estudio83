@@ -24,9 +24,12 @@
   .chip small{opacity:.55;margin-left:4px}
   .status{font-size:12px;letter-spacing:.08em;color:#666;height:16px;text-align:center}
   .hint{font-size:11px;color:#8a8a86;text-align:center;max-width:420px;line-height:1.5}
-  #bandRow{display:flex;justify-content:center;gap:6px;align-items:flex-start}
-  .bc{width:34px;height:34px;border-radius:50%;border:1px solid #444;display:flex;align-items:center;justify-content:center;font:700 10px 'Rajdhani',sans-serif;color:#777;cursor:pointer;transition:all .25s;background:transparent}
-  .bc.on{color:#111;border-color:#fff}
+  #bandRow{position:relative;width:250px;height:40px;margin:10px auto 0;touch-action:none}
+  #bandRow:before{content:'';position:absolute;left:50%;top:-9px;margin-left:-3px;border-left:3px solid transparent;border-right:3px solid transparent;border-top:4px solid #9a9a96}
+  .bi{position:absolute;top:0;left:50%;width:44px;margin-left:-22px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:transform .4s cubic-bezier(.2,.8,.2,1),opacity .4s}
+  .bi i{width:8px;height:8px;border-radius:50%;border:1px solid #444;box-sizing:border-box;transition:background .25s,box-shadow .25s,border-color .25s}
+  .bi span{font:600 10px 'Rajdhani',sans-serif;letter-spacing:.12em;color:#9a9a96}
+  .bi.on span{color:#222}body.dark .bi.on span{color:#eee}
   #subdots{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;min-height:14px;margin-top:26px}
   .sd{font-size:9px;letter-spacing:.08em;color:#8a8a86;cursor:pointer;display:flex;align-items:center;gap:4px}
   .sd i{width:6px;height:6px;border-radius:50%;border:1px solid #9a9a96;display:inline-block}
@@ -510,8 +513,8 @@ function ledDot(){const lit=vol>0.02,on=!!cur&&cur.state==='ok'&&lit,row=$('band
   backlight.style.opacity=lit?.75:0;
   window.dialLine.setAttribute('fill',lit?'#ffa23a':EB.lineColor);
   if(lit)window.dialLine.setAttribute('filter','url(#glowF)');else window.dialLine.removeAttribute('filter');
-  for(let k=0;k<row.length;k++){const el=row[k],act=k===bandIdx,L=LEDS[k];
-    el.classList.toggle('on',act);
+  for(let k=0;k<row.length;k++){const it=row[k],el=it.firstChild,act=k===bandIdx,L=LEDS[k];
+    it.classList.toggle('on',act);
     el.style.background=act&&on?L.c:'transparent';
     el.style.boxShadow=act&&on?`0 0 ${L.g}px ${L.c},0 0 ${L.g*2.4}px ${L.c}`:act&&lit?`0 0 4px ${L.c}`:'none';
     el.style.borderColor=act?(lit?L.c:'#ddd'):'#444';}
@@ -582,9 +585,12 @@ function setFinish(k){const o=FIN[k];bodyFill.setAttribute('fill',o.fill);grain.
 function cycleFinish(){finIdx=(finIdx+1)%finKeys.length;setFinish(finKeys[finIdx]);}
 let saved='madera';try{saved=localStorage.getItem('e83-cil')||'madera';}catch(e){}setFinish(FIN[saved]?saved:'madera');
 function updateBandIndicators(){
-  const row=$('bandRow'),sub=$('subdots');row.innerHTML='';
-  BANDS.forEach((b,k)=>{const el=document.createElement('div');el.className='bc';el.textContent=b.name;
-    el.style.transform=`translateY(${(k-2)*(k-2)*3}px)`;el.onclick=e=>{e.stopPropagation();setBand(k);if(k===0)freq=950;wake();};row.appendChild(el);});
+  const row=$('bandRow'),sub=$('subdots');
+  if(!row.children.length)BANDS.forEach((b,k)=>{const el=document.createElement('div');el.className='bi';el.innerHTML='<i></i><span>'+b.name+'</span>';
+    el.onclick=e=>{e.stopPropagation();if(k===bandIdx)return;setBand(k);if(k===0)freq=950;wake();};row.appendChild(el);});
+  [...row.children].forEach((el,k)=>{const d=k-bandIdx;
+    el.style.transform=`translateX(${d*46}px) translateY(${d*d*4}px) scale(${1-Math.min(3,Math.abs(d))*.1})`;
+    el.style.opacity=Math.max(.2,1-Math.abs(d)*.3);});
   sub.innerHTML='';
   if(EB.subs)EB.subs.forEach((x,k)=>{const d=document.createElement('span');d.className='sd'+(k===subIdx?' on':'');d.style.setProperty('--c',EB.lineColor);d.innerHTML='<i></i>'+x.name;d.onclick=e=>{e.stopPropagation();setBand(bandIdx,k);wake();};sub.appendChild(d);});
   if(window.dialLine)window.dialLine.setAttribute('fill',EB.lineColor);
@@ -595,6 +601,10 @@ function updateZzz(){const z=$('zzz');z.textContent=sleepEnd?'ZZZ '+Math.ceil((s
 $('zzz').addEventListener('click',e=>{e.stopPropagation();sleepIdx=(sleepIdx+1)%SLEEP.length;sleepEnd=SLEEP[sleepIdx]?Date.now()+SLEEP[sleepIdx]*60000:0;updateZzz();});
 setInterval(()=>{if(sleepEnd&&Date.now()>=sleepEnd){sleepEnd=0;sleepIdx=0;if(vol>0.02)animWheel(0);}updateZzz();},1000);
 updateBandIndicators();
+{const br=$('bandRow');let bx=null,bd=false;
+  br.addEventListener('pointerdown',e=>{bx=e.clientX;bd=false;});
+  br.addEventListener('pointermove',e=>{if(bx===null||bd)return;const dx=e.clientX-bx;if(Math.abs(dx)>30){bd=true;const n=bandIdx+(dx<0?1:-1);if(n>=0&&n<BANDS.length){setBand(n);if(n===0)freq=950;wake();}}});
+  br.addEventListener('pointerup',()=>bx=null);br.addEventListener('pointercancel',()=>bx=null);}
 document.body.addEventListener('click',e=>{if(e.clientX<70&&e.clientY<70)document.body.classList.toggle('dark');});
 const pip={v:null,c:null,g:null,img:null};
 function drawPip(){const g=pip.g,on=vol>0.02;
