@@ -540,7 +540,10 @@ let cId=null,cx0=0,cxStart=0,cT=0;
 capHit.addEventListener('pointerdown',e=>{wake();cId=e.pointerId;capHit.setPointerCapture(cId);cx0=cxStart=sx(e);cT=performance.now();cancelAnimationFrame(sweep);});
 capHit.addEventListener('pointermove',e=>{if(e.pointerId!==cId)return;const x=sx(e);if(Math.abs(x-cxStart)<5)return;turnCap((cx0-x)/RC);cx0=x;});
 capHit.addEventListener('pointerup',e=>{if(e.pointerId!==cId)return;cId=null;
-  if(Math.abs(sx(e)-cxStart)<5&&performance.now()-cT<400)nextStation(sx(e)<CX?-1:1);});
+  if(Math.abs(sx(e)-cxStart)<5&&performance.now()-cT<400){
+    const q=svg.createSVGPoint();q.x=e.clientX;q.y=e.clientY;const m=q.matrixTransform(svg.getScreenCTM().inverse());
+    if(Math.hypot((m.x-CX)/78,(m.y-YCAP)/(78*K))<=1){wake();setBand(0);if(vol<=0.02)animWheel(5*STEP);}
+    else nextStation(sx(e)<CX?-1:1);}});
 capHit.addEventListener('pointercancel',()=>cId=null);
 capHit.addEventListener('wheel',e=>{e.preventDefault();const d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:-e.deltaY);turnCap(Math.sign(d)*(e.shiftKey?10:2)/KF);},{passive:false});
 let wId=null,wx0=0,moved=0,wakeLock=null;
