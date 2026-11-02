@@ -27,6 +27,7 @@
   #bandIndicators{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
   #bandDot{width:16px;height:16px;border-radius:50%;transition:background-color 0.2s;background:#f4f4f4}
   #bandLabel{font-size:11px;font-weight:600;letter-spacing:1px;color:#666;height:14px}
+  body.dark{background:#000;color:#bbb}body.dark .status{color:#888}body.dark .hint{color:#666}
   #stations,#finish,#soundmode{display:none}
 </style>
 </head>
@@ -517,6 +518,7 @@ $('bandIndicators').addEventListener('click',e=>{
   wake();
 });
 updateBandIndicators();
+document.body.addEventListener('click',e=>{if(e.target.closest('svg#radio,.bar'))return;document.body.classList.toggle('dark');});
 requestAnimationFrame(loop);
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('radio-sw.js').catch(()=>{});
 })();
