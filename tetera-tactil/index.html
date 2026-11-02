@@ -1,0 +1,663 @@
+<title>Tetera Táctil</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one centered object (the device) with a short title above and the score strip below. */
+:root {
+  --bg: #e7eae1;
+  --fg: #1a1f18;
+  --muted: #5a6356;
+  --rule: #c7ccbe;
+  --chip: #dde1d5;
+  /* the device keeps one look in both themes */
+  --bezel: #0b0f0c;
+  --bezel-edge: #1d2620;
+  --screen: #000;
+  --pcb: #143021;
+  --pad: #b89a4e;
+  --led: #4dff7a;
+  --tea: #d4f04a;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11140f; --fg: #e5e9dd; --muted: #8d9685; --rule: #283024; --chip: #1a1f17;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11140f; --fg: #e5e9dd; --muted: #8d9685; --rule: #283024; --chip: #1a1f17;
+  color-scheme: dark;
+}
+html, body { min-height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--display);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 40px;
+}
+.wrap {
+  max-width: 440px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+header { display: flex; flex-direction: column; gap: 6px; }
+h1 {
+  margin: 0;
+  font-size: clamp(30px, 8vw, 40px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-wrap: balance;
+}
+.lede { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.45; max-width: 38ch; }
+
+/* ---------- device ---------- */
+.device { display: flex; flex-direction: column; align-items: center; }
+.bezel {
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 100%;
+  background: var(--bezel);
+  border-radius: 28px;
+  padding: 14px;
+  box-sizing: border-box;
+  box-shadow:
+    inset 0 0 0 2px var(--bezel-edge),
+    inset 0 2px 0 3px rgba(255,255,255,.04),
+    0 18px 40px -18px rgba(0,0,0,.55),
+    0 2px 6px rgba(0,0,0,.25);
+  position: relative;
+  z-index: 1;
+}
+.screen {
+  width: 100%;
+  height: 100%;
+  background: var(--screen);
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+  outline: none;
+}
+.screen:focus-visible { box-shadow: inset 0 0 0 2px var(--tea); }
+canvas { display: block; width: 100%; height: 100%; }
+
+.pcb {
+  width: 64%;
+  height: 74px;
+  margin-top: -6px;
+  background:
+    radial-gradient(circle at 12% 38%, var(--pad) 0 3px, transparent 3.5px),
+    radial-gradient(circle at 12% 62%, var(--pad) 0 3px, transparent 3.5px),
+    radial-gradient(circle at 88% 38%, var(--pad) 0 3px, transparent 3.5px),
+    radial-gradient(circle at 88% 62%, var(--pad) 0 3px, transparent 3.5px),
+    repeating-linear-gradient(90deg, transparent 0 9px, rgba(255,255,255,.035) 9px 10px),
+    var(--pcb);
+  border-radius: 0 0 10px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  box-shadow: 0 10px 22px -14px rgba(0,0,0,.6);
+}
+.led {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #1f4a2c;
+  box-shadow: 0 0 0 2px rgba(0,0,0,.35);
+  transition: background .15s, box-shadow .15s;
+}
+.led.on { background: var(--led); box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 0 14px 4px rgba(77,255,122,.55); }
+.btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 0;
+  background: radial-gradient(circle at 40% 35%, #3a3f3b, #151816 70%);
+  box-shadow: 0 0 0 3px #0c1a12, 0 2px 0 3px #07100b;
+  color: #9aa69c;
+  font: 500 12px var(--mono);
+  cursor: pointer;
+  display: grid; place-items: center;
+}
+.btn:active { transform: translateY(1px); box-shadow: 0 0 0 3px #0c1a12, 0 1px 0 3px #07100b; }
+.btn:focus-visible { outline: 2px solid var(--tea); outline-offset: 3px; }
+
+/* ---------- score + help ---------- */
+.score {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.score div { padding: 12px 0; display: flex; flex-direction: column; gap: 2px; }
+.score div + div { border-left: 1px solid var(--rule); padding-left: 14px; }
+.score span {
+  font: 500 10.5px var(--mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.score b { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.help {
+  margin: 0; padding: 0; list-style: none;
+  display: flex; flex-wrap: wrap; gap: 8px 14px;
+  color: var(--muted); font-size: 13.5px;
+}
+.help li { display: flex; align-items: center; gap: 6px; }
+kbd {
+  font: 500 11px var(--mono);
+  background: var(--chip);
+  color: var(--fg);
+  border: 1px solid var(--rule);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Tetera Táctil</h1>
+    <p class="lede">Mantené apretada la pantalla para inclinar la tetera. Llená la taza hasta la franja marcada, sin pasarte.</p>
+  </header>
+
+  <div class="device">
+    <div class="bezel">
+      <div class="screen" id="screen" tabindex="0" role="button"
+           aria-label="Pantalla. Mantené apretado para servir; deslizá para cambiar de tetera.">
+        <canvas id="cv"></canvas>
+      </div>
+    </div>
+    <div class="pcb">
+      <button class="btn" id="prev" type="button" aria-label="Tetera anterior">◀</button>
+      <div class="led" id="led" aria-hidden="true"></div>
+      <button class="btn" id="next" type="button" aria-label="Tetera siguiente">▶</button>
+    </div>
+  </div>
+
+  <div class="score" aria-live="polite">
+    <div><span>Justas</span><b id="sScore">0</b></div>
+    <div><span>Racha</span><b id="sStreak">0</b></div>
+    <div><span>Mejor racha</span><b id="sBest">0</b></div>
+  </div>
+
+  <ul class="help">
+    <li><kbd>Espacio</kbd> mantener para servir</li>
+    <li><kbd>←</kbd><kbd>→</kbd> cambiar de tetera</li>
+    <li>En el celu: deslizá sobre la pantalla</li>
+  </ul>
+</div>
+
+<script>
+(() => {
+  const W = 400, FLOOR = 332, G = 640;
+  const INK = '#f2f3ec', DIM = 'rgba(242,243,236,.42)', TEA = '#d4f04a', TEA_DEEP = '#a9c62e';
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const screenEl = document.getElementById('screen');
+  const led = document.getElementById('led');
+  const sScore = document.getElementById('sScore');
+  const sStreak = document.getElementById('sStreak');
+  const sBest = document.getElementById('sBest');
+
+  // ---------- vessels (local coords, pivot at 0,0, spout pointing left) ----------
+  function tube(c, w, draw) {           // hollow spout: wide ink stroke, then black core
+    c.lineWidth = w; c.strokeStyle = INK; c.beginPath(); draw(); c.stroke();
+    c.lineWidth = w - 4.4; c.strokeStyle = '#000'; c.beginPath(); draw(); c.stroke();
+    c.lineWidth = 2.2; c.strokeStyle = INK;
+  }
+
+  const SCENES = [
+    {
+      name: 'Tetera de porcelana', tea: 'Té negro', temp: '95 °C',
+      pivot: [272, 186], tip: [-100, -27], dir: [-0.68, -0.73],
+      thr: 0.42, max: 1.02, rate: 42, v0: 118, width: 3.2, turn: 3.4,
+      vcap: 420, box: { cy: 16, h: 42 },
+      cup: { mouth: 74, bottom: 50, h: 46, handle: 'loop', saucer: true, cap: 180 },
+      body(c) { c.ellipse(0, 16, 58, 42, 0, 0, Math.PI * 2); },
+      draw(c) {
+        c.beginPath();
+        c.moveTo(-54, 2); c.bezierCurveTo(-70, 0, -80, -18, -96, -30);
+        c.moveTo(-55, 30); c.bezierCurveTo(-76, 24, -86, -4, -101, -23);
+        c.moveTo(-96, -30); c.lineTo(-101, -23);
+        c.stroke();
+        c.beginPath(); c.ellipse(0, 16, 58, 42, 0, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.ellipse(0, -22, 30, 6, 0, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.moveTo(-26, -24); c.quadraticCurveTo(0, -44, 26, -24); c.stroke();
+        c.beginPath(); c.ellipse(0, -40, 6, 4.5, 0, 0, Math.PI * 2); c.stroke();
+        c.beginPath();
+        c.moveTo(54, 0); c.bezierCurveTo(92, -12, 96, 46, 50, 40);
+        c.moveTo(56, 10); c.bezierCurveTo(80, 4, 80, 34, 55, 32);
+        c.stroke();
+      }
+    },
+    {
+      name: 'Pava cuello de cisne', tea: 'Gyokuro', temp: '60 °C',
+      pivot: [282, 178], tip: [-114, -40], dir: [-0.9, 0.42],
+      thr: 0.22, max: 0.74, rate: 16, v0: 74, width: 1.7, turn: 2.4,
+      vcap: 260, box: { cy: 16, h: 36 },
+      cup: { mouth: 56, bottom: 44, h: 34, handle: 'none', saucer: false, cap: 90 },
+      body(c) {
+        c.moveTo(-38, 52); c.lineTo(38, 52); c.lineTo(34, -18);
+        c.quadraticCurveTo(0, -32, -34, -18); c.closePath();
+      },
+      draw(c) {
+        tube(c, 7, () => {
+          c.moveTo(-34, 40);
+          c.bezierCurveTo(-72, 42, -58, -8, -82, -34);
+          c.bezierCurveTo(-92, -46, -104, -46, -114, -40);
+        });
+        c.beginPath();
+        c.moveTo(-38, 52); c.lineTo(38, 52); c.lineTo(34, -18);
+        c.quadraticCurveTo(0, -32, -34, -18); c.closePath(); c.stroke();
+        c.beginPath(); c.moveTo(-20, -24); c.quadraticCurveTo(0, -38, 20, -24); c.stroke();
+        c.beginPath(); c.ellipse(0, -33, 5, 4, 0, 0, Math.PI * 2); c.stroke();
+        c.beginPath();
+        c.moveTo(30, -22); c.lineTo(52, -34); c.bezierCurveTo(78, -30, 76, 30, 37, 38);
+        c.moveTo(34, -10); c.lineTo(50, -20); c.bezierCurveTo(64, -16, 62, 22, 37, 28);
+        c.stroke();
+      }
+    },
+    {
+      name: 'Kyusu de mango lateral', tea: 'Sencha', temp: '75 °C',
+      pivot: [268, 196], tip: [-74, -4], dir: [-0.8, -0.6],
+      thr: 0.36, max: 0.98, rate: 34, v0: 108, width: 2.8, turn: 3.6,
+      vcap: 300, box: { cy: 20, h: 32 },
+      cup: { mouth: 58, bottom: 52, h: 50, handle: 'none', saucer: false, cap: 120 },
+      body(c) { c.ellipse(0, 20, 50, 32, 0, 0, Math.PI * 2); },
+      draw(c) {
+        tube(c, 8, () => { c.moveTo(-44, 16); c.quadraticCurveTo(-60, 12, -74, -4); });
+        c.beginPath(); c.ellipse(0, 20, 50, 32, 0, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.ellipse(0, -8, 28, 6, 0, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.moveTo(-22, -10); c.quadraticCurveTo(0, -24, 22, -10); c.stroke();
+        c.beginPath(); c.ellipse(0, -20, 5, 4, 0, 0, Math.PI * 2); c.stroke();
+        c.beginPath();
+        c.moveTo(44, 6); c.lineTo(100, -20);
+        c.moveTo(48, 20); c.lineTo(105, -7);
+        c.moveTo(100, -20); c.quadraticCurveTo(108, -16, 105, -7);
+        c.stroke();
+      }
+    },
+    {
+      name: 'Prensa de vidrio', tea: 'Rooibos', temp: '95 °C',
+      pivot: [276, 184], tip: [-45, -45], dir: [-0.82, -0.57],
+      thr: 0.55, max: 1.2, rate: 62, v0: 96, width: 4.4, turn: 3.0,
+      vcap: 650, box: { cy: 5, h: 45 },
+      cup: { mouth: 66, bottom: 56, h: 66, handle: 'none', saucer: false, cap: 250 },
+      body(c) { c.rect(-32, -40, 64, 90); },
+      draw(c) {
+        c.beginPath();
+        c.moveTo(-32, -36); c.lineTo(-45, -45); c.lineTo(-33, -47);
+        c.stroke();
+        c.beginPath(); c.rect(-32, -40, 64, 90); c.stroke();
+        c.beginPath(); c.moveTo(-36, 50); c.lineTo(36, 50); c.stroke();
+        c.beginPath(); c.rect(-34, -50, 68, 9); c.stroke();
+        c.beginPath(); c.moveTo(0, -50); c.lineTo(0, -80); c.stroke();
+        c.beginPath(); c.ellipse(0, -84, 7, 5, 0, 0, Math.PI * 2); c.stroke();
+        c.save(); c.setLineDash([3, 4]); c.strokeStyle = DIM;
+        c.beginPath(); c.moveTo(-28, -18); c.lineTo(28, -18); c.stroke(); c.restore();
+        c.beginPath();
+        c.moveTo(32, -30); c.lineTo(58, -30); c.lineTo(58, 32); c.lineTo(32, 32);
+        c.moveTo(32, -20); c.lineTo(48, -20); c.lineTo(48, 22); c.lineTo(32, 22);
+        c.stroke();
+      }
+    }
+  ];
+
+  // ---------- state ----------
+  let k = 1, si = 0, S = SCENES[0];
+  let tilt = 0, holding = false, flowing = false;
+  let cup = 0, vessel = 0, spill = 0, puddleX = 0, overflowed = false, poured = 0;
+  let lo = 0, hi = 0, cx = 120;
+  let particles = [], seq = 0, pid = 0;
+  let mode = 'play', doneTimer = 0, fade = 1, wobble = 0, t = 0;
+  let msg = 'Mantené apretado para servir', sub = 'Deslizá o usá ◀ ▶ para cambiar de tetera';
+  let score = 0, streak = 0, best = 0;
+  try { best = +localStorage.getItem('tetera-best') || 0; } catch (e) {}
+
+  const toWorld = (lx, ly) => {
+    const a = -tilt, c = Math.cos(a), s = Math.sin(a);
+    return { x: S.pivot[0] + lx * c - ly * s, y: S.pivot[1] + lx * s + ly * c };
+  };
+  const rotDir = (dx, dy, a) => ({ x: dx * Math.cos(a) - dy * Math.sin(a), y: dx * Math.sin(a) + dy * Math.cos(a) });
+
+  const cupGeom = () => {
+    const c = S.cup, base = FLOOR - (c.saucer ? 5 : 0);
+    return { base, top: base - c.h, mouthL: cx - c.mouth / 2, mouthR: cx + c.mouth / 2,
+             botL: cx - c.bottom / 2, botR: cx + c.bottom / 2 };
+  };
+
+  // place the cup where a mid-strength pour lands
+  function placeCup() {
+    const saved = tilt;
+    tilt = (S.thr + S.max) / 2 + 0.06;
+    const tip = toWorld(S.tip[0], S.tip[1]);
+    const d = rotDir(S.dir[0], S.dir[1], -tilt);
+    const n = Math.hypot(d.x, d.y);
+    let x = tip.x, y = tip.y, vx = d.x / n * S.v0, vy = d.y / n * S.v0;
+    const mouthY = FLOOR - (S.cup.saucer ? 5 : 0) - S.cup.h;
+    for (let i = 0; i < 2000 && y < mouthY; i++) { vy += G / 240; x += vx / 240; y += vy / 240; }
+    tilt = saved;
+    cx = Math.max(64, Math.min(196, x));
+    puddleX = cx;
+  }
+
+  const snap5 = v => Math.round(v / 5) * 5;
+  function newRound(text) {
+    cup = 0; spill = 0; overflowed = false; poured = 0;
+    vessel = S.vcap; particles = [];
+    const cap = S.cup.cap;
+    lo = snap5(cap * (0.55 + Math.random() * 0.2));
+    hi = lo + snap5(cap * 0.12);
+    mode = 'play';
+    msg = text || 'Mantené apretado para servir';
+    sub = 'Franja objetivo: ' + lo + '–' + hi + ' ml';
+  }
+
+  function setScene(i, first) {
+    si = (i + SCENES.length) % SCENES.length;
+    S = SCENES[si];
+    holding = false; tilt = 0; fade = 0;
+    placeCup();
+    newRound();
+    if (first) { cup = Math.round(lo * 0.45); poured = 0; sub = 'Deslizá o usá ◀ ▶ para cambiar de tetera'; }
+  }
+
+  function renderScore() {
+    sScore.textContent = score; sStreak.textContent = streak; sBest.textContent = best;
+  }
+
+  function finish(ok, text) {
+    mode = 'done'; doneTimer = 1.9; holding = false;
+    if (ok) {
+      score++; streak++;
+      if (streak > best) { best = streak; try { localStorage.setItem('tetera-best', best); } catch (e) {} }
+    } else streak = 0;
+    msg = text; sub = ok ? 'Sirviendo otra taza…' : 'Probá de nuevo';
+    renderScore();
+  }
+
+  // ---------- update ----------
+  function update(dt) {
+    t += dt;
+    fade = Math.min(1, fade + dt / 0.35);
+    const target = holding && mode === 'play' ? S.max : 0;
+    tilt += (target - tilt) * Math.min(1, dt * S.turn);
+
+    // emit
+    const f = (tilt - S.thr) / (S.max - S.thr);
+    const wasFlowing = flowing;
+    flowing = f > 0 && vessel > 0;
+    if (flowing && !wasFlowing) seq++;
+    if (flowing) {
+      const vol = Math.min(vessel, S.rate * Math.min(1, f) * dt);
+      vessel -= vol; poured += vol;
+      const tip = toWorld(S.tip[0], S.tip[1]);
+      const d = rotDir(S.dir[0], S.dir[1], -tilt), n = Math.hypot(d.x, d.y);
+      const sp = S.v0 * (0.72 + 0.56 * Math.min(1, f));
+      particles.push({ x: tip.x, y: tip.y, vx: d.x / n * sp, vy: d.y / n * sp, vol, seq, id: pid++ });
+      if (vessel <= 0) { msg = 'Se vació'; sub = 'Soltá para seguir'; }
+    }
+    led.classList.toggle('on', flowing);
+
+    // move
+    const g = cupGeom();
+    const keep = [];
+    for (const p of particles) {
+      const py = p.y;
+      p.vy += G * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+      if (!p.drip && py < g.top && p.y >= g.top && p.x > g.mouthL + 3 && p.x < g.mouthR - 3) {
+        cup += p.vol; wobble = Math.min(1, wobble + p.vol * 0.08);
+        if (cup > S.cup.cap) {
+          const extra = cup - S.cup.cap; cup = S.cup.cap;
+          if (!overflowed) { overflowed = true; msg = '¡Se rebalsa!'; sub = ''; }
+          const side = Math.random() < 0.5 ? -1 : 1;
+          keep.push({ x: side < 0 ? g.mouthL : g.mouthR, y: g.top, vx: side * 22, vy: 0, vol: extra, drip: true, seq: -1, id: pid++ });
+        }
+        continue;
+      }
+      if (p.y >= FLOOR) {
+        spill += p.vol;
+        puddleX += (p.x - puddleX) * Math.min(1, p.vol / (spill + 1) * 4);
+        continue;
+      }
+      if (p.x < -20 || p.x > W + 20) continue;
+      keep.push(p);
+    }
+    particles = keep;
+    wobble *= Math.pow(0.12, dt);
+
+    // judge
+    if (mode === 'play' && !holding && tilt < 0.1 && particles.length === 0 && poured > 0.5) {
+      poured = 0;
+      if (overflowed) finish(false, 'Se rebalsó la taza');
+      else if (cup >= lo && cup <= hi) finish(true, '¡Justo! ' + Math.round(cup) + ' ml');
+      else if (vessel <= 0) finish(false, 'Se terminó el té');
+      else if (cup < lo) {
+        msg = spill > 6 && cup < 4 ? 'Le erraste a la taza' : 'Faltan ' + Math.round(lo - cup) + ' ml';
+        sub = 'Seguí sirviendo';
+      } else {
+        msg = 'Te pasaste de la franja'; sub = 'Mantené para seguir o esperá';
+        finish(false, 'Te pasaste: ' + Math.round(cup) + ' ml');
+      }
+    }
+    if (mode === 'done') {
+      doneTimer -= dt;
+      if (doneTimer <= 0) newRound();
+    }
+  }
+
+  // ---------- draw ----------
+  function drawCup() {
+    const c = S.cup, g = cupGeom();
+    const frac = cup / c.cap;
+    // liquid
+    if (cup > 0.2) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(g.mouthL, g.top); ctx.lineTo(g.mouthR, g.top);
+      ctx.lineTo(g.botR, g.base); ctx.lineTo(g.botL, g.base); ctx.closePath();
+      ctx.clip();
+      const ly = g.base - frac * c.h;
+      const amp = reduceMotion ? 0 : wobble * 2.4;
+      ctx.beginPath();
+      ctx.moveTo(g.mouthL - 4, ly);
+      for (let x = g.mouthL - 4; x <= g.mouthR + 4; x += 4) {
+        ctx.lineTo(x, ly + Math.sin(x * 0.18 + t * 14) * amp);
+      }
+      ctx.lineTo(g.mouthR + 4, g.base + 2); ctx.lineTo(g.mouthL - 4, g.base + 2); ctx.closePath();
+      ctx.fillStyle = TEA; ctx.fill();
+      ctx.restore();
+    }
+    // target band: dashed marks across the cup plus a bracket on its left side
+    const inBand = cup >= lo && cup <= hi && !overflowed;
+    const yLo = g.base - lo / c.cap * c.h, yHi = g.base - hi / c.cap * c.h;
+    const leftX = y => g.botL - (g.botL - g.mouthL) * ((g.base - y) / c.h);
+    const rightX = y => g.botR + (g.mouthR - g.botR) * ((g.base - y) / c.h);
+    ctx.save();
+    ctx.strokeStyle = inBand ? TEA : DIM; ctx.lineWidth = 1.2;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(leftX(yLo) + 3, yLo); ctx.lineTo(rightX(yLo) - 3, yLo);
+    ctx.moveTo(leftX(yHi) + 3, yHi); ctx.lineTo(rightX(yHi) - 3, yHi);
+    ctx.stroke();
+    ctx.setLineDash([]); ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(leftX(yLo) - 6, yLo); ctx.lineTo(leftX(yLo) - 13, yLo);
+    ctx.lineTo(leftX(yHi) - 13, yHi); ctx.lineTo(leftX(yHi) - 6, yHi);
+    ctx.stroke();
+    ctx.restore();
+    // outline
+    ctx.beginPath();
+    ctx.moveTo(g.mouthL, g.top); ctx.lineTo(g.botL, g.base); ctx.lineTo(g.botR, g.base); ctx.lineTo(g.mouthR, g.top);
+    ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx, g.top, c.mouth / 2, 3.5, 0, 0, Math.PI * 2); ctx.stroke();
+    if (c.handle === 'loop') {
+      ctx.beginPath();
+      const hx = g.mouthR - 3;
+      ctx.moveTo(hx, g.top + 8); ctx.bezierCurveTo(hx + 26, g.top + 4, hx + 24, g.base - 10, hx - 6, g.base - 12);
+      ctx.stroke();
+    }
+    if (c.saucer) {
+      ctx.beginPath(); ctx.ellipse(cx, FLOOR - 2, c.mouth / 2 + 14, 4, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+
+  function drawVessel() {
+    // liquid inside, kept level with the floor while the vessel tilts
+    if (vessel > 0.5) {
+      const frac = vessel / S.vcap;
+      const c = toWorld(0, S.box.cy);
+      const h = S.box.h * (0.62 + 0.38 * Math.cos(tilt));
+      const ly = c.y + h - 2 * h * frac * 0.92;
+      ctx.save();
+      ctx.translate(S.pivot[0], S.pivot[1]); ctx.rotate(-tilt);
+      ctx.beginPath(); S.body(ctx); ctx.clip();
+      ctx.rotate(tilt); ctx.translate(-S.pivot[0], -S.pivot[1]);
+      ctx.fillStyle = TEA; ctx.fillRect(0, ly, W, W);
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.translate(S.pivot[0], S.pivot[1]); ctx.rotate(-tilt);
+    S.draw(ctx);
+    ctx.restore();
+  }
+
+  function drawStream() {
+    if (!particles.length) return;
+    ctx.save();
+    ctx.strokeStyle = TEA; ctx.fillStyle = TEA;
+    ctx.lineWidth = S.width; ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (let i = 1; i < particles.length; i++) {
+      const a = particles[i - 1], b = particles[i];
+      if (a.seq !== b.seq || a.seq < 0) continue;
+      if (Math.hypot(a.x - b.x, a.y - b.y) > 22) continue;
+      ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+    }
+    ctx.stroke();
+    for (const p of particles) {
+      if (p.drip) { ctx.beginPath(); ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2); ctx.fill(); }
+    }
+    ctx.restore();
+  }
+
+  function drawText() {
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = '500 12px "JetBrains Mono", ui-monospace, monospace';
+    ctx.fillStyle = INK; ctx.textAlign = 'left';
+    ctx.fillText(S.tea + ' · ' + S.temp, 20, 30);
+    ctx.fillStyle = DIM;
+    ctx.fillText(S.name, 20, 47);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = overflowed ? '#ff8a6b' : (cup >= lo && cup <= hi ? TEA : INK);
+    ctx.fillText(Math.round(cup) + ' / ' + S.cup.cap + ' ml', W - 20, 30);
+    ctx.fillStyle = DIM;
+    ctx.fillText('franja ' + lo + '–' + hi, W - 20, 47);
+    // scene dots
+    for (let i = 0; i < SCENES.length; i++) {
+      ctx.beginPath(); ctx.arc(W / 2 - (SCENES.length - 1) * 6 + i * 12, 40, i === si ? 3 : 2, 0, Math.PI * 2);
+      ctx.fillStyle = i === si ? INK : DIM; ctx.fill();
+    }
+    ctx.textAlign = 'center';
+    ctx.font = '500 14px "JetBrains Mono", ui-monospace, monospace';
+    ctx.fillStyle = mode === 'done' && streak > 0 ? TEA : INK;
+    ctx.fillText(msg, W / 2, 366);
+    ctx.font = '400 11px "JetBrains Mono", ui-monospace, monospace';
+    ctx.fillStyle = DIM;
+    ctx.fillText(sub, W / 2, 386);
+  }
+
+  function draw() {
+    ctx.setTransform(k, 0, 0, k, 0, 0);
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, W);
+    ctx.globalAlpha = fade;
+    ctx.lineWidth = 2.2; ctx.strokeStyle = INK; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    // floor + puddle
+    ctx.save(); ctx.strokeStyle = DIM; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(18, FLOOR + 0.5); ctx.lineTo(W - 18, FLOOR + 0.5); ctx.stroke(); ctx.restore();
+    if (spill > 0.5) {
+      ctx.save(); ctx.fillStyle = TEA_DEEP;
+      ctx.beginPath(); ctx.ellipse(puddleX, FLOOR + 1, Math.min(80, 5 + Math.sqrt(spill) * 3.4), 2.6, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.restore();
+    }
+    drawCup();
+    drawStream();
+    drawVessel();
+    ctx.globalAlpha = 1;
+    drawText();
+  }
+
+  // ---------- loop ----------
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.033, (now - last) / 1000); last = now;
+    update(dt); draw();
+    requestAnimationFrame(frame);
+  }
+
+  function resize() {
+    const r = screenEl.getBoundingClientRect();
+    const dpr = Math.min(3, window.devicePixelRatio || 1);
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    k = cv.width / W;
+  }
+  new ResizeObserver(resize).observe(screenEl);
+
+  // ---------- input ----------
+  let downX = null, swiped = false;
+  screenEl.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    try { screenEl.setPointerCapture(e.pointerId); } catch (_) {}
+    downX = e.clientX; swiped = false;
+    if (mode === 'play') holding = true;
+  });
+  screenEl.addEventListener('pointermove', e => {
+    if (downX === null || swiped) return;
+    const dx = e.clientX - downX;
+    if (Math.abs(dx) > 46 && tilt < S.thr) { swiped = true; holding = false; setScene(si + (dx < 0 ? 1 : -1)); }
+  });
+  const release = () => { downX = null; holding = false; };
+  screenEl.addEventListener('pointerup', release);
+  screenEl.addEventListener('pointercancel', release);
+  screenEl.addEventListener('contextmenu', e => e.preventDefault());
+
+  document.addEventListener('keydown', e => {
+    if (e.target.closest && e.target.closest('button')) return;
+    if (e.code === 'Space' || e.code === 'Enter') {
+      e.preventDefault(); if (!e.repeat && mode === 'play') holding = true;
+    } else if (e.code === 'ArrowRight') { e.preventDefault(); setScene(si + 1); }
+    else if (e.code === 'ArrowLeft') { e.preventDefault(); setScene(si - 1); }
+  });
+  document.addEventListener('keyup', e => {
+    if (e.code === 'Space' || e.code === 'Enter') holding = false;
+  });
+  window.addEventListener('blur', () => { holding = false; });
+  document.getElementById('prev').addEventListener('click', () => setScene(si - 1));
+  document.getElementById('next').addEventListener('click', () => setScene(si + 1));
+
+  // ---------- boot ----------
+  function start(data) {
+    score = data.score || 0; streak = data.streak || 0;
+    best = Math.max(best, data.best || 0);
+    setScene(data.scene || 0, true);
+    fade = 1;
+    renderScore();
+    resize();
+    requestAnimationFrame(frame);
+  }
+  window.claude?.hot?.snapshot?.(() => ({ score, streak, best, scene: si }));
+  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
