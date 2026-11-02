@@ -25,7 +25,7 @@
   .status{font-size:12px;letter-spacing:.08em;color:#666;height:16px;text-align:center}
   .hint{font-size:11px;color:#8a8a86;text-align:center;max-width:420px;line-height:1.5}
   #bandRow{position:relative;width:260px;height:78px;margin:4px auto 0;touch-action:none}
-  #bandRow:after{content:'';position:absolute;left:50%;top:16px;width:300px;height:300px;margin-left:-151px;border:1px solid rgba(0,0,0,.14);border-radius:50%;pointer-events:none}
+  #bandRow:after{content:'';position:absolute;left:50%;top:16px;width:300px;height:300px;margin-left:-151px;border:1px solid rgba(0,0,0,.14);border-radius:50%;pointer-events:none;clip-path:inset(0 0 222px 0)}
   body.dark #bandRow:after{border-color:rgba(255,255,255,.16)}
   #bandRow:before{content:'';position:absolute;left:50%;top:3px;margin-left:-3px;border-left:3px solid transparent;border-right:3px solid transparent;border-top:4px solid #9a9a96}
   .bi{position:absolute;top:12px;left:50%;z-index:1;transform-origin:50% 4.6px;width:44px;margin-left:-22px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:transform .4s cubic-bezier(.2,.8,.2,1),opacity .4s}
@@ -544,6 +544,7 @@ function ledDot(){const lit=vol>0.02,on=!!cur&&cur.state==='ok'&&lit,row=$('band
 const sx=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse()).x;};
 function setBand(idx,si=0){
   bandIdx=Math.max(0,Math.min(BANDS.length-1,idx));const b=BANDS[bandIdx];EB=b;
+  if(b.name==='WT'){sleepEnd=Date.now()+60*60000;updateZzz();}
   if(b.subs){STATIONS=b.subs.map((s,i)=>({...s,f:i+1}));FMIN=1;FMAX=b.subs.length;subIdx=Math.max(0,Math.min(b.subs.length-1,si));freq=subIdx+1;}
   else{STATIONS=b.stations;FMIN=b.min;FMAX=b.max;freq=b.default;subIdx=0;}
   KD=b.kd;KF=b.kf;CAPTURE=b.cap;
