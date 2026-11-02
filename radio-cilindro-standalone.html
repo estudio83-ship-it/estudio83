@@ -241,7 +241,7 @@ function initAudio(){
   cleanIn=ctx.createGain();cleanIn.gain.value=0;cleanIn.connect(master);
   const hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=280;
   const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3000;lp.Q.value=.9;
-  const body=ctx.createBiquadFilter();body.type='peaking';body.frequency.value=900;body.gain.value=4;
+  const body=ctx.createBiquadFilter();body.type='peaking';body.frequency.value=900;body.gain.value=2;
   const sat=ctx.createWaveShaper();const c=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/511.5-1;c[i]=Math.tanh(x*2.4)/Math.tanh(2.4);}sat.curve=c;
   const comp=ctx.createDynamicsCompressor();comp.threshold.value=-22;comp.ratio.value=5;
   fadeG=ctx.createGain();fadeG.gain.value=1;
@@ -292,7 +292,7 @@ function update(){
     pendT=setTimeout(()=>{pend=null;const n=nearest();if(vol>0.02&&n.d<=CAPTURE&&(!cur||cur.st!==n.st))connect(n.st);},250);}
   if(!inR){if(pend){clearTimeout(pendT);pend=null;}if(cur&&d>CAPTURE*2.5)disconnect();}
   const sig=inR?Math.max(0,1-Math.pow(d/CAPTURE,1.4)):0, ok=cur&&cur.state==='ok', s=ok?sig:0;
-  if(cur){if(cur.mode==='plain')cur.el.volume=Math.min(1,s*vol);else {chainIn.gain.setTargetAtTime(classic?s*1.4:0,t,.04);cleanIn.gain.setTargetAtTime(classic?0:s,t,.04);}}
+  if(cur){if(cur.mode==='plain')cur.el.volume=Math.min(1,s*vol);else {chainIn.gain.setTargetAtTime(classic?s*0.8:0,t,.04);cleanIn.gain.setTargetAtTime(classic?0:s,t,.04);}}
   noiseG.gain.setTargetAtTime(.035+(1-s)*.3,t,.04);
   whistle.frequency.setTargetAtTime(110+d/CAPTURE*3300,t,.03);
   whistleG.gain.setTargetAtTime((inR&&ok&&d>CAPTURE*.05)?(d/CAPTURE)*(1-d/CAPTURE)*.16:0,t,.04);
