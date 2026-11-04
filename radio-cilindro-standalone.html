@@ -28,9 +28,9 @@
   #bandRow:before{content:'';position:absolute;left:50%;top:6px;margin-left:-4px;border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid #9a9a96}
   .bi{position:absolute;top:14px;left:50%;z-index:1;transform-origin:50% 6px;width:52px;margin-left:-26px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;filter:grayscale(0);transition:transform .4s cubic-bezier(.2,.8,.2,1),opacity .4s,filter .25s}
   .bi:not(.on){filter:grayscale(.92)}
-  .bi i{width:12px;height:12px;background:linear-gradient(145deg,rgba(255,255,255,.26),rgba(255,255,255,.05) 42%,rgba(0,0,0,.24)),var(--band-led);border-radius:50%;border:1px solid rgba(32,32,32,.62);box-sizing:border-box;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),inset 0 1px 2px rgba(0,0,0,.38);filter:brightness(.76) saturate(.46);transition:filter .25s,box-shadow .25s,border-color .25s}
+  .bi i{width:12px;height:12px;background:var(--band-led);border-radius:50%;border:1px solid rgba(32,32,32,.62);box-sizing:border-box;box-shadow:none;filter:brightness(.76) saturate(.46);transition:filter .25s,box-shadow .25s,border-color .25s}
   .bi.lit i{filter:brightness(.94) saturate(.8)}
-  .bi.led-on i{border-color:rgba(28,28,28,.32);filter:brightness(1.16) saturate(1.08);box-shadow:0 0 4px 1px var(--band-led),0 0 9px 3px var(--band-led),0 0 15px 5px var(--band-led),inset 0 0 0 1px rgba(0,0,0,.12),inset 0 1px 2px rgba(0,0,0,.18)}
+  .bi.led-on i{border-color:rgba(28,28,28,.32);filter:brightness(1.08) saturate(.98);box-shadow:0 0 3px 1px var(--band-led),0 0 6px 2px color-mix(in srgb,var(--band-led) 48%,transparent)}
   .bi.on:not(.led-on) i{border-color:#686868;background:color-mix(in srgb,var(--band-led) 42%,#fff);filter:none;box-shadow:none}
   .bi span{font:600 12px 'Rajdhani',sans-serif;letter-spacing:.1em;color:#9a9a96}
   .bi.on span{color:#222}body.dark .bi.on span{color:#eee}body.dark .bi:not(.lit) i{filter:brightness(.4) saturate(.72)}
