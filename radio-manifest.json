@@ -1,0 +1,25 @@
+{
+  "id": "./radio-cilindro-standalone.html",
+  "name": "Radio Cilindro",
+  "short_name": "Radio",
+  "start_url": "./radio-cilindro-standalone.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4ede3",
+  "theme_color": "#f4ede3",
+  "icons": [
+    {
+      "src": "https://raw.githack.com/estudio83-ship-it/estudio83/f11b0bee404a87449b17cf8d00615c1278a17131/radio-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://raw.githack.com/estudio83-ship-it/estudio83/f11b0bee404a87449b17cf8d00615c1278a17131/radio-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
