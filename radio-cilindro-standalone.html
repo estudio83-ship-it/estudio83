@@ -343,7 +343,7 @@ function disconnect(){if(hls){try{hls.destroy();}catch(e){}hls=null;}if(!cur)ret
   try{audioEl.pause();audioEl.removeAttribute('src');audioEl.load();}catch(e){}cur=null;}
 function connect(st,aire){
   disconnect();
-  if(st.deezer){cur={st,mode:'deezer',state:'external',aire:false};return;}
+  if(st.deezer){cur={st,mode:'deezer',state:'unsupported',aire:false};return;}
   if(st.kiwi&&(aire||!st.url)){const g=ctx.createGain();g.connect(chainIn);g.connect(cleanIn);
     const c={st,src:g,mode:'fx',state:'tuning',aire:true};cur=c;
     c.kiwi=KiwiAM.open(ctx,st.f,g,{onState:(x,h)=>{if(cur!==c)return;c.state=x;if(x==='ok'){c.aire=h.kind==='kiwi';if(h.kind==='yt'){c.mode='plain';c.el=h;}}}});return;}
@@ -558,7 +558,7 @@ function render(){
   const {st,d}=nearest(),on=vol>0.02,status=$('status');
   if(!on||!(d<=CAPTURE&&cur&&cur.st===st))status.classList.remove('wtn');
   if(!on)status.textContent='';
-  else if(EB.name==='DZR')status.textContent='DEEZER · REPRODUCCIÓN EXTERNA';
+  else if(EB.name==='DZR')status.textContent=subIdx===0?'FLOW NO ADMITE REPRODUCCIÓN INTEGRADA':'LIBROS: NECESITA FUENTE COMPATIBLE';
   else if(d<=CAPTURE&&cur&&cur.st===st){status.classList.toggle('wtn',cur.state==='ok'&&EB.name==='WT');status.textContent=cur.state==='ok'?(EB.name==='WT'?'WHITE NOISE':st.name):st.name+' · '+(cur.state==='nosig'?(st.kiwi?'SIN SEÑAL · TOCÁ 950 OTRA VEZ':'SIN SEÑAL'):'SINTONIZANDO…');}
   else status.textContent=Math.round(freq)+' kHz · estática';
   document.querySelectorAll('#stations .chip').forEach(b=>b.classList.toggle('on',on&&Math.abs(+b.dataset.f-freq)<3));
@@ -674,21 +674,17 @@ const finKeys=Object.keys(FIN);let finIdx=0;
 function setFinish(k){const o=FIN[k];bodyFill.setAttribute('fill',o.fill);grain.style.display=o.grain?'':'none';bodyShade.setAttribute('opacity',o.sh);finIdx=finKeys.indexOf(k);try{localStorage.setItem('e83-cil',k);}catch(e){}}
 function cycleFinish(){finIdx=(finIdx+1)%finKeys.length;setFinish(finKeys[finIdx]);}
 let saved='madera';try{saved=localStorage.getItem('e83-cil')||'madera';}catch(e){}setFinish(FIN[saved]?saved:'madera');
-function openDeezer(option){
-  const url=option===1?'https://www.deezer.com/channels/audiobooks':'https://www.deezer.com/en/flow';
-  window.open(url,'_blank','noopener,noreferrer');
-}
 function updateBandIndicators(){
   const row=$('bandRow'),sub=$('subdots');
   if(!row.children.length)BANDS.forEach((b,k)=>{const el=document.createElement('div');el.className='bi';el.innerHTML='<i></i><span>'+b.name+'</span>';
-    el.onclick=e=>{e.stopPropagation();if(k===bandIdx){if(b.name==='DZR')openDeezer(subIdx);return;}setBand(k);if(k===0)freq=950;if(b.name==='DZR')openDeezer(0);else wake();};row.appendChild(el);});
+    el.onclick=e=>{e.stopPropagation();if(k===bandIdx)return;setBand(k);if(k===0)freq=950;wake();};row.appendChild(el);});
   [...row.children].forEach((el,k)=>{const d=k-bandIdx;
     const a=d*17*Math.PI/180;
     el.style.transform=`translate(${(165*Math.sin(a)).toFixed(1)}px,${(165*(1-Math.cos(a))).toFixed(1)}px) rotate(${d*17}deg)`;
     el.style.opacity=Math.max(.2,1-Math.abs(d)*.3);});
   sub.innerHTML='';
   sub.style.visibility=EB.name==='WT'?'hidden':'';
-  if(EB.subs)EB.subs.forEach((x,k)=>{const d=document.createElement('span');d.className='sd'+(k===subIdx?' on':'');d.style.setProperty('--c',EB.lineColor);d.innerHTML='<i></i>'+x.name;d.onclick=e=>{e.stopPropagation();setBand(bandIdx,k);if(EB.name==='DZR')openDeezer(k);else wake();};sub.appendChild(d);});
+  if(EB.subs)EB.subs.forEach((x,k)=>{const d=document.createElement('span');d.className='sd'+(k===subIdx?' on':'');d.style.setProperty('--c',EB.lineColor);d.innerHTML='<i></i>'+x.name;d.onclick=e=>{e.stopPropagation();setBand(bandIdx,k);wake();};sub.appendChild(d);});
   if(window.dialLine)window.dialLine.setAttribute('fill',EB.lineColor);
   generateDial();
 }
