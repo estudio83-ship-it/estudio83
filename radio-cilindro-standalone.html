@@ -37,7 +37,7 @@
   .bi:not(.on) i{position:relative;z-index:2;background:#d2d2d0;border:1px solid #b8b8b6;box-shadow:none;filter:none}
   body.dark .bi:not(.on) i{background:#c6c6c3;border-color:#a4a4a1;box-shadow:none;filter:none}
   #subdots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));justify-items:center;gap:6px;width:min(360px,90vw);margin:15px auto 0}
-  #subdots.sat{grid-template-columns:repeat(4,max-content);justify-content:center;column-gap:18px;width:min(290px,90vw)}
+  #subdots.sat{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 12px;width:max-content;max-width:90vw}
   .sd{font-size:10px;letter-spacing:.04em;color:#8a8a86;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
   .sd i{width:8px;height:8px;border-radius:50%;border:1px solid #9a9a96;display:inline-block}
   .sd.on{color:#222;font-weight:600}.sd.on i{background:var(--c);border-color:var(--c)}
