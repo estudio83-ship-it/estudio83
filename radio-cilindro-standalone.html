@@ -259,27 +259,11 @@ const BANDS=[
     {f:15.3,name:'VRT BÉLGICA',url:'https://icecast.vrtcdn.be/radio1-high.mp3'},
     {f:17.6,name:'NPO HOLANDA',url:'https://icecast.omroep.nl/radio1-bb-mp3'}
   ]},
-  {name:'SAT',min:1,max:16,default:1,lineColor:'#3a7bd5',kd:.12,kf:6,cap:.4,tick:1,label:1,win:2,subs:[
+  {name:'SAT',min:1,max:4,default:1,lineColor:'#3a7bd5',kd:.12,kf:6,cap:.4,tick:1,label:1,win:2,subs:[
     {name:'HOUSE',url:'https://stream.zeno.fm/lwv6zqgtv1dtv'},
-    {name:'CHILL',url:'https://media-ssl.musicradio.com/ChillMP3'},
-    {name:'ROCK',url:'https://sa.mp3.icecast.magma.edge-access.net/sc_rad2'},
-    {name:'PODCAST',url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service'},
-    {name:'AMBIENT',url:'https://ice5.somafm.com/groovesalad-128-mp3'},
-    {name:'DRONE',url:'https://ice5.somafm.com/dronezone-128-mp3'},
-    {name:'DEEP SPACE',url:'https://ice2.somafm.com/deepspaceone-128-mp3'},
-    {name:'JAZZ',url:'https://ice5.somafm.com/sonicuniverse-128-mp3'},
-    {name:'ELECTRO',url:'https://ice5.somafm.com/thetrip-128-mp3'},
-    {name:'INDIE',url:'https://ice5.somafm.com/indiepop-128-mp3'},
-    {name:'POP',url:'https://ice5.somafm.com/poptron-128-mp3'},
     {name:'80S',url:'https://ice5.somafm.com/u80s-128-mp3'},
-    {name:'FOLK',url:'https://ice5.somafm.com/folkfwd-128-mp3'},
-    {name:'WORLD',url:'https://ice5.somafm.com/suburbsofgoa-128-mp3'},
-    {name:'BEATS',url:'https://ice5.somafm.com/beatblender-128-mp3'},
-    {name:'SPY',url:'https://ice5.somafm.com/secretagent-128-mp3'}
-  ]},
-  {name:'DZR',min:1,max:2,default:1,lineColor:'#d43b62',kd:.12,kf:6,cap:.4,tick:1,label:1,win:2,subs:[
-    {name:'FLOW',deezer:'flow'},
-    {name:'LIBROS',deezer:'audiobooks'}
+    {name:'INDIE',url:'https://ice5.somafm.com/indiepop-128-mp3'},
+    {name:'PODCAST',url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service'}
   ]},
   {name:'WT',min:1,max:1,default:1,lineColor:'#e8e0c8',kd:.12,kf:6,cap:.4,tick:1,label:1,win:2,subs:[
     {name:'WT',proc:'static'}
@@ -343,7 +327,6 @@ function disconnect(){if(hls){try{hls.destroy();}catch(e){}hls=null;}if(!cur)ret
   try{audioEl.pause();audioEl.removeAttribute('src');audioEl.load();}catch(e){}cur=null;}
 function connect(st,aire){
   disconnect();
-  if(st.deezer){cur={st,mode:'deezer',state:'unsupported',aire:false};return;}
   if(st.kiwi&&(aire||!st.url)){const g=ctx.createGain();g.connect(chainIn);g.connect(cleanIn);
     const c={st,src:g,mode:'fx',state:'tuning',aire:true};cur=c;
     c.kiwi=KiwiAM.open(ctx,st.f,g,{onState:(x,h)=>{if(cur!==c)return;c.state=x;if(x==='ok'){c.aire=h.kind==='kiwi';if(h.kind==='yt'){c.mode='plain';c.el=h;}}}});return;}
@@ -368,9 +351,9 @@ function update(){
     pendT=setTimeout(()=>{pend=null;const n=nearest();if(vol>0.02&&n.d<=CAPTURE&&(!cur||cur.st!==n.st))connect(n.st);},250);}
   if(!inR){if(pend){clearTimeout(pendT);pend=null;}if(cur&&d>CAPTURE*2.5)disconnect();}
   const sig=inR?Math.max(0,1-Math.pow(d/CAPTURE,1.4)):0, ok=cur&&cur.state==='ok', s=ok?sig:0;
-  if(cur){if(cur.mode==='plain')cur.el.volume=Math.min(1,s*vol);else if(cur.mode==='deezer'){chainIn.gain.setTargetAtTime(0,t,.04);cleanIn.gain.setTargetAtTime(0,t,.04);}else {const cl=classic&&EB.name==='AM';chainIn.gain.setTargetAtTime(cl?s*0.8:0,t,.04);cleanIn.gain.setTargetAtTime(cl?0:s,t,.04);}}
+  if(cur){if(cur.mode==='plain')cur.el.volume=Math.min(1,s*vol);else {const cl=classic&&EB.name==='AM';chainIn.gain.setTargetAtTime(cl?s*0.8:0,t,.04);cleanIn.gain.setTargetAtTime(cl?0:s,t,.04);}}
   const stat=!!cur&&cur.mode==='proc'&&cur.st.proc==='static';
-  const pureBand=EB.name==='SW'||EB.name==='SAT'||EB.name==='DZR';
+  const pureBand=EB.name==='SW'||EB.name==='SAT';
   noiseG.gain.setTargetAtTime(pureBand?0:stat?.4:ok?0:.3*(1-s),t,.04);
   whistle.frequency.setTargetAtTime(110+d/CAPTURE*3300,t,.03);
   whistleG.gain.setTargetAtTime(!pureBand&&inR&&ok&&d>CAPTURE*.05?(d/CAPTURE)*(1-d/CAPTURE)*.16:0,t,.04);
@@ -558,7 +541,6 @@ function render(){
   const {st,d}=nearest(),on=vol>0.02,status=$('status');
   if(!on||!(d<=CAPTURE&&cur&&cur.st===st))status.classList.remove('wtn');
   if(!on)status.textContent='';
-  else if(EB.name==='DZR')status.textContent=subIdx===0?'FLOW NO ADMITE REPRODUCCIÓN INTEGRADA':'LIBROS: NECESITA FUENTE COMPATIBLE';
   else if(d<=CAPTURE&&cur&&cur.st===st){status.classList.toggle('wtn',cur.state==='ok'&&EB.name==='WT');status.textContent=cur.state==='ok'?(EB.name==='WT'?'WHITE NOISE':st.name):st.name+' · '+(cur.state==='nosig'?(st.kiwi?'SIN SEÑAL · TOCÁ 950 OTRA VEZ':'SIN SEÑAL'):'SINTONIZANDO…');}
   else status.textContent=Math.round(freq)+' kHz · estática';
   document.querySelectorAll('#stations .chip').forEach(b=>b.classList.toggle('on',on&&Math.abs(+b.dataset.f-freq)<3));
@@ -584,7 +566,7 @@ function startProc(c,type){
   if(type==='fire')c.iv=setInterval(()=>{g.gain.setTargetAtTime(.15+Math.random()*.5,ctx.currentTime,.02);},110);
 }
 function loop(){update();render();notifyNative();ledDot();requestAnimationFrame(loop);}
-const LEDS=[{c:'#ffb040',g:7},{c:'#ff7a1a',g:11},{c:'#33ff66',g:11},{c:'#3a8cff',g:13},{c:'#e8476e',g:10},{c:'#a77df0',g:10}];
+const LEDS=[{c:'#ffb040',g:7},{c:'#ff7a1a',g:11},{c:'#33ff66',g:11},{c:'#3a8cff',g:13},{c:'#a77df0',g:10}];
 function ledDot(){const lit=vol>0.02,on=!!cur&&cur.state==='ok'&&lit,row=$('bandRow').children;
   backlight.style.opacity=0;
   window.dialLine.setAttribute('fill',lit?LEDS[bandIdx].c:'#151515');
