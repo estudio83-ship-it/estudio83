@@ -1,0 +1,55 @@
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;700&family=Barlow:wght@400;600&family=Amatic+SC:wght@400;700&display=swap");
+/* Cartocor 2026 — estilos compartidos por los módulos de diapositiva */
+.ico-corrugado{-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24 7 41 15.5V33L24 41.5 7 33V15.5Z'/%3E%3Cpath d='M7 15.5 24 24l17-8.5M24 24v17.5M15.5 11.2 32.5 19.7v6'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24 7 41 15.5V33L24 41.5 7 33V15.5Z'/%3E%3Cpath d='M7 15.5 24 24l17-8.5M24 24v17.5M15.5 11.2 32.5 19.7v6'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;background-color:currentColor;display:inline-block}
+.ico-flexible{-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 14h12l5-6 4 3.5-4 4.5V41a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2Z'/%3E%3Crect x='18' y='20' width='9' height='17' rx='1'/%3E%3Cpath d='M20.5 25h4M20.5 29h4M20.5 33h4'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 14h12l5-6 4 3.5-4 4.5V41a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2Z'/%3E%3Crect x='18' y='20' width='9' height='17' rx='1'/%3E%3Cpath d='M20.5 25h4M20.5 29h4M20.5 33h4'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;background-color:currentColor;display:inline-block}
+.ico-papel{-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6h17l8 8v28H12Z'/%3E%3Cpath d='M29 6v8h8'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6h17l8 8v28H12Z'/%3E%3Cpath d='M29 6v8h8'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;background-color:currentColor;display:inline-block}
+.ico-bolsas{-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 8h22l2 34H11Z'/%3E%3Cpath d='M13.5 13h21' stroke-dasharray='2 2.5'/%3E%3Crect x='17' y='19' width='14' height='17' rx='1'/%3E%3Cpath d='M19.5 32.5 24 25.5l4.5 7Z'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 8h22l2 34H11Z'/%3E%3Cpath d='M13.5 13h21' stroke-dasharray='2 2.5'/%3E%3Crect x='17' y='19' width='14' height='17' rx='1'/%3E%3Cpath d='M19.5 32.5 24 25.5l4.5 7Z'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;background-color:currentColor;display:inline-block}
+.ico-caja-dibujada{-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 72'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 30v26l30 11V40Z'/%3E%3Cpath d='M52 40l26-12v26L52 67'/%3E%3Cpath d='M22 30 6 18l30-8 16 12Z'/%3E%3Cpath d='M52 22l14-14 22 8-10 12'/%3E%3Cpath d='M36 10l16 12 26 6'/%3E%3Cpath d='M21.5 31 52.5 39.5 77 27.5' opacity='.7'/%3E%3Cpath d='M30 44c-3 4 0 10 3 6s1-9-3-6Z'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 72'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 30v26l30 11V40Z'/%3E%3Cpath d='M52 40l26-12v26L52 67'/%3E%3Cpath d='M22 30 6 18l30-8 16 12Z'/%3E%3Cpath d='M52 22l14-14 22 8-10 12'/%3E%3Cpath d='M36 10l16 12 26 6'/%3E%3Cpath d='M21.5 31 52.5 39.5 77 27.5' opacity='.7'/%3E%3Cpath d='M30 44c-3 4 0 10 3 6s1-9-3-6Z'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;background-color:currentColor;display:inline-block}
+html,body{margin:0;background:var(--papel)}
+*{box-sizing:border-box}
+/* Lienzo 16:9 — 960×540 px = 13,333×7,5 in (1 px = 1 pt) */
+.sl{position:relative;width:960px;height:540px;overflow:hidden;background:var(--papel);color:var(--tinta);font-family:var(--font-texto)}
+.sl p{margin:0}
+.foto{position:absolute;inset:0;background-size:cover;background-position:center}
+.foto-borrosa{filter:blur(6px) saturate(.8);transform:scale(1.05)}
+.velo-claro::after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.55)}
+
+/* Pill dibujada: fondo arena + dos trazos a mano levemente girados */
+.pill{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:.3em;padding:14px 52px;background:var(--arena);border-radius:var(--radio-pill);color:var(--tinta);white-space:nowrap}
+.pill::before,.pill::after{content:"";position:absolute;border-radius:var(--radio-pill);pointer-events:none}
+.pill::before{inset:-4px -8px -2px -6px;border:1.5px solid var(--tinta);transform:rotate(-1.3deg)}
+.pill::after{inset:1px -3px -6px 2px;border:1.2px solid var(--tinta-profunda);transform:rotate(.9deg)}
+.pill b{font-weight:700}
+.titulo-con-caja{display:flex;align-items:center}
+.titulo-con-caja .ico-caja-dibujada{width:96px;height:72px;color:var(--tinta);margin-right:-28px;position:relative;z-index:1}
+
+/* Nota KPI: arena + trazo naranja */
+.nota{position:relative;background:var(--arena);border-radius:var(--radio-pill);padding:8px 26px;text-align:center;color:var(--tinta)}
+.nota::before{content:"";position:absolute;inset:-2px -3px -3px -1px;border:1.2px solid var(--acento);border-radius:var(--radio-pill);transform:rotate(-.8deg)}
+.nota em{font-style:normal;font-weight:700;color:var(--acento)}
+
+/* Mancha arena orgánica */
+.mancha{position:absolute;background:var(--arena);border-radius:46% 54% 42% 58% / 60% 40% 60% 40%}
+
+/* Círculos de unidad de negocio */
+.circ{display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radio-circulo);color:var(--papel)}
+.circ i{width:58%;height:58%}
+.u-corrugado{background:var(--corrugado);color:var(--tinta)}
+.u-papel{background:var(--papel-reciclado);color:var(--tinta)}
+.u-kraft{background:var(--kraft);color:var(--tinta)}
+.u-flexible{background:var(--flexible);color:var(--papel)}
+.u-bolsas{background:var(--bolsas);color:var(--papel)}
+.u-celeste{background:var(--celeste);color:var(--tinta-profunda)}
+.foto-circ{border-radius:var(--radio-circulo);background-size:cover;background-position:center}
+
+/* Panel de vidrio (2025) */
+.vidrio{background:var(--vidrio);border-radius:var(--radio-panel);box-shadow:var(--sombra-panel);backdrop-filter:blur(4px)}
+
+/* Línea curva blanca sobre fotos */
+.trazo{position:absolute;left:0;right:0;height:60px;pointer-events:none}
+.trazo path{fill:none;stroke:var(--papel);stroke-width:1.4;opacity:.9}
+.logo{position:absolute;height:34px}
+.texto-papel{color:var(--papel)}
+.gris{color:var(--gris-etiqueta)}
+.num{font-family:var(--font-cifras);font-variant-numeric:tabular-nums}
+

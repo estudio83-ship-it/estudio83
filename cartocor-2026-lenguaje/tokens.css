@@ -1,0 +1,50 @@
+/* Cartocor 2026 — generated from tokens.json */
+:root, [data-theme="claro"] {
+  --tinta: #1F497D;
+  --tinta-profunda: #17375E;
+  --gris-etiqueta: #7F7F7F;
+  --papel: #FFFFFF;
+  --arena: #F4F0ED;
+  --acento: #F79646;
+  --corrugado: #99D25C;
+  --corrugado-oscuro: #5CAD3F;
+  --papel-reciclado: #EAC53A;
+  --kraft: #BF8527;
+  --flexible: #407BC7;
+  --bolsas: #776496;
+  --celeste: #9EBFDE;
+  --vidrio: rgba(255,255,255,0.78);
+  --velo-bosque: rgba(76,104,44,0.72);
+  --marca-cartocor: #01B946;
+  --marca-converflex: #252F60;
+  --marca-zucamor: #2E4A9D;
+  --marca-papel-misionero: #018E28;
+  --marca-puntapel: #98C83E;
+  --sombra-producto: 0 8px 16px rgba(31,73,125,0.18);
+  --sombra-panel: 0 2px 10px rgba(0,0,0,0.08);
+}
+:root {
+  --margen: 40px;
+  --paso-l: 32px;
+  --paso-m: 20px;
+  --paso-s: 10px;
+  --radio-pill: 999px;
+  --radio-panel: 28px;
+  --radio-ficha: 12px;
+  --radio-circulo: 50%;
+  --font-texto: Raleway, "Segoe UI", Arial, sans-serif;
+  --font-cifras: Bahnschrift, Barlow, "DIN Alternate", "Arial Narrow", sans-serif;
+  --font-manuscrita: "Om Telolet Om", "Amatic SC", "Segoe Print", cursive;
+}
+.titulo-portada { font-family: var(--font-texto); font-size: 60px; line-height: 1; font-weight: 700; letter-spacing: 0.5px; }
+.subtitulo-portada { font-family: var(--font-texto); font-size: 30px; line-height: 1.15; font-weight: 300; }
+.titulo-pill { font-family: var(--font-texto); font-size: 32px; line-height: 1.1; font-weight: 700; letter-spacing: 0.5px; }
+.titulo-pill-mixto { font-family: var(--font-texto); font-size: 26px; line-height: 1.1; font-weight: 300; }
+.titulo-tabla { font-family: var(--font-texto); font-size: 20px; line-height: 1.2; font-weight: 700; }
+.cuerpo { font-family: var(--font-texto); font-size: 15px; line-height: 1.45; font-weight: 400; }
+.kpi-cifra { font-family: var(--font-texto); font-size: 19px; line-height: 1.15; font-weight: 700; }
+.kpi-texto { font-family: var(--font-texto); font-size: 13px; line-height: 1.3; font-weight: 400; }
+.etiqueta { font-family: var(--font-texto); font-size: 13px; line-height: 1.2; font-weight: 400; }
+.cifra-grande { font-family: var(--font-cifras); font-size: 40px; line-height: 1; font-weight: 600; }
+.cifra-tabla { font-family: var(--font-cifras); font-size: 19px; line-height: 1.2; font-weight: 400; letter-spacing: 1px; }
+.manuscrita-seccion { font-family: var(--font-manuscrita); font-size: 44px; line-height: 1.05; font-weight: 400; }

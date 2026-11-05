@@ -1,0 +1,201 @@
+{
+ "v": 3,
+ "layout": "files",
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-05T18:43:16Z"
+ },
+ "title": "Cartocor 2026",
+ "namespace": "Cartocor",
+ "libraries": [],
+ "sections": {},
+ "groups": [
+  "Logos",
+  "Fotos",
+  "Referencias"
+ ],
+ "assetGroups": {
+  "Logos": {
+   "name": "Logos",
+   "tile": "m",
+   "order": [
+    "logo-cartocor-blanco.png"
+   ],
+   "files": {
+    "logo-cartocor-blanco.png": {
+     "name": "logo-cartocor-blanco.png",
+     "blob": "c0db15dd7dec76359ba95c8c300ca182",
+     "size": 30587,
+     "type": "image/png"
+    }
+   }
+  },
+  "Fotos": {
+   "name": "Fotos",
+   "tile": "l",
+   "order": [
+    "foto-bosque.jpg",
+    "foto-corrugado.jpg",
+    "foto-bobina-kraft.jpg"
+   ],
+   "files": {
+    "foto-bosque.jpg": {
+     "name": "foto-bosque.jpg",
+     "blob": "d2f10daa59523dae4da036753adbebf9",
+     "size": 266768,
+     "type": "image/jpeg"
+    },
+    "foto-corrugado.jpg": {
+     "name": "foto-corrugado.jpg",
+     "blob": "79ec28b00e91a6de6fbf43678bb0e5ca",
+     "size": 231535,
+     "type": "image/jpeg"
+    },
+    "foto-bobina-kraft.jpg": {
+     "name": "foto-bobina-kraft.jpg",
+     "blob": "121bb22b3f2ea31006bd9d095854874b",
+     "size": 206569,
+     "type": "image/jpeg"
+    }
+   }
+  },
+  "Referencias": {
+   "name": "Referencias",
+   "tile": "m",
+   "order": [
+    "ref-2026-p1.jpg",
+    "ref-2026-p3.jpg",
+    "ref-2026-p5.jpg",
+    "ref-2026-p6.jpg",
+    "ref-2026-p12.jpg",
+    "ref-2026-p18.jpg",
+    "ref-2025-p2.jpg",
+    "ref-2025-p3.jpg",
+    "ref-2025-p5.jpg",
+    "ref-2025-p7.jpg",
+    "ref-2025-p8.jpg",
+    "ref-2025-p9.jpg",
+    "ref-2025-p13.jpg",
+    "ref-2025-p16.jpg",
+    "ref-2025-p18.jpg",
+    "ref-2025-p21.jpg",
+    "ref-2025-p22.jpg"
+   ],
+   "files": {
+    "ref-2026-p1.jpg": {
+     "name": "ref-2026-p1.jpg",
+     "blob": "b4439d910092ee25a99e7feb658b5a07",
+     "size": 128559,
+     "type": "image/jpeg"
+    },
+    "ref-2026-p3.jpg": {
+     "name": "ref-2026-p3.jpg",
+     "blob": "b0447d6f284d36d1705df4416034b98f",
+     "size": 98448,
+     "type": "image/jpeg"
+    },
+    "ref-2026-p5.jpg": {
+     "name": "ref-2026-p5.jpg",
+     "blob": "55b95ab85cd81b7b83f109484b133000",
+     "size": 88940,
+     "type": "image/jpeg"
+    },
+    "ref-2026-p6.jpg": {
+     "name": "ref-2026-p6.jpg",
+     "blob": "75e1dc9f9ede272c642950c34b20bf7f",
+     "size": 85871,
+     "type": "image/jpeg"
+    },
+    "ref-2026-p12.jpg": {
+     "name": "ref-2026-p12.jpg",
+     "blob": "4e65ce971c6b28e81790ac468cef738c",
+     "size": 55295,
+     "type": "image/jpeg"
+    },
+    "ref-2026-p18.jpg": {
+     "name": "ref-2026-p18.jpg",
+     "blob": "de443396dd1a10f5c59ec0817f61ccbf",
+     "size": 194840,
+     "type": "image/jpeg"
+    },
+    "ref-2025-p2.jpg": {
+     "name": "ref-2025-p2.jpg",
+     "blob": "0bfd721c3b0f6d548ab09194a8d5f499",
+     "size": 130223,
+     "type": "image/jpeg"
+    },
+    "ref-2025-p3.jpg": {
+     "name": "ref-2025-p3.jpg",
+     "blob": "74ff021c86708f2322a215c85f980c53",
+     "size": 59225,
+     "type": "image/jpeg"
+    },
+    "ref-2025-p5.jpg": {
+     "name": "ref-2025-p5.jpg",
+     "blob": "10b5d17ac08c80c4d5f9b420157317b7",
+     "size": 41502,
+     "type": "image/jpeg"
+    },
+    "ref-2025-p7.jpg": {
+     "name": "ref-2025-p7.jpg",
+     "blob": "050f776020b2149851440054f8dfac90",
+     "size": 49719,
+     "type": "image/jpeg"
+    },
+    "ref-2025-p8.jpg": {
+     "name": "ref-2025-p8.jpg",
+     "blob": "6c4301352ed7e4a3873becc90ee1956c",
+     "size": 34833,
+     "type": "image/jpeg"
+    },
+    "ref-2025-p9.jpg": {
+     "name": "ref-2025-p9.jpg",
+     "blob": "258807e5566c9ce3816d2b9b1320c984",
+     "size": 47634,
+     "type": "image/jpeg"
+    },
+    "ref-2025-p13.jpg": {
+     "name": "ref-2025-p13.jpg",
+     "blob": "2f4a9b70fde650e1ef8dc32f0d4b2b87",
+     "size": 86773,
+     "type": "image/jpeg"
+    },
+    "ref-2025-p16.jpg": {
+     "name": "ref-2025-p16.jpg",
+     "blob": "50c9b3d1e6df5c5326c444553d61613e",
+     "size": 41548,
+     "type": "image/jpeg"
+    },
+    "ref-2025-p18.jpg": {
+     "name": "ref-2025-p18.jpg",
+     "blob": "cbfceddfebd04b3976b98ff918fd41ef",
+     "size": 26641,
+     "type": "image/jpeg"
+    },
+    "ref-2025-p21.jpg": {
+     "name": "ref-2025-p21.jpg",
+     "blob": "22179826064be276e2cc6f92a827922f",
+     "size": 65520,
+     "type": "image/jpeg"
+    },
+    "ref-2025-p22.jpg": {
+     "name": "ref-2025-p22.jpg",
+     "blob": "9016aad2f758ec0a22e2c55a916aa3ec",
+     "size": 112503,
+     "type": "image/jpeg"
+    }
+   }
+  }
+ },
+ "blobs": {},
+ "docs": {
+  "readme": "project/README.md",
+  "sections": []
+ },
+ "lastChange": {
+  "by": "Claude",
+  "at": "2026-11-05T18:43:16Z",
+  "via": "Claude Code",
+  "note": "Lenguaje de diseño 2026 a partir del institucional 2026 y la plantilla 2025"
+ }
+}
