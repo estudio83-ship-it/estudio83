@@ -9,6 +9,7 @@ module.exports = function (ctx) {
   const TINT = { corrugado: "E6F3D6", papel: "FBF2D2", flexibles: "D9E5F4", bolsas: "E4E0EC", celeste: "E5EEF7", kraft: "F2E5CF" };
   const UCOL = { corrugado: C.accent1, papel: C.accent2, flexibles: C.accent3, bolsas: C.accent4, kraft: C.accent5 };
   const UHEX = { corrugado: T.accent1, papel: T.accent2, flexibles: T.accent3, bolsas: T.accent4, kraft: T.accent5, celeste: HX.celeste };
+  const CG = process.env.NOFREE ? SH.rect : SH.custGeom;
   let gid = 0;
   const G = (grupo, pieza) => `G·${grupo}·${pieza}`;
   const newG = (base) => `${base} ${++gid}`;
@@ -67,7 +68,7 @@ module.exports = function (ctx) {
     }
     return pts;
   }
-  const free = (s, x, y, w, h, points, o) => s.addShape(SH.custGeom, { x: p(x), y: p(y), w: p(w), h: p(h), points, ...o });
+  const free = (s, x, y, w, h, points, o) => process.env.NOFREE ? s.addShape(SH.roundRect, { x: p(x), y: p(y), w: p(w), h: p(h), rectRadius: 0.1, fill: o.fill, line: { color: (o.line || {}).color || C.text1, width: 1 }, objectName: o.objectName }) : s.addShape(CG, { x: p(x), y: p(y), w: p(w), h: p(h), points, ...o });
 
   function sketchPanel(s, x, y, w, h, { r = 26, fill = C.background2, line = C.accent6, lw = 1.3, seed = 1, grupo, doble = true } = {}) {
     const g = grupo || newG("Panel dibujado");
@@ -117,6 +118,7 @@ module.exports = function (ctx) {
     return s;
   }
   function svgIcon(name, hex = "#1F497D", sw = 1.6) {
+    if (process.env.NOSVG) return null;
     const f = path.join(__dirname, "node_modules/lucide-static/icons", name + ".svg");
     if (!fs.existsSync(f)) return null;
     let t = fs.readFileSync(f, "utf8").replace(/<!--.*?-->/s, "").replace(/stroke="currentColor"/, `stroke="${hex}"`).replace(/stroke-width="2"/, `stroke-width="${sw}"`).replace(/width="24"/, 'width="96"').replace(/height="24"/, 'height="96"').replace(/class="[^"]*"/, "");
@@ -161,8 +163,8 @@ module.exports = function (ctx) {
   pres.defineSlideMaster({
     title: "TITULO CON OLA", background: { color: C.background1 },
     objects: [
-      { text: { text: "", options: { shape: SH.custGeom, x: 0, y: p(440), w: p(960), h: p(100), points: wavePts(960, 100, 40, 14, 1.3, 0.6), fill: { color: C.text1 }, line: { type: "none" } } } },
-      { text: { text: "", options: { shape: SH.custGeom, x: 0, y: p(430), w: p(960), h: p(110), points: wavePts(960, 110, 40, 12, 1.1, 2.1), fill: { color: C.text2, transparency: 55 }, line: { type: "none" } } } },
+      { text: { text: "", options: { shape: CG, x: 0, y: p(440), w: p(960), h: p(100), points: wavePts(960, 100, 40, 14, 1.3, 0.6), fill: { color: C.text1 }, line: { type: "none" } } } },
+      { text: { text: "", options: { shape: CG, x: 0, y: p(430), w: p(960), h: p(110), points: wavePts(960, 110, 40, 12, 1.1, 2.1), fill: { color: C.text2, transparency: 55 }, line: { type: "none" } } } },
       { placeholder: { options: { name: "title", type: "title", x: p(120), y: p(28), w: p(720), h: p(46), fontSize: 30, bold: true, color: C.text1, align: "center", valign: "middle", margin: 0 }, text: "TÍTULO CENTRADO" } },
       { placeholder: { options: { name: "body", type: "body", x: p(160), y: p(78), w: p(640), h: p(44), fontSize: 15, color: C.text1, align: "center", valign: "top", margin: 0 }, text: "Bajada en una o dos líneas" } },
     ],
@@ -176,7 +178,7 @@ module.exports = function (ctx) {
     // Historia
     let s = pres.addSlide({ masterName: "SOLO TITULO", sectionTitle: "Institucional" });
     s.addText(mixto("NUESTRA", "Historia"), { placeholder: "title" });
-    s.addShape(SH.custGeom, { x: 0, y: p(430), w: p(960), h: p(110), points: wavePts(960, 110, 40, 14, 1.3, 0.6), fill: { color: C.text1 }, line: { type: "none" }, objectName: "Ola inferior" });
+    s.addShape(CG, { x: 0, y: p(430), w: p(960), h: p(110), points: wavePts(960, 110, 40, 14, 1.3, 0.6), fill: { color: C.text1 }, line: { type: "none" }, objectName: "Ola inferior" });
     sketchPanel(s, 50, 130, 860, 280, { seed: 3, grupo: "Panel historia" });
     s.addShape(SH.line, { x: p(50), y: p(258), w: p(860), h: 0, line: { color: HX.celeste, width: 1 }, objectName: "Línea de tiempo" });
     const hitos = [["1951", "Arcor abre su primera planta en Arroyito, Córdoba.", FOTO.bosque], ["1980", "Nace Cartocor con la planta de cartón corrugado de Paraná, Entre Ríos.", FOTO.corr], ["2017", "Adquisición de Zucamor: mayor productor de papel reciclado del país.", FOTO.bob], ["2026", "17 sitios y 920 MMU$S de ventas estimadas en Packaging.", FOTO.bosque]];
@@ -186,7 +188,7 @@ module.exports = function (ctx) {
     // Misión, visión, propósito
     s = pres.addSlide({ masterName: "SOLO TITULO", sectionTitle: "Institucional" });
     s.addText(mixto("NUESTRA", "Filosofía"), { placeholder: "title" });
-    s.addShape(SH.custGeom, { x: 0, y: p(440), w: p(960), h: p(100), points: wavePts(960, 100, 40, 14, 1.3, 0.6), fill: { color: C.text1 }, line: { type: "none" }, objectName: "Ola inferior" });
+    s.addShape(CG, { x: 0, y: p(440), w: p(960), h: p(100), points: wavePts(960, 100, 40, 14, 1.3, 0.6), fill: { color: C.text1 }, line: { type: "none" }, objectName: "Ola inferior" });
     puntoLinea(s, 40, 120, 880, [C.accent1, C.accent2, C.accent3], "Línea con puntos");
     const mvp = [["Misión", "corrugado", "Brindar a las personas de todo el mundo la oportunidad de disfrutar alimentos y golosinas de calidad, ricos y saludables."], ["Visión", "papel", "Ser la empresa líder de alimentos y golosinas de Latinoamérica, reconocida internacionalmente por sus prácticas sostenibles."], ["Propósito", "flexibles", "Hacer accesibles las tendencias en alimentación para que todos puedan vivir mejor."]];
     mvp.forEach(([t, u, txt], i) => tarjetaMVP(s, 60 + i * 290, 170, 260, 230, t, u, txt));
@@ -353,6 +355,7 @@ module.exports = function (ctx) {
     // G4 Gráficos nativos
     s = galeriaSlide("GRÁFICOS NATIVOS", "Gráficos de PowerPoint: clic derecho > Editar datos. Copiarlos conserva el estilo; las fuentes siguen el tema.");
     const base = { showLegend: false, catAxisLabelColor: T.dk1, valAxisLabelColor: T.dk1, catAxisLabelFontFace: "+mn-lt", valAxisLabelFontFace: "+mn-lt", catAxisLabelFontSize: 10, valAxisLabelFontSize: 9, valGridLine: { color: "E6E1DC", size: 0.5 }, catGridLine: { style: "none" }, dataLabelFontFace: "+mn-lt", dataLabelFontSize: 10, dataLabelColor: T.dk1, showTitle: true, titleFontFace: "+mn-lt", titleFontSize: 12, titleColor: T.dk1 };
+    if (!process.env.NOCHART) {
     s.addChart(pres.charts.BAR, [{ name: "Millones de cajas", labels: ["2025", "2026(P)"], values: [94, 118] }], { ...base, x: p(30), y: p(56), w: p(290), h: p(210), barDir: "col", chartColors: [T.accent3], title: "Millones de cajas armadas", showValue: true, dataLabelPosition: "outEnd", barGapWidthPct: 80, valAxisHidden: true, valGridLine: { style: "none" }, objectName: "Gráfico columnas" });
     s.addChart(pres.charts.BAR, [{ name: "Máquinas", labels: ["Pollo", "Carne", "Otros", "Lácteos", "Fruta"], values: [35, 29, 15, 11, 35] }], { ...base, x: p(335), y: p(56), w: p(290), h: p(210), barDir: "bar", chartColors: [T.dk2], title: "Máquinas por mercado", showValue: true, dataLabelPosition: "outEnd", valAxisHidden: true, valGridLine: { style: "none" }, objectName: "Gráfico barras" });
     s.addChart(pres.charts.DOUGHNUT, [{ name: "Destino", labels: ["Intra-negocio", "Grupo Arcor", "Terceros"], values: [150, 95, 675] }], { ...base, x: p(640), y: p(56), w: p(290), h: p(210), holeSize: 60, chartColors: [T.accent3, T.accent4, T.accent1], title: "Destino de ventas 2026(e)", showValue: true, showLegend: true, legendPos: "r", legendFontFace: "+mn-lt", legendFontSize: 10, legendColor: T.dk1, dataLabelColor: "FFFFFF", dataBorder: { pt: 2, color: "FFFFFF" }, objectName: "Gráfico anillo" });
@@ -368,6 +371,7 @@ module.exports = function (ctx) {
       [{ text: "Bolsas", options: { fontSize: 11, color: T.dk1, fill: { color: T.lt2 } } }, td("56", { fill: T.lt2 }), td("60", { fill: T.lt2 }), td("+7 %", { fill: T.lt2 })],
       [{ text: "Total", options: { fontSize: 12, bold: true, color: HX.corrOsc, fill: { color: "FFFFFF" } } }, td("870", { bold: true }), td("920", { bold: true }), td("+6 %", { bold: true })],
     ], { x: p(645), y: p(300), w: p(280), colW: [p(100), p(60), p(60), p(60)], rowH: p(28), border: { type: "solid", pt: 0.5, color: "E6E1DC" }, fontFace: "Raleway", objectName: "Tabla estilo" });
+    }
     cap(s, "Tabla nativa (encabezado tinta, filas arena alternadas)", 645, 480, 280);
 
     // G5 Línea de tiempo
