@@ -110,6 +110,7 @@ button.reset:hover{background:var(--orange-deep);border-color:var(--orange-deep)
 .descargas{position:absolute;right:22px;bottom:22px;display:flex;align-items:center;gap:8px;max-width:calc(100% - 44px)}
 .descargas .status{font-size:12px;text-align:right;max-width:280px;margin-right:4px}
 .status{font:13px var(--mono);color:var(--soft);min-height:1.4em;margin:0}
+.status .copiar{font:600 12px var(--sans,Inter,sans-serif);color:var(--accent,#1d5fbf);background:#fff;border:1px solid var(--accent,#1d5fbf);border-radius:980px;padding:3px 10px;cursor:pointer}
 
 svg.plan{display:block;width:100%;height:100%}
 .plan .k{fill:var(--kraft);stroke:var(--kraft);stroke-width:.8;stroke-linejoin:round;vector-effect:non-scaling-stroke}
@@ -466,21 +467,34 @@ function directa(text, file) {
     a.download = file;
     document.body.appendChild(a); a.click(); a.remove();
     say("Descarga iniciada: " + file + ".");
-    enMarco();
-  } catch (e) { say("No se pudo descargar."); enMarco(); }
+    enMarco(text, file);
+  } catch (e) { say("No se pudo descargar."); enMarco(text, file); }
 }
-// Dentro de un marco (por ejemplo, una página de SharePoint que muestra el archivo incrustado) el
-// navegador puede bloquear la descarga sin avisar. Se ofrece abrir la página sola, donde sí descarga.
-function enMarco() {
+// Dentro de un marco (por ejemplo, SharePoint mostrando el archivo incrustado o en su vista previa) el
+// navegador puede bloquear la descarga y las pestañas nuevas sin avisar. Queda el portapapeles: se copia
+// el contenido del archivo y se guarda con el Bloc de notas.
+function copiar(text) {
+  let ok = false;
+  try {
+    const t = document.createElement("textarea");
+    t.value = text; t.setAttribute("readonly", ""); t.style.position = "fixed"; t.style.opacity = "0";
+    document.body.appendChild(t); t.select(); ok = document.execCommand("copy"); t.remove();
+  } catch (e) {}
+  if (ok) return Promise.resolve();
+  return navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject();
+}
+function enMarco(text, file) {
   let marco = true;
   try { marco = window.self !== window.top; } catch (e) {}
   if (!marco) return;
   const st = document.getElementById("status");
-  st.textContent = "Si la descarga no empezó, ";
-  const ir = document.createElement("a");
-  ir.href = location.href; ir.target = "_blank"; ir.rel = "noopener";
-  ir.textContent = "abrí la página en una pestaña nueva";
-  st.appendChild(ir); st.appendChild(document.createTextNode(" y descargá desde ahí."));
+  st.textContent = "¿No bajó? ";
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "copiar"; b.textContent = "Copiar " + file;
+  b.addEventListener("click", () => copiar(text).then(
+    () => say("Copiado. Pegalo en el Bloc de notas y guardalo como " + file + " (tipo: Todos los archivos)."),
+    () => say("No se pudo copiar. Descargá el .html y abrilo desde la compu.")));
+  st.appendChild(b);
 }
 async function download(text, ext) {
   const file = name() + "." + ext;
