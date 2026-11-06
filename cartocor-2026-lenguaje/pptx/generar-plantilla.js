@@ -254,6 +254,26 @@ async function build() {
   await prepIcons();
   defineLayouts();
 
+  if (process.env.ELEMENTOS) { // PPT de elementos de diseño: íconos a mano, recursos, galería y esquemas
+    pres.title = "Cartocor 2026 – Elementos de diseño";
+    const EL = require("./elementos-mod.js")({ pres, fit, enc, A, IMG });
+    EL.masters();
+    pres.addSection({ title: "Apertura" });
+    const s0 = pres.addSlide({ masterName: "PORTADA ELEMENTOS", sectionTitle: "Apertura" });
+    s0.addText("ELEMENTOS DE DISEÑO", { placeholder: "title" });
+    s0.addText("Íconos de negocio, recursos dibujados, galería y esquemas · 2026", { placeholder: "body" });
+    s0.addNotes("Biblioteca de elementos del lenguaje Cartocor 2026. Todo es editable: los íconos y trazos son formas libres (clic derecho › Modificar puntos) y los elementos compuestos están agrupados para copiar y pegar.");
+    EL.iconos();
+    EL.recursos();
+    const GALE = require("./galeria.js")({ A, fit, enc, pres, C, SH, HX, U, p, ICONS, IMG, SCR, LIGHT, CIFRAS, MANO, THEME, circIcon, pillShapes, drawObjs });
+    GALE.galeria();
+    EL.esquemas();
+    await pres.writeFile({ fileName: OUT });
+    await applyTheme(OUT, THEME);
+    console.log("ok", OUT);
+    return;
+  }
+
   // 1. Portada
   pres.addSection({ title: "Apertura" });
   let s = pres.addSlide({ masterName: "PORTADA", sectionTitle: "Apertura" });
