@@ -450,6 +450,8 @@ async function build() {
   GAL.modulos();
   const ORI = require("./originales.js")({ A, fit, enc, pres, C, SH, HX, p, LIGHT, CIFRAS, MANO, circIcon });
   ORI.modulos();
+  const SIS = require("./sistema.js")({ A, fit, enc, pres, C, SH, HX, p, LIGHT, CIFRAS, MANO, THEME });
+  SIS.esquemas();
 
   // 14. Cierre
   pres.addSection({ title: "Cierre" });
@@ -458,6 +460,7 @@ async function build() {
   s.addText([{ text: "QR", options: { bold: true, fontSize: 18, breakLine: true } }, { text: "cartocor.com", options: { fontSize: 9 } }], { shape: SH.roundRect, x: p(834), y: p(424), w: p(86), h: p(96), rectRadius: p(12), fill: { color: C.background1 }, line: { type: "none" }, color: C.text1, align: "center", valign: "middle", margin: 2, objectName: "Lugar del QR" });
   s.addNotes("Reemplazar el recuadro por el QR real a cartocor.com.");
 
+  SIS.sistema();
   GAL.galeria();
   ORI.galeria();
 
