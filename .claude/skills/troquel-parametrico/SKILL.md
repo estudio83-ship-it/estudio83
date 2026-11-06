@@ -49,3 +49,4 @@ y `caja-galeno/parametrico/` (completo, armado desde el DXF del troquel 6463).
 - Si piden clave, generar con `--proteger` y la clave en `TROQUEL_CLAVE` (nunca en el repositorio).
 - Si una medida depende de otra (por ejemplo, el ancho de la cantidad de botellas), que se ajuste sola con
   `enlazar`, y que se pueda corregir a mano.
+- Holgura de 1 mm entre el producto y el troquel: los agujeros y ranuras salen 1 mm más grandes que la medida del producto.

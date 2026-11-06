@@ -51,7 +51,7 @@ De menor a mayor complejidad: la **caja sola** (lo que se abre por defecto), **c
 | Cartón | `e` | Espesor del cartón | De 1 a 7; onda E 2 · B 3 · C 4 (el 6463 es onda B) | 3 |
 | Botella | `bot` | Sin / Con | Suma la botella | Sin |
 | Botella | `Lb` | Alto | Largo de la botella (va acostada a lo largo de la caja), hasta 350 | 306 |
-| Botella | `Dc` | ⌀ base | Diámetro de la base: el agujero de la cuna | 80 |
+| Botella | `Dc` | ⌀ base | Diámetro de la base: el agujero de la cuna sale de `Dc + 1` | 80 |
 | Botella | `Dm` | ⌀ máximo | El mayor diámetro del cuerpo (en las cónicas, antes del radio del hombro); nunca menor que la base. Manda el alto de la caja, el paso entre botellas y el compartimento del acordeón | 80 |
 | Botella | `Dn` | ⌀ cuello | Ranura de la cuna | 31 |
 | Botella | `n` | Cantidad | Botellas (hasta 6) | 3 |
@@ -141,7 +141,8 @@ Ancho `Wi = H − 2e`. Filas desde el borde inferior:
 
 Frascos en `Wi/2 + (i − (n−1)/2)·p`, alternados: los pares apoyan el cuerpo en el tabique A y el cuello en el B; los impares al revés.
 
-- **Agujero del cuerpo:** círculo `Dc` centrado en el tabique; lengüeta de 33 de ancho que queda unida al panel central (sin intermitente en ese tramo) y llega hasta 13 antes del centro; muesca de 25 desde el círculo hasta el hendido del puente, cortada sobre el hendido.
+- **Holgura:** el troquel deja 1 mm entre la botella y el corte: agujero `Dc + 1` y ranura del cuello `Dn + 1`.
+- **Agujero del cuerpo:** círculo `Dc + 1` centrado en el tabique; lengüeta de 33 de ancho que queda unida al panel central (sin intermitente en ese tramo) y llega hasta 13 antes del centro; muesca de 25 desde el círculo hasta el hendido del puente, cortada sobre el hendido.
 - **Ranura del cuello:** fondo semicircular `Dn/2` en el centro del tabique; lados rectos hasta 23,8 antes del hendido; ensancha a 40 en el hendido y sigue abierta a 40 por todo el puente hasta el hendido siguiente, donde cierra con un corte.
 - **Muesca de borde:** 35 × 4 en el borde de la pared exterior, del lado donde apoya el cuerpo.
 

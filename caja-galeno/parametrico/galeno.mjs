@@ -26,6 +26,9 @@ export const DEFAULTS = {
   sep: 0, // separador: 0 sin separador, 1 cuna (el del 6463), 2 acordeón
   t: 28, // puente de la cuna
 };
+// Holgura entre la botella y el troquel: el agujero de la cuna y la ranura del cuello salen 1 mm más
+// grandes que los diámetros de la botella.
+export const HOLGURA = 1;
 export const lengthFor = (Lb, e) => Lb + 3 * e + BOTTLE_GAP;
 // El ancho sale de las botellas: n pasos más las paredes y el juego lateral del 6463 (274 = 3 × 86 + 2 × 3 + 10),
 // redondeado al milímetro.
@@ -90,13 +93,13 @@ export function limits(P) {
   // La caja que sale de la botella tiene que quedar dentro del rango del largo.
   lim.Lb = [Math.max(st.Lb[0], st.L[0] - 3 * e - BOTTLE_GAP), Math.min(st.Lb[1], st.L[1] - 3 * e - BOTTLE_GAP)];
   const Lb = cl(P.Lb, lim.Lb);
-  lim.Dc = [st.Dc[0], Math.min(st.Dc[1], st.A[1] - 2 * e - 2 * WALL_MIN)];
+  lim.Dc = [st.Dc[0], Math.min(st.Dc[1], st.A[1] - 2 * e - 2 * WALL_MIN - HOLGURA)];
   const Dc = cl(P.Dc, lim.Dc);
   lim.Dm = [Math.max(st.Dm[0], Dc), Math.min(st.Dm[1], st.A[1] - 2 * e - 2 * WALL_MIN)];
   const Dm = cl(P.Dm, lim.Dm);
   lim.Dn = [st.Dn[0], Math.min(st.Dn[1], Dc - 6)];
-  const half = Math.max(Dc / 2, FIX.flareW / 2);
-  const pMin = Math.max(Dm + 2, Dc / 2 + FIX.flareW / 2 + 3);
+  const half = Math.max((Dc + HOLGURA) / 2, FIX.flareW / 2);
+  const pMin = Math.max(Dm + 2, (Dc + HOLGURA) / 2 + FIX.flareW / 2 + 3);
   const p1 = cl(P.p, [pMin, 500]);
   // Cuántas botellas entran a lo ancho con la caja en su ancho máximo, según el separador.
   const Wmax = st.H[1] - 2 * e;
@@ -157,17 +160,17 @@ export function validate(P) {
   if (P.Dm < P.Dc) w.push(`El diámetro máximo (${P.Dm}) no puede ser menor que el de la base (${P.Dc}).`);
   if (P.Dm > d.wall - 2 * WALL_MIN) w.push(`La botella de ⌀${P.Dm} no entra en el alto interior de ${d.wall} (A − 2e).`);
   if (!P.sep) return w;
-  const R = P.Dc / 2;
-  if (P.Dc > d.wall - 2 * WALL_MIN) w.push(`El agujero de ⌀${P.Dc} no entra en el tabique de ${d.wall} (A − 2e): dejá al menos ${WALL_MIN} mm por lado.`);
+  const hueco = P.Dc + HOLGURA, R = hueco / 2;
+  if (hueco > d.wall - 2 * WALL_MIN) w.push(`El agujero de ⌀${hueco} no entra en el tabique de ${d.wall} (A − 2e): dejá al menos ${WALL_MIN} mm por lado.`);
   if (P.Dn >= P.Dc) w.push(`La ranura del cuello (${P.Dn}) tiene que ser menor que el agujero del cuerpo (${P.Dc}).`);
-  if (FIX.flareW <= P.Dn) w.push(`La ranura del cuello (${P.Dn}) es más ancha que la boca de 40 mm de la ranura.`);
-  if (R < FIX.tongueW / 2 + 1) w.push(`Con ⌀${P.Dc} la lengüeta de apoyo de 33 mm no cabe en el agujero.`);
+  if (FIX.flareW <= P.Dn + HOLGURA) w.push(`La ranura del cuello (${P.Dn + HOLGURA}) es más ancha que la boca de 40 mm de la ranura.`);
+  if (R < FIX.tongueW / 2 + 1) w.push(`Con ⌀${hueco} la lengüeta de apoyo de 33 mm no cabe en el agujero.`);
   if (P.sep === 2) {
     const c = (d.Wi - (P.n - 1) * LOMO * P.e) / P.n;
     if (c < P.Dm + 2) w.push(`Con acordeón, cada compartimento mide ${Math.round(c)} mm y la botella ⌀${P.Dm}: no entra.`);
     return w;
   }
-  const span = (P.n - 1) * P.p + P.Dc;
+  const span = (P.n - 1) * P.p + hueco;
   if (span > d.Wi - 6) w.push(`${P.n} botellas con paso ${P.p} ocupan ${Math.round(span)} mm y el interior mide ${Math.round(d.Wi)} (H − 2e).`);
   if (P.n > 1 && P.p < P.Dm + 2) w.push(`El paso (${P.p}) es menor que el diámetro máximo más 2 mm: las botellas se tocan.`);
   if (d.main < 40) w.push(`El panel entre tabiques queda en ${d.main} mm (L − 3e − 2t).`);
@@ -278,7 +281,7 @@ function insert(P, x0, y0, out) {
   const { wall, main, Wi } = d;
   const t = P.t;
   const c1 = wall, c2 = wall + t, p1 = 2 * wall + t, p2 = p1 + main, c3 = p2 + wall, c4 = c3 + t, top = c4 + wall;
-  const R = P.Dc / 2, hn = P.Dn / 2, hf = FIX.flareW / 2;
+  const R = (P.Dc + HOLGURA) / 2, hn = (P.Dn + HOLGURA) / 2, hf = FIX.flareW / 2;
   const L = (k, u0, v0, u1, v1) => out.push({ t: "L", k, a: [x0 + u0, y0 + v0], b: [x0 + u1, y0 + v1] });
   const Arc = (k, u, v, r, a0, a1) => out.push({ t: "A", k, c: [x0 + u, y0 + v], r, a0, a1 });
   const deg = (v) => (Math.acos(v) * 180) / Math.PI;

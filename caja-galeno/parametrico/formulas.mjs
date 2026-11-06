@@ -69,8 +69,8 @@ export const TABLES = {
     ["Largo total", "4A + L − 11e", (P) => 4 * P.A + P.L - 11 * P.e],
     ["Plegado", "(L − 3e) × (H − 2e) × (A − 2e)", (P) => `${fmtMm(P.L - 3 * P.e)} × ${fmtMm(P.H - 2 * P.e)} × ${fmtMm(P.A - 2 * P.e)}`],
     ["Frasco · largo máximo", "L − 3e − 5", (P) => P.L - 3 * P.e - 5],
-    ["Agujero del cuerpo", "⌀ Dc", (P) => P.Dc],
-    ["Ranura del cuello", "Dn", (P) => P.Dn],
+    ["Agujero del cuerpo", "⌀ Dc + 1", (P) => P.Dc + 1],
+    ["Ranura del cuello", "Dn + 1", (P) => P.Dn + 1],
     ["Centros de los frascos", "Wi/2 + (i − (n − 1)/2)·p", (P) => Array.from({ length: P.n }, (_, i) => fmtMm((P.H - 2 * P.e) / 2 + (i - (P.n - 1) / 2) * P.p)).join(" · ")],
   ],
 };
