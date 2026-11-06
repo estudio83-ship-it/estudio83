@@ -6,6 +6,26 @@ const { applyTheme } = require("/root/.claude/skills/synced/e9b35989-4a9f-4c50-9
 
 const SCR = "/tmp/claude-0/-home-user-estudio83/76984eb5-6892-50fe-8e69-894fe593cd33/scratchpad/";
 const IMG = SCR + "build/img/";
+const A = SCR + "build/asset/";
+const fs = require("fs");
+const { execFileSync } = require("child_process");
+const CROPDIR = SCR + "build/crops/"; fs.mkdirSync(CROPDIR, { recursive: true });
+// recorte exacto a la proporción del marco (evita fotos deformadas)
+function fit(src, w, h) {
+  const full = src.startsWith("/") ? src : A + src;
+  const ext = full.endsWith(".png") ? ".png" : ".jpg";
+  const out = CROPDIR + path.basename(full).replace(/\.\w+$/, "") + "-" + Math.round(w * 1000 / h) + ext;
+  if (!fs.existsSync(out)) execFileSync("python3", ["-I", SCR + "build/crop.py", full, String(w), String(h), out]);
+  return out;
+}
+function pngSize(file) { const b = fs.readFileSync(file); return [b.readUInt32BE(16), b.readUInt32BE(20)]; }
+// imagen encajada en una caja sin deformar (logos, íconos, recursos)
+function enc(file, x, y, w, h, al = "c") {
+  const full = file.startsWith("/") ? file : A + file;
+  const [iw, ih] = pngSize(full); const k = Math.min(w / iw, h / ih), ww = iw * k, hh = ih * k;
+  const xx = al === "l" ? x : al === "r" ? x + w - ww : x + (w - ww) / 2;
+  return { path: full, x: xx, y: y + (h - hh) / 2, w: ww, h: hh };
+}
 const OUT = process.argv[2] || SCR + "build/Cartocor_2026_Plantilla.pptx";
 
 const THEME = {
@@ -38,9 +58,9 @@ const SH = pres.ShapeType;
 const U = { // unidades de negocio
   corrugado: { col: C.accent1, nombre: "Corrugado", ico: "corrugado", icoCol: "tinta" },
   papel: { col: C.accent2, nombre: "Papel", ico: "papel", icoCol: "tinta" },
-  kraft: { col: C.accent5, nombre: "Papel kraft", ico: "papel", icoCol: "tinta" },
-  flexibles: { col: C.accent3, nombre: "Flexibles", ico: "flexible", icoCol: "blanco" },
-  bolsas: { col: C.accent4, nombre: "Bolsas industriales", ico: "bolsas", icoCol: "blanco" },
+  kraft: { col: C.accent5, nombre: "Papel kraft", ico: "kraft", icoCol: "tinta" },
+  flexibles: { col: C.accent3, nombre: "Flexibles", ico: "flexible", icoCol: "tinta" },
+  bolsas: { col: C.accent4, nombre: "Bolsas industriales", ico: "bolsas", icoCol: "tinta" },
 };
 
 // ---------- íconos (línea) ----------
@@ -58,12 +78,19 @@ async function png(svg, w, h) {
   return "image/png;base64," + buf.toString("base64");
 }
 async function prepIcons() {
-  for (const [k, body] of Object.entries(ICON_SVG)) {
-    for (const [cn, hex] of [["tinta", "#1F497D"], ["blanco", "#FFFFFF"]]) {
-      ICONS[k + "-" + cn] = await png(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><g ${STROKE} stroke="${hex}">${body}</g></svg>`, 256, 256);
-    }
+  // íconos originales del institucional 2026 (línea oscura) + versión blanca recoloreada
+  const files = { corrugado: "icono-corrugado.png", papel: "icono-papel.png", flexible: "icono-flexibles.png", bolsas: "icono-bolsas.png", kraft: "icono-kraft.png" };
+  for (const [k, f] of Object.entries(files)) {
+    const buf = fs.readFileSync(A + f);
+    const sq = await sharp(buf).resize(256, 256, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer();
+    ICONS[k + "-tinta"] = "image/png;base64," + sq.toString("base64");
+    const alpha = await sharp(sq).extractChannel(3).toBuffer();
+    const white = await sharp({ create: { width: 256, height: 256, channels: 3, background: "#ffffff" } }).joinChannel(alpha).png().toBuffer();
+    ICONS[k + "-blanco"] = "image/png;base64," + white.toString("base64");
   }
-  ICONS.caja = await png(CAJA_SVG, 384, 288);
+  const cj = fs.readFileSync(A + "caja-dibujada.png");
+  ICONS.caja = "image/png;base64," + cj.toString("base64");
+  ICONS.cajaSize = pngSize(A + "caja-dibujada.png");
 }
 
 // ---------- piezas reutilizables ----------
@@ -82,14 +109,16 @@ function drawObjs(slide, objs) {
     else if (o.image) slide.addImage({ ...o.image });
   }
 }
-const caja = (x, y, w = 96) => ({ image: { data: ICONS.caja, x: p(x), y: p(y), w: p(w), h: p(w * 0.75) } });
+const caja = (x, y, w = 96) => ({ image: { data: ICONS.caja, x: p(x), y: p(y), w: p(w), h: p(w * ICONS.cajaSize[1] / ICONS.cajaSize[0]), altText: "Caja dibujada" } });
 const trazo = (y, x = 0, w = 960) => ({ image: { path: IMG + "trazo-blanco.png", x: p(x), y: p(y), w: p(w), h: p(60) } });
-const logo = (x, y, h = 34) => ({ image: { path: SCR + "img/logo-cartocor-blanco.png", x: p(x), y: p(y), w: p(h * 1382 / 425), h: p(h) } });
+const logo = (x, y, h = 34) => ({ image: { path: A + "logo-cartocor-blanco.png", x: p(x), y: p(y), w: p(h * 1382 / 425), h: p(h), altText: "Cartocor" } });
+const logoEnc = (file, x, y, w, h) => { const e = enc(file, x, y, w, h); return { image: { path: e.path, x: p(e.x), y: p(e.y), w: p(e.w), h: p(e.h), altText: file.replace(/^logo-|\.png$/g, "") } }; };
 function circIcon(slide, unidad, x, y, d, name) {
   const u = U[unidad];
-  slide.addShape(SH.ellipse, { x: p(x), y: p(y), w: p(d), h: p(d), fill: { color: u.col }, line: { type: "none" }, objectName: name || "Círculo " + u.nombre });
-  const s = d * 0.58;
-  slide.addImage({ data: ICONS[u.ico + "-" + u.icoCol], x: p(x + (d - s) / 2), y: p(y + (d - s) / 2), w: p(s), h: p(s), altText: "Ícono " + u.nombre, objectName: "Ícono " + u.nombre });
+  // estilo 2026: círculo de color desplazado abajo-izquierda y dibujo de línea encima
+  slide.addShape(SH.ellipse, { x: p(x), y: p(y + d * 0.08), w: p(d * 0.92), h: p(d * 0.92), fill: { color: u.col }, line: { type: "none" }, objectName: name || "Círculo " + u.nombre });
+  const s = d * 0.78;
+  slide.addImage({ data: ICONS[u.ico + "-" + u.icoCol], x: p(x + d * 0.2), y: p(y - d * 0.02), w: p(s), h: p(s), altText: "Ícono " + u.nombre, objectName: "Ícono " + u.nombre });
 }
 function nota(slide, x, y, w, h, cifra, antes, clave, despues) {
   slide.addText("", { shape: SH.roundRect, x: p(x), y: p(y), w: p(w), h: p(h), rectRadius: p(h) / 2, fill: { color: C.background2 }, line: { type: "none" }, objectName: "Nota fondo" });
@@ -102,6 +131,15 @@ function nota(slide, x, y, w, h, cifra, antes, clave, despues) {
   ], { x: p(x), y: p(y), w: p(w), h: p(h), align: "center", valign: "middle", color: C.text1, margin: 0, isTextBox: true, objectName: "Nota texto" });
 }
 
+function marcasCirculo(slide, x0, y, d, paso) {
+  ["cartocor", "converflex", "zucamor", "papel-misionero", "puntapel"].forEach((k, i) => {
+    const x = x0 + i * paso;
+    slide.addShape(SH.ellipse, { x: p(x), y: p(y), w: p(d), h: p(d), fill: { color: C.background1 }, line: { color: C.background2, width: 1 }, objectName: "Círculo marca " + k });
+    const e = enc("logo-" + k + "-color.png", x + d * 0.14, y + d * 0.2, d * 0.72, d * 0.6);
+    slide.addImage({ path: e.path, x: p(e.x), y: p(e.y), w: p(e.w), h: p(e.h), altText: "Logo " + k, objectName: "Logo " + k });
+  });
+}
+
 // ---------- layouts ----------
 function defineLayouts() {
   const BG_FOTO = (f) => ({ path: IMG + f });
@@ -111,6 +149,7 @@ function defineLayouts() {
     title: "PORTADA", background: BG_FOTO("portada.jpg"),
     objects: [
       logo(40, 410), trazo(450),
+      { image: { path: A + "esquina-doblada.png", x: p(852), y: p(415), w: p(108), h: p(108 * 952 / 750), altText: "Esquina doblada" } },
       ph("title", "title", { x: p(400), y: p(66), w: p(504), h: p(72), fontSize: 60, bold: true, color: C.background1, align: "right", valign: "bottom", charSpacing: 0.5, margin: 0 }, "PACKAGING"),
       ph("body", "body", { x: p(400), y: p(146), w: p(504), h: p(40), fontFace: LIGHT, fontSize: 30, color: C.background1, align: "right", valign: "top", margin: 0 }, "Presentación institucional"),
       ph("anio", "body", { x: p(600), y: p(188), w: p(304), h: p(52), fontSize: 40, bold: true, color: C.background1, align: "right", valign: "top", margin: 0 }, "2026"),
@@ -130,9 +169,9 @@ function defineLayouts() {
   const seps = [
     ["SEPARADOR CORRUGADO", C.accent1, "sep-corrugado.jpg", "corrugado-blanco"],
     ["SEPARADOR PAPEL", C.accent2, "sep-bobina.jpg", "papel-blanco"],
-    ["SEPARADOR FLEXIBLES", C.accent3, "sep-corrugado.jpg", "flexible-blanco"],
-    ["SEPARADOR BOLSAS", C.accent4, "sep-bobina.jpg", "bolsas-blanco"],
-    ["SEPARADOR TRANSVERSAL", HX.celeste, "bosque.jpg", null],
+    ["SEPARADOR FLEXIBLES", C.accent3, "sep-flexibles.jpg", "flexible-blanco"],
+    ["SEPARADOR BOLSAS", C.accent4, "sep-bolsas.jpg", "bolsas-blanco"],
+    ["SEPARADOR TRANSVERSAL", HX.celeste, "sep-transversal.jpg", null],
   ];
   for (const [t, col, foto, ico] of seps) {
     const objs = [
@@ -183,13 +222,13 @@ function defineLayouts() {
     ],
   });
 
-  for (const [k, marca, mcol] of [["corrugado", "CARTOCOR", HX.cartocor], ["flexibles", "CONVERFLEX", HX.converflex], ["papel", "PAPEL MISIONERO", HX.misionero], ["bolsas", "PUNTAPEL", HX.puntapel]]) {
+  for (const [k, marca, mcol, lg] of [["corrugado", "CARTOCOR", HX.cartocor, "logo-cartocor-color.png"], ["flexibles", "CONVERFLEX", HX.converflex, "logo-converflex-color.png"], ["papel", "PAPEL MISIONERO", HX.misionero, "logo-papel-misionero-color.png"], ["bolsas", "PUNTAPEL", HX.puntapel, "logo-puntapel-color.png"]]) {
     pres.defineSlideMaster({
       title: "UNIDAD " + U[k].nombre.toUpperCase().split(" ")[0], background: { color: C.background1 },
       objects: [
         { text: { text: "", options: { shape: SH.ellipse, x: p(-180), y: p(-200), w: p(520), h: p(520), fill: { color: U[k].col }, line: { type: "none" } } } },
         { text: { text: "", options: { shape: SH.ellipse, x: p(24), y: p(22), w: p(96), h: p(96), fill: { color: C.background1 }, line: { type: "none" } } } },
-        ph("marca", "body", { x: p(24), y: p(22), w: p(96), h: p(96), fontSize: 11, bold: true, color: mcol, align: "center", valign: "middle", margin: 0 }, marca),
+        logoEnc(lg, 34, 46, 76, 48),
         { text: { text: "", options: { shape: SH.roundRect, x: p(110), y: p(200), w: p(800), h: p(300), rectRadius: p(120), fill: { color: C.background2 }, line: { type: "none" } } } },
         ph("title", "title", { x: p(360), y: p(40), w: p(380), h: p(60), fontSize: 26, bold: true, color: C.text1, valign: "middle", margin: 0 }, U[k].nombre),
         ph("body", "body", { x: p(150), y: p(472), w: p(720), h: p(30), fontSize: 15, color: C.text1, valign: "middle", margin: 0 }, "Cifra clave de la unidad"),
@@ -202,6 +241,9 @@ function defineLayouts() {
     objects: [
       { text: { text: "", options: { shape: SH.roundRect, x: p(220), y: p(200), w: p(520), h: p(120), rectRadius: p(12), fill: { color: HX.velo, transparency: 28 }, line: { type: "none" } } } },
       logo(40, 466),
+      { text: { text: "", options: { shape: SH.roundRect, x: p(834), y: p(420), w: p(90), h: p(100), rectRadius: p(12), fill: { color: C.background1 }, line: { type: "none" } } } },
+      { image: { path: A + "qr-cartocor.png", x: p(844), y: p(426), w: p(70), h: p(70), altText: "QR cartocor.com" } },
+      { text: { text: "Cartocor.com", options: { x: p(834), y: p(498), w: p(90), h: p(16), fontSize: 8, color: C.text1, align: "center", margin: 0 } } },
       ph("title", "title", { x: p(220), y: p(200), w: p(520), h: p(120), fontSize: 52, bold: true, color: C.background1, align: "center", valign: "middle", margin: 0 }, "¡GRACIAS!"),
     ],
   });
@@ -230,10 +272,8 @@ async function build() {
     { text: "Automatización", options: { bullet: { type: "number" }, breakLine: true } },
     { text: "Sostenibilidad", options: { bullet: { type: "number" } } },
   ], { placeholder: "body" });
-  ["CARTOCOR", "CONVER-\nFLEX", "ZUCAMOR", "PAPEL\nMISIONERO", "PUNTAPEL"].forEach((m, i) => {
-    s.addText(m, { shape: SH.ellipse, x: p(500 + i * 84), y: p(426), w: p(76), h: p(76), fill: { color: C.background1 }, line: { type: "none" }, fontSize: 7, bold: true, color: C.text1, align: "center", valign: "middle", margin: 1, fit: "none", objectName: "Marca " + m });
-  });
-  s.addNotes("Reemplazar los círculos con texto por los logos oficiales de cada marca.");
+  marcasCirculo(s, 500, 426, 76, 84);
+  s.addNotes("Círculos con los logos de las cinco marcas, como en la plantilla 2025.");
 
   // 3. Presentación de negocio
   pres.addSection({ title: "Quiénes somos" });
@@ -248,11 +288,12 @@ async function build() {
   const marcas = [["CARTOCOR", HX.cartocor, "corrugado", "Corrugado"], ["CONVERFLEX", HX.converflex, "flexibles", "Flexibles"], ["ZUCAMOR", HX.zucamor, "papel", "Papel reciclado"], ["PAPEL MISIONERO", HX.misionero, "kraft", "Papel kraft"], ["PUNTAPEL", HX.puntapel, "bolsas", "Bolsas industriales"]];
   marcas.forEach(([m, col, u, lab], i) => {
     const x = 482 + i * 88;
-    s.addText(m, { shape: SH.roundRect, x: p(x), y: p(300), w: p(76), h: p(82), rectRadius: p(12), fill: { color: col }, line: { type: "none" }, fontSize: 8, bold: true, color: C.background1, align: "center", valign: "middle", margin: 2, objectName: "Ficha " + m });
+    const fk = ["cartocor", "converflex", "zucamor", "papel-misionero", "puntapel"][i];
+    s.addImage({ path: A + "ficha-" + fk + ".png", x: p(x + 6), y: p(i === 0 ? 290 : 298), w: p(i === 0 ? 70 : 64), h: p(i === 0 ? 88 : 81), altText: "Logo " + m, objectName: "Ficha " + m });
     circIcon(s, u, x + 8, 392, 60);
     s.addText(lab, { x: p(x - 8), y: p(456), w: p(92), h: p(36), fontSize: 11, color: HX.gris, align: "center", valign: "top", margin: 0, isTextBox: true, objectName: "Rótulo " + lab });
   });
-  s.addNotes("Fichas de marca en el color de cada marca; debajo, el ícono de su unidad. Reemplazar el texto de las fichas por los logos oficiales.");
+  s.addNotes("Fichas de marca originales del institucional 2026 (Cartocor más grande, como en el original) con el ícono de cada unidad debajo.");
 
   // 4. Separador
   pres.addSection({ title: "Resultados" });
@@ -289,8 +330,8 @@ async function build() {
   s = pres.addSlide({ masterName: "SOLO TITULO", sectionTitle: "Resultados" });
   s.addText([{ text: "PACKAGING ", options: { fontFace: LIGHT } }, { text: "Highlights", options: { bold: true } }], { placeholder: "title" });
   s.addShape(SH.roundRect, { x: p(50), y: p(200), w: p(560), h: p(170), rectRadius: p(70), fill: { color: C.background2 }, line: { type: "none" }, objectName: "Mancha arena" });
-  s.addImage({ path: SCR + "up/foto-corrugado.jpg", x: p(70), y: p(150), w: p(210), h: p(210), sizing: { type: "cover", w: p(210), h: p(210) }, rounding: true, altText: "Cartón corrugado", objectName: "Foto corrugado" });
-  s.addImage({ path: SCR + "up/foto-bobina-kraft.jpg", x: p(320), y: p(170), w: p(190), h: p(190), sizing: { type: "cover", w: p(190), h: p(190) }, rounding: true, altText: "Bobinas de papel kraft", objectName: "Foto bobina" });
+  s.addImage({ path: fit(SCR + "up/foto-corrugado.jpg", 210, 210), x: p(70), y: p(150), w: p(210), h: p(210), rounding: true, altText: "Cartón corrugado", objectName: "Foto corrugado" });
+  s.addImage({ path: fit(SCR + "up/foto-bobina-kraft.jpg", 190, 190), x: p(320), y: p(170), w: p(190), h: p(190), rounding: true, altText: "Bobinas de papel kraft", objectName: "Foto bobina" });
   circIcon(s, "corrugado", 222, 302, 66);
   circIcon(s, "kraft", 462, 314, 56);
   s.addText("Corrugado", { x: p(110), y: p(392), w: p(130), h: p(24), fontSize: 13, color: HX.gris, align: "center", margin: 0, isTextBox: true });
@@ -335,9 +376,7 @@ async function build() {
       { text: sub, options: { fontSize: 13 } },
     ], { shape: SH.roundRect, x: p(x), y: p(178), w: p(194), h: p(204), rectRadius: p(28), fill: { color: bg }, line: { type: "none" }, color: fg, align: "center", valign: "middle", margin: 6, objectName: "Ficha " + lab });
   });
-  ["CARTOCOR", "CONVER-\nFLEX", "ZUCAMOR", "PAPEL\nMIS.", "PUNTAPEL"].forEach((m, i) => {
-    s.addText(m, { shape: SH.ellipse, x: p(320 + i * 66), y: p(440), w: p(58), h: p(58), fill: { color: C.background1 }, line: { type: "none" }, fontSize: 7, bold: true, color: C.text1, align: "center", valign: "middle", margin: 1, objectName: "Marca " + m });
-  });
+  marcasCirculo(s, 320, 440, 58, 66);
   s.addNotes("Siempre cuatro fichas. Cifras del institucional 2026 (cajas armadas: Argentina).");
 
   // 9. Separador soluciones
@@ -347,19 +386,18 @@ async function build() {
 
   // 10. Unidad de negocio
   s = pres.addSlide({ masterName: "UNIDAD CORRUGADO", sectionTitle: "Soluciones" });
-  s.addText("CARTOCOR", { placeholder: "marca" });
   s.addText("Cartón corrugado", { placeholder: "title" });
   s.addText([{ text: "Fruta, carnes, bebidas y displays POP", options: { bold: true } }, { text: " · 900 millones de m² por año" }], { placeholder: "body" });
   s.addShape(SH.ellipse, { x: p(788), y: p(24), w: p(140), h: p(140), fill: { color: C.accent1 }, line: { type: "none" }, objectName: "Aro sello" });
-  s.addImage({ path: SCR + "up/foto-corrugado.jpg", x: p(793), y: p(29), w: p(130), h: p(130), sizing: { type: "cover", w: p(130), h: p(130) }, rounding: true, altText: "Cartón corrugado", objectName: "Sello foto" });
+  s.addImage({ path: fit(SCR + "up/foto-corrugado.jpg", 130, 130), x: p(793), y: p(29), w: p(130), h: p(130), rounding: true, altText: "Cartón corrugado", objectName: "Sello foto" });
   s.addText("Corrugado", { x: p(793), y: p(29), w: p(130), h: p(130), fontFace: MANO, fontSize: 30, color: C.background1, align: "center", valign: "middle", margin: 0, isTextBox: true, shadow: { type: "outer", color: "000000", opacity: 0.5, blur: 4, offset: 1, angle: 90 }, objectName: "Sello texto" });
   circIcon(s, "corrugado", 890, 20, 44);
-  const col = [["up/foto-corrugado.jpg", 150, 228, 170, 120, -4], ["up/foto-bobina-kraft.jpg", 340, 238, 150, 170, 3], ["up/foto-corrugado.jpg", 510, 222, 180, 120, -2], ["up/foto-bobina-kraft.jpg", 712, 258, 150, 130, 4]];
-  col.forEach(([f, x, y, w, h, r], i) => {
-    s.addShape(SH.rect, { x: p(x), y: p(y), w: p(w), h: p(h), fill: { color: C.background1 }, line: { type: "none" }, rotate: r, shadow: { type: "outer", color: "1F497D", opacity: 0.2, blur: 10, offset: 4, angle: 90 }, objectName: "Marco " + (i + 1) });
-    s.addImage({ path: SCR + f, x: p(x + 6), y: p(y + 6), w: p(w - 12), h: p(h - 12), sizing: { type: "cover", w: p(w - 12), h: p(h - 12) }, rotate: r, altText: "Producto de packaging", objectName: "Foto collage " + (i + 1) });
+  // collage de productos recortados (originales de la plantilla 2025)
+  [["producto-display-pop.png", 140, 205, 110, 200], ["producto-05.png", 250, 290, 120, 110], ["producto-07.png", 360, 230, 140, 110], ["producto-12.png", 500, 300, 150, 100], ["producto-09.png", 640, 220, 100, 110], ["producto-03.png", 730, 300, 130, 140], ["producto-16.png", 330, 350, 140, 110], ["producto-pallet.png", 800, 220, 90, 100]].forEach(([f, x, y, w, h], i) => {
+    const e = enc(f, x, y, w, h);
+    s.addImage({ path: e.path, x: p(e.x), y: p(e.y), w: p(e.w), h: p(e.h), shadow: { type: "outer", color: "1F497D", opacity: 0.22, blur: 10, offset: 4, angle: 90 }, altText: "Producto de packaging", objectName: "Producto " + (i + 1) });
   });
-  s.addNotes("Reemplazar las fotos del collage por productos reales (PNG recortados con sombra, o fotos con marco blanco).");
+  s.addNotes("Collage con productos recortados de la plantilla 2025. Reemplazar por los productos del cliente o de la unidad (PNG sin fondo, con sombra).");
 
   // 11. Timeline
   pres.addSection({ title: "Automatización" });
@@ -402,14 +440,16 @@ async function build() {
   // 13. Burbujas de datos
   s = pres.addSlide({ masterName: "SOLO TITULO", sectionTitle: "Sostenibilidad" });
   s.addText([{ text: "SOSTENIBILIDAD ", options: { fontFace: LIGHT } }, { text: "en cifras", options: { bold: true } }], { placeholder: "title" });
-  s.addImage({ path: IMG + "bosque.jpg", x: p(560), y: p(-40), w: p(520), h: p(620), sizing: { type: "cover", w: p(520), h: p(620) }, rounding: true, altText: "Plantación de pinos", objectName: "Foto bosque" });
+  s.addImage({ path: fit(IMG + "bosque.jpg", 520, 620), x: p(560), y: p(-40), w: p(520), h: p(620), rounding: true, altText: "Plantación de pinos", objectName: "Foto bosque" });
   [[60, 160, 190, C.accent1, "60 %", "energía renovable"], [270, 140, 160, C.accent3, "180.000 t", "cartón reciclado por año"], [150, 340, 150, C.accent4, "14 %", "menos CO₂ en transporte"], [330, 320, 170, HX.corrOsc, "600.000", "plantines por año"]].forEach(([x, y, d, c, v, l]) => {
     s.addText([{ text: v, options: { fontFace: CIFRAS, fontSize: v.length > 6 ? 22 : (d > 165 ? 34 : 28), bold: true, color: c, breakLine: true } }, { text: l, options: { fontSize: 12, color: C.text1 } }], { shape: SH.ellipse, x: p(x), y: p(y), w: p(d), h: p(d), fill: { color: C.background2 }, line: { type: "none" }, align: "center", valign: "middle", margin: 10, objectName: "Burbuja " + v });
   });
   s.addNotes("El tamaño de la burbuja marca la importancia del dato, no su valor.");
 
-  const GAL = require("./galeria.js")({ pres, C, SH, HX, U, p, ICONS, IMG, SCR, LIGHT, CIFRAS, MANO, THEME, circIcon, pillShapes, drawObjs });
+  const GAL = require("./galeria.js")({ A, fit, enc, pres, C, SH, HX, U, p, ICONS, IMG, SCR, LIGHT, CIFRAS, MANO, THEME, circIcon, pillShapes, drawObjs });
   GAL.modulos();
+  const ORI = require("./originales.js")({ A, fit, enc, pres, C, SH, HX, p, LIGHT, CIFRAS, MANO, circIcon });
+  ORI.modulos();
 
   // 14. Cierre
   pres.addSection({ title: "Cierre" });
@@ -419,6 +459,7 @@ async function build() {
   s.addNotes("Reemplazar el recuadro por el QR real a cartocor.com.");
 
   GAL.galeria();
+  ORI.galeria();
 
   await pres.writeFile({ fileName: OUT });
   await applyTheme(OUT, THEME);

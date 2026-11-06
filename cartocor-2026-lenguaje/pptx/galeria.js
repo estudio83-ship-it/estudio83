@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 module.exports = function (ctx) {
-  const { pres, C, SH, HX, U, p, ICONS, IMG, SCR, LIGHT, CIFRAS, MANO, THEME, circIcon, pillShapes, drawObjs } = ctx;
+  const { A, fit, enc, pres, C, SH, HX, U, p, ICONS, IMG, SCR, LIGHT, CIFRAS, MANO, THEME, circIcon, pillShapes, drawObjs } = ctx;
   const T = THEME.colors;
   const TINT = { corrugado: "E6F3D6", papel: "FBF2D2", flexibles: "D9E5F4", bolsas: "E4E0EC", celeste: "E5EEF7", kraft: "F2E5CF" };
   const UCOL = { corrugado: C.accent1, papel: C.accent2, flexibles: C.accent3, bolsas: C.accent4, kraft: C.accent5 };
@@ -142,7 +142,7 @@ module.exports = function (ctx) {
   function fotoCirculo(s, x, y, d, foto, ringCol, grupo, badge) {
     const g = grupo || newG("Foto circular");
     s.addShape(SH.ellipse, { x: p(x - 4), y: p(y - 4), w: p(d + 8), h: p(d + 8), fill: { color: C.background1 }, line: { color: ringCol, width: 1.5 }, objectName: G(g, "Aro") });
-    s.addImage({ path: foto, x: p(x), y: p(y), w: p(d), h: p(d), sizing: { type: "cover", w: p(d), h: p(d) }, rounding: true, altText: "Foto", objectName: G(g, "Foto") });
+    s.addImage({ path: fit(foto, d, d), x: p(x), y: p(y), w: p(d), h: p(d), rounding: true, altText: "Foto", objectName: G(g, "Foto") });
     if (badge) {
       const u = U[badge], bd = d * 0.34, bx = x + d - bd * 0.75, by = y + d - bd * 0.85;
       s.addShape(SH.ellipse, { x: p(bx), y: p(by), w: p(bd), h: p(bd), fill: { color: u.col }, line: { color: C.background1, width: 2 }, objectName: G(g, "Insignia") });
@@ -261,7 +261,7 @@ module.exports = function (ctx) {
   ];
   function mapa(s, mx, my, conLista, h = 420) {
     const w = h * 984 / 1923;
-    s.addImage({ path: SCR + "arcor/un/ppt/media/image77.png", x: p(mx), y: p(my), w: p(w), h: p(h), altText: "Mapa de Argentina", objectName: "Mapa Argentina" });
+    s.addImage({ path: A + "mapa-argentina.png", x: p(mx), y: p(my), w: p(w), h: p(h), altText: "Mapa de Argentina", objectName: "Mapa Argentina" });
     PLANTAS.forEach(([prov, txt, fx, fy]) => pin(s, mx + fx * w - 11, my + fy * h - 22, C.accent6, "Pin " + prov, 22));
     if (!conLista) return;
     PLANTAS.forEach(([prov, txt], i) => {
@@ -537,11 +537,11 @@ module.exports = function (ctx) {
     cap(s, "Conector punteado", 500, 204);
     fotoCirculo(s, 50, 250, 110, FOTO.corr, C.accent6, "Foto circular con aro"); cap(s, "Foto circular + aro", 40, 372);
     fotoCirculo(s, 210, 250, 110, FOTO.bob, C.accent5, "Foto circular con insignia", "kraft"); cap(s, "Foto + insignia de unidad", 200, 372);
-    { const g = "Sello de unidad", x = 370, y = 250, d = 110; s.addShape(SH.ellipse, { x: p(x - 5), y: p(y - 5), w: p(d + 10), h: p(d + 10), fill: { color: C.accent1 }, line: { type: "none" }, objectName: G(g, "Aro") }); s.addImage({ path: FOTO.corr, x: p(x), y: p(y), w: p(d), h: p(d), sizing: { type: "cover", w: p(d), h: p(d) }, rounding: true, altText: "Corrugado", objectName: G(g, "Foto") }); s.addText("Corrugado", { x: p(x), y: p(y), w: p(d), h: p(d), fontFace: MANO, fontSize: 26, color: C.background1, align: "center", valign: "middle", margin: 0, shadow: { type: "outer", color: "000000", opacity: 0.5, blur: 4, offset: 1, angle: 90 }, objectName: G(g, "Texto") }); }
+    { const g = "Sello de unidad", x = 370, y = 250, d = 110; s.addShape(SH.ellipse, { x: p(x - 5), y: p(y - 5), w: p(d + 10), h: p(d + 10), fill: { color: C.accent1 }, line: { type: "none" }, objectName: G(g, "Aro") }); s.addImage({ path: fit(FOTO.corr, d, d), x: p(x), y: p(y), w: p(d), h: p(d), rounding: true, altText: "Corrugado", objectName: G(g, "Foto") }); s.addText("Corrugado", { x: p(x), y: p(y), w: p(d), h: p(d), fontFace: MANO, fontSize: 26, color: C.background1, align: "center", valign: "middle", margin: 0, shadow: { type: "outer", color: "000000", opacity: 0.5, blur: 4, offset: 1, angle: 90 }, objectName: G(g, "Texto") }); }
     cap(s, "Sello de unidad", 370, 372);
-    { const g = "Foto con marco", x = 530, y = 250; s.addShape(SH.rect, { x: p(x), y: p(y), w: p(150), h: p(110), fill: { color: C.background1 }, line: { type: "none" }, rotate: -3, shadow: { type: "outer", color: "1F497D", opacity: 0.2, blur: 10, offset: 4, angle: 90 }, objectName: G(g, "Marco") }); s.addImage({ path: FOTO.bob, x: p(x + 6), y: p(y + 6), w: p(138), h: p(98), sizing: { type: "cover", w: p(138), h: p(98) }, rotate: -3, altText: "Foto", objectName: G(g, "Foto") }); }
+    { const g = "Foto con marco", x = 530, y = 250; s.addShape(SH.rect, { x: p(x), y: p(y), w: p(150), h: p(110), fill: { color: C.background1 }, line: { type: "none" }, rotate: -3, shadow: { type: "outer", color: "1F497D", opacity: 0.2, blur: 10, offset: 4, angle: 90 }, objectName: G(g, "Marco") }); s.addImage({ path: fit(FOTO.bob, 138, 98), x: p(x + 6), y: p(y + 6), w: p(138), h: p(98), rotate: -3, altText: "Foto", objectName: G(g, "Foto") }); }
     cap(s, "Foto con marco (collage)", 530, 372);
-    { const g = "Foto con corte ondulado", x = 720, y = 240, w = 200, h = 130; s.addImage({ path: FOTO.bosque, x: p(x), y: p(y), w: p(w), h: p(h), sizing: { type: "cover", w: p(w), h: p(h) }, altText: "Foto", objectName: G(g, "Foto") }); const pts = [{ x: p(w * 0.72), y: 0 }]; for (let j = 1; j <= 30; j++) pts.push({ x: p(w * 0.72 + 14 * Math.sin(j / 30 * Math.PI * 2.2)), y: p(h * j / 30) }); pts.push({ x: p(w), y: p(h) }, { x: p(w), y: 0 }, { close: true }); free(s, x, y, w, h, pts, { fill: { color: C.background1 }, line: { type: "none" }, objectName: G(g, "Corte blanco") }); }
+    { const g = "Foto con corte ondulado", x = 720, y = 240, w = 200, h = 130; s.addImage({ path: fit(FOTO.bosque, w, h), x: p(x), y: p(y), w: p(w), h: p(h), altText: "Foto", objectName: G(g, "Foto") }); const pts = [{ x: p(w * 0.72), y: 0 }]; for (let j = 1; j <= 30; j++) pts.push({ x: p(w * 0.72 + 14 * Math.sin(j / 30 * Math.PI * 2.2)), y: p(h * j / 30) }); pts.push({ x: p(w), y: p(h) }, { x: p(w), y: 0 }, { close: true }); free(s, x, y, w, h, pts, { fill: { color: C.background1 }, line: { type: "none" }, objectName: G(g, "Corte blanco") }); }
     cap(s, "Corte ondulado (forma blanca sobre foto)", 720, 372, 200);
     ["CARTOCOR", "CONVERFLEX", "ZUCAMOR", "PAPEL MISIONERO", "PUNTAPEL"].forEach((m, i) => {
       const c = [HX.cartocor, HX.converflex, HX.zucamor, HX.misionero, HX.puntapel][i];

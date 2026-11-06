@@ -15,6 +15,17 @@ def bbox(el):
     o=x.find('a:off',NS); e=x.find('a:ext',NS)
     X,Y,W,H=int(o.get('x')),int(o.get('y')),int(e.get('cx')),int(e.get('cy'))
     return X,Y,X+W,Y+H
+def sanitize(name, data):
+    if not (name.endswith('.xml') or name.endswith('.rels')): return data
+    t=data.decode('utf-8')
+    # rotaciones negativas -> rango canónico [0, 21600000)
+    t=re.sub(r'rot="(-\d+)"', lambda m: 'rot="%d"' % (int(m.group(1)) % 21600000), t)
+    t=t.replace('<a:ln/>','<a:ln><a:noFill/></a:ln>').replace('<a:ln></a:ln>','<a:ln><a:noFill/></a:ln>')
+    t=re.sub(r'<a:srcRect l="0" r="0" t="0" b="0"\s*/>','',t)
+    t=t.replace('<a:stretch/>','<a:stretch><a:fillRect/></a:stretch>')
+    t=re.sub(r'descr="/[^"]*/([^"/]*)"', lambda m: 'descr="%s"' % m.group(1), t)
+    if name=='[Content_Types].xml': t=t.replace('ContentType="image/jpg"','ContentType="image/jpeg"')
+    return t.encode('utf-8')
 total=0
 for item in zin.infolist():
     data=zin.read(item.filename)
@@ -52,5 +63,5 @@ for item in zin.infolist():
                 i=j
             else: i+=1
         data=etree.tostring(root,xml_declaration=True,encoding='UTF-8',standalone=True)
-    zout.writestr(item,data)
+    zout.writestr(item,sanitize(item.filename,data))
 zout.close(); shutil.move(tmp,src); print('grupos',total)
