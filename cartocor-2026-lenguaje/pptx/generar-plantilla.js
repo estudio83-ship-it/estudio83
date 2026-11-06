@@ -408,12 +408,17 @@ async function build() {
   });
   s.addNotes("El tamaño de la burbuja marca la importancia del dato, no su valor.");
 
+  const GAL = require("./galeria.js")({ pres, C, SH, HX, U, p, ICONS, IMG, SCR, LIGHT, CIFRAS, MANO, THEME, circIcon, pillShapes, drawObjs });
+  GAL.modulos();
+
   // 14. Cierre
   pres.addSection({ title: "Cierre" });
   s = pres.addSlide({ masterName: "CIERRE", sectionTitle: "Cierre" });
   s.addText("¡GRACIAS!", { placeholder: "title" });
   s.addText([{ text: "QR", options: { bold: true, fontSize: 18, breakLine: true } }, { text: "cartocor.com", options: { fontSize: 9 } }], { shape: SH.roundRect, x: p(834), y: p(424), w: p(86), h: p(96), rectRadius: p(12), fill: { color: C.background1 }, line: { type: "none" }, color: C.text1, align: "center", valign: "middle", margin: 2, objectName: "Lugar del QR" });
   s.addNotes("Reemplazar el recuadro por el QR real a cartocor.com.");
+
+  GAL.galeria();
 
   await pres.writeFile({ fileName: OUT });
   await applyTheme(OUT, THEME);
