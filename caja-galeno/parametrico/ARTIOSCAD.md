@@ -41,16 +41,24 @@ Guardá esa tabla de conversión para reutilizarla con cada variante. Unidades: 
 El troquel sale con la caja girada 90° a la derecha (tubo vertical) y el separador a su derecha, a 8 mm, con el largo vertical. El DXF lleva las líneas del troquel y sólo las cotas H y L (`--todas-las-cotas` para el resto).
 
 
+De menor a mayor complejidad: la **caja sola** (lo que se abre por defecto), **con botella** (la caja la acompaña) y **con separador** (cuna o acordeón; necesita la botella).
+
 | Grupo | Var | En la página | Qué es | Original |
 |---|---|---|---|---|
-| Botella | `Lb` | Alto botella | Largo de la botella (va acostada a lo largo de la caja), hasta 350 | 306 |
-| Botella | `Dc` | Diámetro botella | Agujero del tabique (hasta 100, y hasta A − 2e − 4 y H − 2e − 6) | 80 |
-| Botella | `Dn` | Diámetro cuello | Ranura del tabique | 31 |
-| Botella | `n` | Cantidad | Botellas (hasta 6) | 3 |
-| Caja | `A` | Alto | Ancho de los costados, hasta 200; sale del diámetro, se puede agrandar pero no bajar de `Dc + 2e + 8` | 94 |
-| Caja | `H` | Ancho | Alto del frente entre hendidos (largo del tubo), hasta 600; sale de las botellas, se puede agrandar pero no achicar por debajo de lo que necesitan | 274 |
-| Caja | `t` | Puente separador | Puente de los tabiques, de 10 a 50 | 28 |
+| Caja | `L` | Largo | Ancho del contrafrente; con botella sale de `Lb + 3e + 5` y no baja de eso | 320 |
+| Caja | `A` | Alto | Ancho de los costados, hasta 200; con botella sale del ⌀ máximo (`Dm + 2e + 8`) y no baja de eso | 94 |
+| Caja | `H` | Ancho | Alto del frente entre hendidos (largo del tubo), hasta 600; con botella sale de la cantidad y el ⌀ máximo | 274 |
 | Cartón | `e` | Espesor del cartón | De 1 a 7; onda E 2 · B 3 · C 4 (el 6463 es onda B) | 3 |
+| Botella | `bot` | Sin / Con | Suma la botella | Sin |
+| Botella | `Lb` | Alto | Largo de la botella (va acostada a lo largo de la caja), hasta 350 | 306 |
+| Botella | `Dc` | ⌀ base | Diámetro de la base: el agujero de la cuna | 80 |
+| Botella | `Dm` | ⌀ máximo | El mayor diámetro del cuerpo (en las cónicas, antes del radio del hombro); nunca menor que la base. Manda el alto de la caja, el paso entre botellas y el compartimento del acordeón | 80 |
+| Botella | `Dn` | ⌀ cuello | Ranura de la cuna | 31 |
+| Botella | `n` | Cantidad | Botellas (hasta 6) | 3 |
+| Separador | `sep` | Sin / Cuna / Acordeón | 0 sin separador, 1 cuna (el del 6463), 2 acordeón; sumar uno suma la botella | Sin |
+| Separador | `t` | Puente de la cuna | De 10 a 50; sólo con cuna | 28 |
+
+El paso entre ejes de botellas sale del ⌀ máximo: `p = Dm + 6`. `generar.mjs` acepta `--L --A --H --e --bot --Lb --Dc --Dm --Dn --n --sep --t` (y `--p` para forzar el paso); dar medidas de botella suma la botella.
 
 Mandan las botellas: el ancho y el alto de la caja nunca cambian la cantidad ni el diámetro. Con el ancho máximo de 600, entran 6 botellas hasta ⌀91 (con onda B); con diámetros mayores, hasta 5. Alrededor de cada agujero del separador queda siempre material mínimo: 7,5 mm del agujero (o de la boca de la ranura del cuello) al costado, como en el 6463, y 4 mm del agujero a cada hendido del tabique.
 
@@ -58,9 +66,9 @@ El paso entre ejes de botellas ya no es una variable: sale del diámetro, `p = D
 
 El largo de la caja sale de la botella: `L = Lb + 3e + 5` (entra en el separador plegado, `L − 3e`, con 5 mm de juego). Con la botella del 6463 y onda B, L = 320.
 
-El ancho también sale de las botellas: `H = n·(Dc + 6) + 2e + 10`, redondeado al milímetro (10 es el juego lateral). Al cambiar `n` o `Dc` en la página, H se recalcula; después se puede ajustar a mano. En `generar.mjs`, si pasás `--n` o `--p` sin `--H`, H se calcula igual.
+El ancho también sale de las botellas: `H = n·(Dm + 6) + 2e + 10`, redondeado al milímetro (10 es el juego lateral). Al cambiar `n` o el ⌀ en la página, H se recalcula; después se puede ajustar a mano. En `generar.mjs`, si pasás `--n` o `--p` sin `--H`, H se calcula igual.
 
-La profundidad sale del diámetro: `A = Dc + 2e + 8` (el agujero con 4 mm por lado en el tabique de `A − 2e`). Al cambiar `Dc` en la página, A y H se recalculan.
+La profundidad sale del ⌀ máximo: `A = Dm + 2e + 8` (el agujero con 4 mm por lado en el tabique de `A − 2e`). Al cambiar `Dc` en la página, A y H se recalculan.
 
 Derivadas: el separador plegado ocupa `L − 3e` de largo (si crece `t`, se achica el panel central `L − 3e − 2t`, la caja no cambia); frasco hasta `L − 3e − 5`; interior de `H − 2e` de ancho por `4A + L − 11e` de largo.
 
@@ -68,17 +76,17 @@ Todas las variables y medidas se manejan en milímetros enteros; las cotas del p
 
 ## Separador acordeón (opción)
 
-En la página, en Caja → Separador, se elige entre la **cuna** con agujeros (el separador del 6463) y un **acordeón**: una sola tira con hendidos paralelos al largo de la botella, que apoya en el piso y se pliega en zigzag formando un tabique doble entre botella y botella.
+En la página, en Separador, se elige entre **sin separador**, la **cuna** con agujeros (el separador del 6463) y un **acordeón**: una sola tira con hendidos paralelos al largo de la botella, que apoya en el piso y se pliega en zigzag formando un tabique doble entre botella y botella.
 
 | Tramo de la tira | Medida |
 |---|---|
 | Ancho de la tira | `L − 3e` (el largo del separador plegado) |
-| Piso de cada compartimento | `(H − 2e − 3e(n − 1)) / n` |
+| Piso de cada compartimento | `(H − 2e − 3e(n − 1)) / n`, al menos `Dm + 2` |
 | Cada lado del tabique | `A − 2e` (alto interior de la caja) |
 | Lomo del tabique | `3e` (las dos paredes y una luz de e) |
 | Largo total de la tira | `H − 2e + 2(n − 1)(A − 2e)` |
 
-Con acordeón el puente `t` no se usa, y el ancho de la caja no baja de lo necesario para que cada compartimento sea 2 mm más ancho que la botella. En `generar.mjs`: `--sep 1`.
+Con acordeón el puente `t` no se usa, y el ancho de la caja no baja de lo necesario para que cada compartimento sea 2 mm más ancho que la botella. En `generar.mjs`: `--sep 2` (y `--sep 1` para la cuna).
 
 ## Fórmulas para rearmarlo como paramétrico nativo
 

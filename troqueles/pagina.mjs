@@ -84,6 +84,9 @@ h3.group{font:700 20px/1.15 var(--display);letter-spacing:-.02em;color:var(--ink
 /* En pantallas táctiles los campos van a 16 px: con menos, Safari del iPhone hace zoom al tocarlos. */
 @media (pointer:coarse),(max-width:860px){input[type=number]{font-size:16px!important}}
 .var.off{opacity:.38}
+.campo.off{opacity:.45}
+.grupo.apagado .figura .lienzo{opacity:.35}
+.grupo.apagado h3.group{color:var(--soft)}
 .var.off input{cursor:not-allowed}
 button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--flash);font-weight:600}
 button{font:500 14px var(--body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:980px;padding:8px 16px;cursor:pointer}
@@ -178,7 +181,10 @@ svg.plan{display:block;width:100%;height:100%}
   .sheet{padding:14px 16px;gap:10px;border-radius:24px}
   .side{overflow:auto;align-content:start}
   form{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:start}
-  form .grupo:nth-child(2){grid-row:span 2}
+  /* Dos columnas que se leen de arriba abajo: primero la izquierda, después la derecha. */
+  form{grid-auto-flow:column;grid-template-rows:auto auto}
+  .side{position:relative}
+  .side .reset{position:absolute;right:16px;bottom:14px}
   .grupo{padding:10px 12px;gap:6px;border-radius:18px}
   h3.group{font-size:17px}
   .var{grid-template-columns:24px minmax(0,1fr) 64px;gap:0 6px}
@@ -298,8 +304,11 @@ for (const a of ATAJOS) {
   div.className = "presets";
   div.setAttribute("role", "group");
   div.setAttribute("aria-label", a.titulo);
-  div.innerHTML = '<span class="tag">' + a.titulo + "</span>" + a.opciones.map(([n, v]) => '<button type="button" data-atajo="' + v + '" data-key="' + a.key + '" data-nombre="' + n + '" aria-label="' + a.titulo + " " + n + (a.unidad ? ", " + v + " " + a.unidad : "") + '">' + n + "</button>").join("");
-  form.querySelector('.grupo[data-group="' + paramDeInicio(a.key).group + '"]').appendChild(div);
+  // El rótulo sobra cuando repite el título del recuadro.
+  div.innerHTML = (a.titulo === paramDeInicio(a.key).group ? "" : '<span class="tag">' + a.titulo + "</span>") + a.opciones.map(([n, v]) => '<button type="button" data-atajo="' + v + '" data-key="' + a.key + '" data-nombre="' + n + '" aria-label="' + a.titulo + " " + n + (a.unidad ? ", " + v + " " + a.unidad : "") + '">' + n + "</button>").join("");
+  const grupo = form.querySelector('.grupo[data-group="' + paramDeInicio(a.key).group + '"]');
+  // arriba: los botones van debajo del título (por ejemplo, para sumar o no una parte del diseño).
+  if (a.arriba) grupo.insertBefore(div, grupo.querySelector("h3").nextSibling); else grupo.appendChild(div);
 }
 const f1 = (v) => (Math.round(v * 10) / 10).toString();
 const mm = (v) => String(Math.round(v));
@@ -396,7 +405,7 @@ const aBarra = (p, v) => { const d = INICIAL[p.key]; return v <= d ? (d === p.mi
 const paramDe = (key) => PARAMETROS.find((q) => q.key === key);
 const setValue = (key, v) => { state[key] = v; document.getElementById("v-" + key).value = v; document.getElementById("r-" + key).value = aBarra(paramDe(key), v); };
 let hotTimer = 0;
-function render(source) {
+function render(source, cambio) {
   for (const p of PARAMETROS) {
     const num = document.getElementById("v-" + p.key), rng = document.getElementById("r-" + p.key);
     if (source === rng) num.value = deBarra(p, Number(rng.value)); else if (source === num) rng.value = aBarra(p, Number(num.value));
@@ -405,7 +414,7 @@ function render(source) {
     if (Number.isFinite(v) && v > 0) state[p.key] = Math.min(p.max, Math.max(p.min, p.step >= 1 ? Math.round(v) : v));
   }
   // Variables que siguen a otras (DESIGN.enlazar).
-  const key = source && source.id ? source.id.slice(2) : null;
+  const key = cambio || (source && source.id ? source.id.slice(2) : null);
   if (key && DESIGN.enlazar) { const sigue = DESIGN.enlazar(state, key); if (sigue) for (const k in sigue) setValue(k, sigue[k]); }
   const prevDims = model ? model.dims.map((d) => d.value) : null;
   model = DESIGN.generate(state);
@@ -430,10 +439,13 @@ function render(source) {
   document.querySelectorAll("[data-atajo]").forEach((b) => b.setAttribute("aria-pressed", String(Math.abs(Number(b.dataset.atajo) - model.P[b.dataset.key]) < 1e-9)));
   // Variables que no aplican con los valores actuales (DESIGN.inactiva): la fila queda atenuada y
   // sin uso, sin cambiar el tamaño del panel.
-  form.querySelectorAll(".var").forEach((row) => {
-    const off = !!(DESIGN.inactiva && DESIGN.inactiva(model.P, row.dataset.key));
+  // Recuadros enteros que no se usan (DESIGN.apagado, por ejemplo la botella si no se sumó): quedan
+  // atenuados con sus botones de arriba activos para sumarlos.
+  form.querySelectorAll(".grupo").forEach((g) => g.classList.toggle("apagado", !!(DESIGN.apagado && DESIGN.apagado(model.P, g.dataset.group))));
+  form.querySelectorAll(".var, .campo").forEach((row) => {
+    const off = !!(DESIGN.inactiva && DESIGN.inactiva(model.P, row.dataset.key)) || !!row.closest(".grupo.apagado");
     row.classList.toggle("off", off);
-    row.querySelectorAll("input").forEach((i) => { i.disabled = off; });
+    row.querySelectorAll("input, button").forEach((i) => { i.disabled = off; });
   });
   document.getElementById("facts").innerHTML = DESIGN.resumen(model).map(([k, v, hint]) => '<div class="row"><dt>' + k + "</dt><dd><strong>" + v + "</strong><span>" + hint + "</span></dd></div>").join("");
   clearTimeout(hotTimer);
@@ -516,7 +528,7 @@ form.addEventListener("change", () => render("commit"));
 document.querySelectorAll("[data-atajo]").forEach((b) => b.addEventListener("click", () => {
   const a = ATAJOS.find((q) => q.key === b.dataset.key);
   setValue(a.key, Number(b.dataset.atajo));
-  render("commit"); say(a.titulo + ": " + b.dataset.nombre + (a.unidad ? ", " + b.dataset.atajo + " " + a.unidad : "") + ".");
+  render("commit", a.key); say(a.titulo + ": " + b.dataset.nombre + (a.unidad ? ", " + b.dataset.atajo + " " + a.unidad : "") + ".");
 }));
 document.getElementById("reset").addEventListener("click", () => {
   for (const k in INICIAL) setValue(k, INICIAL[k]);

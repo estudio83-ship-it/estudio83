@@ -8,19 +8,23 @@ import { escribirDxf, escribirCf2, mmEntero } from "../../troqueles/cad.mjs";
 // zonas rectas con L, A y H; las orejas curvas escalan con A. El interior se dibuja desde cero con
 // las medidas de las botellas.
 
-// La botella manda: su largo fija el largo de la caja, L = Lb + 3e + 5 (entra en el separador
-// plegado, L − 3e, con 5 mm de juego). Con la botella del 6463 (306) y onda B, L = 320.
+// De menor a mayor complejidad: la caja sola (L, A, H y el cartón); con botella, la caja la acompaña
+// (L = Lb + 3e + 5: la botella entra en el separador plegado, L − 3e, con 5 mm de juego; con la
+// botella del 6463, 306, y onda B, L = 320); con separador, cuna (el del 6463) o acordeón.
 export const BOTTLE_GAP = 5;
 export const DEFAULTS = {
-  Lb: 306, // largo de la botella (va acostada a lo largo de la caja)
-  Dc: 80, // ⌀ del cuerpo de la botella: agujero del tabique
-  Dn: 31, // ⌀ del cuello de la botella: ranura del tabique
-  n: 3, // botellas
-  A: 94, // profundidad de la caja (costados)
-  H: 274, // alto del frente entre hendidos (largo del tubo)
-  t: 28, // puente de los tabiques
+  L: 320, // largo de la caja (ancho del contrafrente)
+  A: 94, // alto de la caja (profundidad de los costados)
+  H: 274, // ancho de la caja (alto del frente entre hendidos, largo del tubo)
   e: 3, // espesor del cartón: onda B (el 6463 está compensado para B)
-  sep: 0, // separador: 0 cuna (el del 6463, con agujeros), 1 acordeón
+  bot: 0, // 0 caja sola, 1 con botella
+  Lb: 306, // alto de la botella (va acostada a lo largo de la caja)
+  Dc: 80, // ⌀ de la base de la botella: agujero de la cuna
+  Dm: 80, // ⌀ máximo de la botella (en las cónicas, antes del hombro): manda el alto y el paso
+  Dn: 31, // ⌀ del cuello: ranura de la cuna
+  n: 3, // botellas
+  sep: 0, // separador: 0 sin separador, 1 cuna (el del 6463), 2 acordeón
+  t: 28, // puente de la cuna
 };
 export const lengthFor = (Lb, e) => Lb + 3 * e + BOTTLE_GAP;
 // El ancho sale de las botellas: n pasos más las paredes y el juego lateral del 6463 (274 = 3 × 86 + 2 × 3 + 10),
@@ -40,19 +44,21 @@ export const pitchFor = (Dc) => Dc + PITCH_GAP;
 // Espesores de referencia por onda (mm). Cada fabricante tiene los suyos: e se puede editar.
 export const ONDAS = { E: 2, B: 3, C: 4 };
 
+// En el orden del panel, de menor a mayor complejidad. bot y sep se eligen con botones (sin fila).
 export const PARAMS = [
-  { key: "Lb", group: "Botella", label: "Alto botella", min: 180, max: 350, step: 1 },
-  { key: "Dc", group: "Botella", label: "Diámetro botella", min: 36, max: 100, step: 1 },
-  { key: "Dn", group: "Botella", label: "Diámetro cuello", min: 8, max: 38, step: 1 },
-  { key: "n", group: "Botella", label: "Cantidad", min: 1, max: 6, step: 1 },
+  { key: "L", group: "Caja", label: "Largo", min: 210, max: 700, step: 1 },
   { key: "A", group: "Caja", label: "Alto", min: 60, max: 200, step: 1 },
   { key: "H", group: "Caja", label: "Ancho", min: 120, max: 600, step: 1 },
-  { key: "t", group: "Caja", label: "Puente separador", min: 10, max: 50, step: 1 },
-  // Tipo de separador: se elige con los botones Cuna / Acordeón, sin fila propia.
-  { key: "sep", group: "Caja", label: "Separador", min: 0, max: 1, step: 1, oculto: true },
   { key: "e", group: "Cartón", label: "Espesor del cartón", min: 1, max: 7, step: 1 },
+  { key: "bot", group: "Botella", label: "Botella", min: 0, max: 1, step: 1, oculto: true },
+  { key: "Lb", group: "Botella", label: "Alto botella", min: 180, max: 350, step: 1 },
+  { key: "Dc", group: "Botella", label: "Diámetro base", min: 36, max: 100, step: 1 },
+  { key: "Dm", group: "Botella", label: "Diámetro máximo", min: 36, max: 110, step: 1 },
+  { key: "Dn", group: "Botella", label: "Diámetro cuello", min: 8, max: 38, step: 1 },
+  { key: "n", group: "Botella", label: "Cantidad", min: 1, max: 6, step: 1 },
+  { key: "sep", group: "Separador", label: "Separador", min: 0, max: 2, step: 1, oculto: true },
+  { key: "t", group: "Separador", label: "Puente de la cuna", min: 10, max: 50, step: 1 },
 ];
-const L_RANGE = [210, 700];
 
 // Medidas fijas del troquel original que no dependen de los parámetros.
 export const SEPARATOR_GAP = 5;
@@ -74,35 +80,42 @@ export const LOMO = 3;
 export const WALL_MIN = 4;
 
 // Rango válido de cada variable dado el resto, para que el troquel no tenga líneas cruzadas ni sueltas.
-// Mandan las botellas: la cantidad sólo depende del diámetro (y del ancho máximo de la caja); el ancho
-// y el alto de la caja no bajan de lo que necesitan las botellas con su material mínimo alrededor.
+// Mandan las botellas: la cantidad sólo depende del diámetro (y del ancho máximo de la caja); el largo,
+// el ancho y el alto de la caja no bajan de lo que necesitan las botellas y el separador.
 export function limits(P) {
   const st = Object.fromEntries(PARAMS.map((q) => [q.key, [q.min, q.max]]));
-  const lim = { e: st.e };
+  const lim = { e: st.e, bot: [0, 1], sep: [0, 2] };
   const cl = (v, [a, b]) => Math.min(b, Math.max(a, v));
-  const e = cl(P.e, lim.e);
-  // La caja que sale de la botella tiene que quedar entre 210 y 700 de largo.
-  lim.Lb = [Math.max(st.Lb[0], L_RANGE[0] - 3 * e - BOTTLE_GAP), Math.min(st.Lb[1], L_RANGE[1] - 3 * e - BOTTLE_GAP)];
-  const L = lengthFor(cl(P.Lb, lim.Lb), e);
-  // El panel central del separador (L − 3e − 2t) no baja de 40.
-  lim.t = [st.t[0], Math.max(st.t[0], Math.min(st.t[1], (L - 3 * e - 40) / 2))];
+  const e = cl(P.e, lim.e), sep = Math.round(P.sep) || 0, bot = sep > 0 || Math.round(P.bot) === 1;
+  // La caja que sale de la botella tiene que quedar dentro del rango del largo.
+  lim.Lb = [Math.max(st.Lb[0], st.L[0] - 3 * e - BOTTLE_GAP), Math.min(st.Lb[1], st.L[1] - 3 * e - BOTTLE_GAP)];
+  const Lb = cl(P.Lb, lim.Lb);
   lim.Dc = [st.Dc[0], Math.min(st.Dc[1], st.A[1] - 2 * e - 2 * WALL_MIN)];
   const Dc = cl(P.Dc, lim.Dc);
+  lim.Dm = [Math.max(st.Dm[0], Dc), Math.min(st.Dm[1], st.A[1] - 2 * e - 2 * WALL_MIN)];
+  const Dm = cl(P.Dm, lim.Dm);
   lim.Dn = [st.Dn[0], Math.min(st.Dn[1], Dc - 6)];
   const half = Math.max(Dc / 2, FIX.flareW / 2);
-  const pMin = Math.max(Dc + 2, Dc / 2 + FIX.flareW / 2 + 3);
-  // Lugar de centro a centro de las botellas extremas con la caja en su ancho máximo.
-  const room = st.H[1] - 2 * e - 2 * EDGE_MIN - 2 * half;
+  const pMin = Math.max(Dm + 2, Dc / 2 + FIX.flareW / 2 + 3);
   const p1 = cl(P.p, [pMin, 500]);
-  lim.n = [1, Math.max(1, Math.min(st.n[1], 1 + Math.floor(room / p1 + 1e-9)))];
+  // Cuántas botellas entran a lo ancho con la caja en su ancho máximo, según el separador.
+  const Wmax = st.H[1] - 2 * e;
+  const nMax = sep === 1 ? 1 + Math.floor((Wmax - 2 * EDGE_MIN - 2 * half) / p1 + 1e-9)
+    : sep === 2 ? Math.floor((Wmax + LOMO * e) / (Dm + 2 + LOMO * e) + 1e-9)
+    : Math.floor(Wmax / (Dm + 2) + 1e-9);
+  lim.n = [1, Math.max(1, Math.min(st.n[1], nMax))];
   const n = cl(Math.round(P.n), lim.n);
+  const room = Wmax - 2 * EDGE_MIN - 2 * half;
   lim.p = n > 1 ? [pMin, Math.max(pMin, Math.min(500, room / (n - 1)))] : [pMin, Math.max(pMin, 500)];
   const p = cl(P.p, lim.p);
-  lim.sep = [0, 1];
-  lim.A = [Math.max(st.A[0], Dc + 2 * e + 2 * WALL_MIN), st.A[1]];
+  lim.L = [bot ? Math.max(st.L[0], lengthFor(Lb, e)) : st.L[0], st.L[1]];
+  const L = cl(P.L, lim.L);
+  // El panel central de la cuna (L − 3e − 2t) no baja de 40.
+  lim.t = [st.t[0], Math.max(st.t[0], Math.min(st.t[1], (L - 3 * e - 40) / 2))];
+  lim.A = [bot ? Math.max(st.A[0], Dm + 2 * e + 2 * WALL_MIN) : st.A[0], st.A[1]];
   // Con cuna, el ancho deja el material mínimo alrededor de los agujeros; con acordeón, cada
-  // compartimento tiene que ser al menos 2 mm más ancho que la botella.
-  const hMin = Math.round(P.sep) === 1 ? n * (Dc + 2) + (n - 1) * LOMO * e + 2 * e : (n - 1) * p + 2 * half + 2 * EDGE_MIN + 2 * e;
+  // compartimento es al menos 2 mm más ancho que la botella; sin separador, las botellas entran juntas.
+  const hMin = !bot ? st.H[0] : sep === 1 ? (n - 1) * p + 2 * half + 2 * EDGE_MIN + 2 * e : sep === 2 ? n * (Dm + 2) + (n - 1) * LOMO * e + 2 * e : n * (Dm + 2) + 2 * e;
   lim.H = [Math.max(st.H[0], hMin), st.H[1]];
   // Todo en milímetros enteros: los rangos se redondean hacia adentro.
   for (const k in lim) { const a = Math.ceil(lim[k][0] - 1e-9), b = Math.floor(lim[k][1] + 1e-9); lim[k] = [a, Math.max(a, b)]; }
@@ -110,45 +123,53 @@ export function limits(P) {
 }
 
 export function clampParams(params) {
+  params = params || {};
+  const given = (k) => params[k] !== undefined;
   const P = { ...DEFAULTS, ...params };
-  // Compatibilidad: si viene L (largo de caja) y no Lb, se deduce la botella.
-  if (params && params.L !== undefined && params.Lb === undefined) P.Lb = params.L - 3 * P.e - BOTTLE_GAP;
-  // El paso sale del diámetro (salvo que venga dado). Si cambian las botellas y no vienen A o H,
-  // la caja las acompaña: el diámetro mueve el alto A; la cantidad y el paso, el ancho H.
-  const given = (k) => params && params[k] !== undefined;
-  if (!given("p")) P.p = pitchFor(P.Dc);
-  if (!given("A") && given("Dc")) P.A = Math.max(60, Math.min(200, depthFor(P.Dc, P.e)));
-  if (!given("H") && (given("n") || given("p") || given("Dc"))) P.H = Math.max(120, Math.min(600, widthFor(Math.round(P.n), P.p, P.e)));
+  // Un separador necesita la botella; las medidas de la botella dadas sin decir nada la suman.
+  P.sep = Math.max(0, Math.min(2, Math.round(Number(P.sep)) || 0));
+  if (!given("bot") && ["Lb", "Dc", "Dm", "Dn", "n", "p"].some(given)) P.bot = 1;
+  P.bot = P.sep > 0 || Math.round(Number(P.bot)) === 1 ? 1 : 0;
+  if (!given("Dm") || P.Dm < P.Dc) P.Dm = Math.max(P.Dc, given("Dm") ? P.Dm : P.Dc);
+  // Con botella, la caja la acompaña salvo que sus medidas vengan dadas: el alto sale del ⌀ máximo,
+  // el ancho de la cantidad y el paso, y el largo del alto de la botella.
+  if (!given("p")) P.p = pitchFor(P.Dm);
+  if (P.bot) {
+    if (!given("L")) P.L = lengthFor(P.Lb, P.e);
+    if (!given("A")) P.A = Math.max(60, Math.min(200, depthFor(P.Dm, P.e)));
+    if (!given("H")) P.H = Math.max(120, Math.min(600, widthFor(Math.round(P.n), P.p, P.e)));
+  }
   const notes = [];
-  const lim = limits(P);
-  P.sep = Number(P.sep) >= 0.5 ? 1 : 0;
-  for (const key of ["e", "Lb", "t", "Dc", "Dn", "n", "p", "A", "H"]) {
+  for (const key of ["e", "Lb", "Dc", "Dm", "Dn", "n", "p", "L", "t", "A", "H"]) {
     const [a, b] = limits(P)[key];
     let v = key === "n" ? Math.round(P[key]) : P[key];
-    if (!Number.isFinite(v)) v = key === "p" ? pitchFor(P.Dc) : DEFAULTS[key];
+    if (!Number.isFinite(v)) v = key === "p" ? pitchFor(P.Dm) : DEFAULTS[key];
     const c = Math.min(b, Math.max(a, v));
     if (Math.abs(c - P[key]) > 1e-9) notes.push(`${key} ajustado a ${Math.round(c)} (rango ${a}–${b} con estas medidas).`);
     P[key] = c;
-    if (key === "Lb") P.L = lengthFor(P.Lb, P.e);
   }
-  return { P, notes, limits: lim };
+  return { P, notes, limits: limits(P) };
 }
 
 export function validate(P) {
   const d = derived(P), w = [];
+  if (!P.bot) return w;
+  if (P.Dm < P.Dc) w.push(`El diámetro máximo (${P.Dm}) no puede ser menor que el de la base (${P.Dc}).`);
+  if (P.Dm > d.wall - 2 * WALL_MIN) w.push(`La botella de ⌀${P.Dm} no entra en el alto interior de ${d.wall} (A − 2e).`);
+  if (!P.sep) return w;
   const R = P.Dc / 2;
   if (P.Dc > d.wall - 2 * WALL_MIN) w.push(`El agujero de ⌀${P.Dc} no entra en el tabique de ${d.wall} (A − 2e): dejá al menos ${WALL_MIN} mm por lado.`);
   if (P.Dn >= P.Dc) w.push(`La ranura del cuello (${P.Dn}) tiene que ser menor que el agujero del cuerpo (${P.Dc}).`);
   if (FIX.flareW <= P.Dn) w.push(`La ranura del cuello (${P.Dn}) es más ancha que la boca de 40 mm de la ranura.`);
   if (R < FIX.tongueW / 2 + 1) w.push(`Con ⌀${P.Dc} la lengüeta de apoyo de 33 mm no cabe en el agujero.`);
-  if (P.sep === 1) {
+  if (P.sep === 2) {
     const c = (d.Wi - (P.n - 1) * LOMO * P.e) / P.n;
-    if (c < P.Dc + 2) w.push(`Con acordeón, cada compartimento mide ${Math.round(c)} mm y la botella ⌀${P.Dc}: no entra.`);
+    if (c < P.Dm + 2) w.push(`Con acordeón, cada compartimento mide ${Math.round(c)} mm y la botella ⌀${P.Dm}: no entra.`);
     return w;
   }
   const span = (P.n - 1) * P.p + P.Dc;
   if (span > d.Wi - 6) w.push(`${P.n} botellas con paso ${P.p} ocupan ${Math.round(span)} mm y el interior mide ${Math.round(d.Wi)} (H − 2e).`);
-  if (P.n > 1 && P.p < P.Dc + 2) w.push(`El paso (${P.p}) es menor que el agujero más 2 mm: los agujeros se tocan.`);
+  if (P.n > 1 && P.p < P.Dm + 2) w.push(`El paso (${P.p}) es menor que el diámetro máximo más 2 mm: las botellas se tocan.`);
   if (d.main < 40) w.push(`El panel entre tabiques queda en ${d.main} mm (L − 3e − 2t).`);
   return w;
 }
@@ -356,7 +377,7 @@ export function generate(params, plantilla) {
   const right = map([989.1, 900])[0];
   const bottom = map([700, 525])[1];
   const nBox = entities.length;
-  const ins = P.sep === 1 ? acordeon(P, right + FIX.gap, bottom + 31, entities) : insert(P, right + FIX.gap, bottom + 31, entities);
+  const ins = P.sep === 2 ? acordeon(P, right + FIX.gap, bottom + 31, entities) : P.sep === 1 ? insert(P, right + FIX.gap, bottom + 31, entities) : null;
   const d = derived(P);
   // Cotas de la caja (en coordenadas del plano original, antes del giro).
   const X = (x) => map([x, 900])[0];
@@ -387,38 +408,41 @@ export function generate(params, plantilla) {
   const boxPts = ptsOf(entities.slice(0, nBox));
   const bx = { xMin: Math.min(...boxPts.map((q) => q[0])), xMax: Math.max(...boxPts.map((q) => q[0])), yMin: Math.min(...boxPts.map((q) => q[1])), yMax: Math.max(...boxPts.map((q) => q[1])) };
 
-  // El separador queda a la derecha de la caja con su largo vertical
-  // (girado 90° respecto de como quedaba debajo de la caja).
-  const r = ins.rows;
-  // Pegado a la caja (5 mm de separación de corte) y centrado en su altura.
-  const tx = bx.xMax + SEPARATOR_GAP - ins.x0, ty = (bx.yMax + bx.yMin) / 2 - (ins.y0 + r.top / 2);
-  const insT = ([x, y]) => [x + tx, y + ty];
-  for (const e of entities.slice(nBox)) {
-    if (e.t === "L") { e.a = insT(e.a); e.b = insT(e.b); }
-    else e.c = insT(e.c);
-  }
-  if (ins.tipo === "acordeon") {
-    const ix0 = ins.x0 + tx, ix1 = ix0 + ins.ancho, iy0 = ins.y0 + ty;
-    H_(dims, ix0, ix1, iy0 - 40, "tira");
-    dims[dims.length - 1].src = "h";
-    ins.cortes.map((v) => iy0 + v).forEach((y, i, all) => {
-      if (!i) return;
-      V_(dims, all[i - 1], y, ix1 + 45, ins.tramos[i - 1]);
+  let insT = (q) => q;
+  if (ins) {
+    // El separador queda a la derecha de la caja con su largo vertical
+    // (girado 90° respecto de como quedaba debajo de la caja).
+    const r = ins.rows;
+    // Pegado a la caja (5 mm de separación de corte) y centrado en su altura.
+    const tx = bx.xMax + SEPARATOR_GAP - ins.x0, ty = (bx.yMax + bx.yMin) / 2 - (ins.y0 + r.top / 2);
+    insT = ([x, y]) => [x + tx, y + ty];
+    for (const e of entities.slice(nBox)) {
+      if (e.t === "L") { e.a = insT(e.a); e.b = insT(e.b); }
+      else e.c = insT(e.c);
+    }
+    if (ins.tipo === "acordeon") {
+      const ix0 = ins.x0 + tx, ix1 = ix0 + ins.ancho, iy0 = ins.y0 + ty;
+      H_(dims, ix0, ix1, iy0 - 40, "tira");
+      dims[dims.length - 1].src = "h";
+      ins.cortes.map((v) => iy0 + v).forEach((y, i, all) => {
+        if (!i) return;
+        V_(dims, all[i - 1], y, ix1 + 45, ins.tramos[i - 1]);
+        dims[dims.length - 1].src = "v";
+      });
+      V_(dims, iy0, iy0 + r.top, ix1 + 175, "acordeón");
       dims[dims.length - 1].src = "v";
-    });
-    V_(dims, iy0, iy0 + r.top, ix1 + 175, "acordeón");
-    dims[dims.length - 1].src = "v";
-  } else {
-    const ix0 = ins.x0 + tx, ix1 = ix0 + d.Wi, iy0 = ins.y0 + ty;
-    H_(dims, ix0, ix1, iy0 - 40, "interior");
-    dims[dims.length - 1].src = "h";
-    [0, r.c1, r.c2, r.p1, r.p2, r.c3, r.c4, r.top].map((v) => iy0 + v).forEach((y, i, all) => {
-      if (!i) return;
-      V_(dims, all[i - 1], y, ix1 + 45, ["pared", "puente", "tabique", "panel", "tabique", "puente", "pared"][i - 1]);
+    } else {
+      const ix0 = ins.x0 + tx, ix1 = ix0 + d.Wi, iy0 = ins.y0 + ty;
+      H_(dims, ix0, ix1, iy0 - 40, "interior");
+      dims[dims.length - 1].src = "h";
+      [0, r.c1, r.c2, r.p1, r.p2, r.c3, r.c4, r.top].map((v) => iy0 + v).forEach((y, i, all) => {
+        if (!i) return;
+        V_(dims, all[i - 1], y, ix1 + 45, ["pared", "puente", "tabique", "panel", "tabique", "puente", "pared"][i - 1]);
+        dims[dims.length - 1].src = "v";
+      });
+      V_(dims, iy0, iy0 + r.top, ix1 + 175, "interior");
       dims[dims.length - 1].src = "v";
-    });
-    V_(dims, iy0, iy0 + r.top, ix1 + 175, "interior");
-    dims[dims.length - 1].src = "v";
+    }
   }
 
   const all = ptsOf(entities);
@@ -433,11 +457,11 @@ export function generate(params, plantilla) {
     // los hendidos de las tapas (incluye los cierres de pared doble).
     externa: [P.L + 2 * P.e, P.A + 2 * P.e, P.H + (22 / 3) * P.e],
     plancha: `${Math.round(xMax - xMin)} × ${Math.round(yMax - yMin)}`,
-    botella: `${Math.round(P.n)} × ${Math.round(P.Lb)} de largo · ⌀ ${Math.round(P.Dc)} cuerpo · ⌀ ${Math.round(P.Dn)} cuello`,
-    interior: ins.tipo === "acordeon" ? `acordeón ${Math.round(ins.ancho)} × ${Math.round(r.top)}` : `${Math.round(d.Wi)} × ${Math.round(d.insertLen)} (plegado ${Math.round(d.folded)} × ${Math.round(d.Wi)} × ${Math.round(d.wall)})`,
+    botella: P.bot ? `${Math.round(P.n)} × ${Math.round(P.Lb)} de largo · ⌀ ${Math.round(P.Dc)} base · ⌀ ${Math.round(P.Dm)} máximo · ⌀ ${Math.round(P.Dn)} cuello` : "sin botella",
+    interior: !ins ? "sin separador" : ins.tipo === "acordeon" ? `acordeón ${Math.round(ins.ancho)} × ${Math.round(ins.rows.top)}` : `${Math.round(d.Wi)} × ${Math.round(d.insertLen)} (plegado ${Math.round(d.folded)} × ${Math.round(d.Wi)} × ${Math.round(d.wall)})`,
     bounds: { xMin, xMax, yMin, yMax },
   };
-  ins.T = insT;
+  if (ins) ins.T = insT;
   return { P, entities, dims, info, anchors: { map, insert: ins, rot }, notes, warnings: [...validate(P), ...problems] };
 }
 

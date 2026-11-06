@@ -1,6 +1,6 @@
 // La caja tipo galeno como diseño de la plantilla de troqueles (../../troqueles/LEEME.md):
 // todo lo que la página necesita saber de este troquel en particular.
-import { DEFAULTS, PARAMS, ONDAS, generate, limits, widthFor, depthFor, pitchFor, toDxf, toCf2 } from "./galeno.mjs";
+import { DEFAULTS, PARAMS, ONDAS, generate, limits, widthFor, depthFor, pitchFor, lengthFor, toDxf, toCf2 } from "./galeno.mjs";
 import { DIM_FORMULAS } from "./formulas.mjs";
 import { botellaSvg, botellaCampos, cajaSvg, ondaSvg } from "./dibujos.mjs";
 
@@ -12,20 +12,31 @@ export function crearDiseno(PLANTILLA) {
     DEFAULTS,
     generate: (state) => generate(state, PLANTILLA),
     limits,
-    // Botones rápidos: la onda del cartón y el tipo de separador (uno u otro).
+    // De menor a mayor complejidad: la caja sola; se suma la botella; se suma un separador (cuna o
+    // acordeón), que necesita la botella.
     atajos: [
       { titulo: "Onda", key: "e", opciones: Object.entries(ONDAS), unidad: "mm" },
-      { titulo: "Separador", key: "sep", opciones: [["Cuna", 0], ["Acordeón", 1]] },
+      { titulo: "Botella", key: "bot", opciones: [["Sin", 0], ["Con", 1]], arriba: true },
+      { titulo: "Separador", key: "sep", opciones: [["Sin", 0], ["Cuna", 1], ["Acordeón", 2]], arriba: true },
     ],
-    // El puente es de la cuna: con acordeón no se usa.
-    inactiva: (P, key) => key === "t" && P.sep === 1,
-    // Las medidas de la caja acompañan a las botellas (después se pueden corregir a mano):
-    // la cantidad mueve el ancho H; el diámetro mueve el alto A y el ancho H (el paso es Dc + 6).
+    // Recuadros atenuados mientras no se usan; el puente es sólo de la cuna.
+    apagado: (P, grupo) => (grupo === "Botella" && !P.bot) || (grupo === "Separador" && !P.sep),
+    inactiva: (P, key) => key === "t" && P.sep !== 1,
+    // Con botella, la caja la acompaña (después se puede corregir a mano): el alto de la botella mueve
+    // el largo L; el ⌀ máximo mueve el alto A y, con la cantidad, el ancho H (paso = ⌀ máximo + 6).
+    // Sumar un separador suma la botella; sacar la botella saca el separador.
     enlazar(s, key) {
-      const ancho = Math.max(120, Math.min(600, widthFor(Math.min(6, s.n), pitchFor(s.Dc), s.e)));
-      if (key === "n") return { H: ancho };
-      if (key === "Dc") return { A: Math.max(60, Math.min(200, depthFor(s.Dc, s.e))), H: ancho };
-      return null;
+      const out = {};
+      let bot = s.bot === 1;
+      if (key === "sep" && s.sep > 0 && !bot) { out.bot = 1; bot = true; }
+      if (key === "bot" && s.bot === 0 && s.sep > 0) out.sep = 0;
+      if (key === "Dc" && s.Dm < s.Dc) out.Dm = s.Dc;
+      if (!bot) return out;
+      const Dm = Math.max(s.Dm, s.Dc), todo = key === "bot" || key === "sep";
+      if (todo || key === "Lb" || key === "e") out.L = Math.max(210, Math.min(700, lengthFor(s.Lb, s.e)));
+      if (todo || key === "Dc" || key === "Dm" || key === "e") out.A = Math.max(60, Math.min(200, depthFor(Dm, s.e)));
+      if (todo || key === "Dc" || key === "Dm" || key === "n" || key === "e") out.H = Math.max(120, Math.min(600, widthFor(Math.min(6, s.n), pitchFor(Dm), s.e)));
+      return out;
     },
     // Dibujos del panel: la botella con sus cotas y el cartón con su onda.
     figuras: { Botella: (P) => botellaSvg(P), Caja: (P) => cajaSvg(P), "Cartón": (P) => ondaSvg(P, ONDAS) },
@@ -54,10 +65,10 @@ export function crearDiseno(PLANTILLA) {
     simple: { "h:costado": "A", "h:contrafrente": "L", "v:frente": "H", "v:puente": "t", "v:compartimento": "", "v:lomo": "", "h:plano total": "", "v:plano total": "" },
     // Letras del plano y qué letras mueve cada variable del panel.
     letras: ["Dc", "Dn", "L", "A", "H", "t", "e"],
-    toca: { Lb: ["L"], Dc: ["Dc", "A", "H"], Dn: ["Dn"], n: ["Dc", "Dn", "H"], A: ["A"], H: ["H"], t: ["t"], e: ["e"] },
+    toca: { L: ["L"], Lb: ["L"], Dc: ["Dc"], Dm: ["A", "H"], Dn: ["Dn"], n: ["Dc", "Dn", "H"], A: ["A"], H: ["H"], t: ["t"], e: ["e"] },
     // Notas sueltas sobre el plano: [punto, texto, visible en la vista simple].
     llamadas(model) {
-      const map = (p) => model.anchors.rot(model.anchors.map(p)), ins = model.anchors.insert, r = ins.rows;
+      const map = (p) => model.anchors.rot(model.anchors.map(p)), ins = model.anchors.insert, r = ins ? ins.rows : null;
       const caja = [
         [map([530, 1090]), "guardapolvo A + 26"],
         [map([944, 1090]), "A + 29"],
@@ -66,7 +77,7 @@ export function crearDiseno(PLANTILLA) {
         [map([741.5, 1000]), "traba 87 × 10e/3"],
         [map([741.5, 1228]), "diente 85 × 5"],
       ];
-      if (ins.tipo === "acordeon") return caja;
+      if (!ins || ins.tipo === "acordeon") return caja;
       const out = [
         ...caja,
         [ins.T([ins.x0 + ins.centres[0], ins.y0 + (r.p2 + r.c3) / 2]), "⌀Dc", true],
@@ -81,10 +92,10 @@ export function crearDiseno(PLANTILLA) {
       const onda = Object.keys(ONDAS).find((k) => Math.abs(ONDAS[k] - P.e) < 1e-9);
       return [
         ["Tipo de cartón", onda ? "Onda " + onda : "Espesor propio", "espesor " + mm(P.e) + " mm"],
-        ["Botella", mm(P.Lb) + " × ⌀" + mm(P.Dc), P.n + (P.n > 1 ? " botellas" : " botella") + " · cuello ⌀" + mm(P.Dn)],
+        P.bot ? ["Botella", mm(P.Lb) + " × ⌀" + mm(P.Dm), P.n + (P.n > 1 ? " botellas" : " botella") + " · base ⌀" + mm(P.Dc)] : ["Botella", "Sin botella", "caja sola"],
         ["Medidas internas", x3([P.L, P.A, P.H]), "L × A × H"],
         ["Medidas externas", x3(model.info.externa), "con paredes y cierres"],
-        ["Plancha total", x3([b.xMax - b.xMin, b.yMax - b.yMin]), "separador " + (P.sep === 1 ? "acordeón" : "cuna")],
+        ["Plancha total", x3([b.xMax - b.xMin, b.yMax - b.yMin]), P.sep === 2 ? "separador acordeón" : P.sep === 1 ? "separador cuna" : "sin separador"],
       ];
     },
     archivo(model) {
@@ -96,6 +107,6 @@ export function crearDiseno(PLANTILLA) {
     cf2: (model, name) => toCf2(model, { name }),
     describir: (model) => "Troquel galeno " + model.info.caja + " mm",
     // Combinaciones con las que se comprueba que cada fórmula dé lo que mide el plano.
-    casosFormulas: [{}, { L: 370 }, { L: 400, A: 110, H: 300, t: 32, n: 4, Dc: 70, Dn: 28, p: 72 }, { L: 250, A: 70, H: 200, n: 2, Dc: 56, Dn: 22, p: 64 }, { e: 2 }, { e: 4 }, { e: 4, L: 370, t: 40 }, { e: 2, A: 120, H: 300, t: 15 }, { sep: 1 }, { sep: 1, n: 5, Dc: 70, e: 4 }, { sep: 1, n: 1, A: 150 }],
+    casosFormulas: [{}, { L: 370, A: 110, H: 300 }, { e: 2 }, { e: 4 }, { sep: 1 }, { sep: 1, L: 370 }, { sep: 1, L: 400, A: 110, H: 300, t: 32, n: 4, Dc: 70, Dn: 28, p: 72 }, { sep: 1, L: 250, A: 70, H: 200, n: 2, Dc: 56, Dn: 22, p: 64 }, { sep: 1, e: 4, L: 370, t: 40 }, { sep: 1, e: 2, A: 120, H: 300, t: 15 }, { sep: 2 }, { sep: 2, n: 5, Dc: 70, Dm: 85, e: 4 }, { sep: 2, n: 1, A: 150 }, { bot: 1, Dc: 60, Dm: 95 }],
   };
 }

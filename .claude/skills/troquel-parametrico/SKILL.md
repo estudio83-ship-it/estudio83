@@ -35,7 +35,7 @@ y `caja-galeno/parametrico/` (completo, armado desde el DXF del troquel 6463).
 ## Lo que el usuario ya pidió (respetarlo en todos los diseños)
 
 - Todo en español rioplatense. Medidas en mm enteros, sin decimales.
-- Variables del producto primero (por ejemplo, Botella), después Caja y Cartón; títulos de grupo en negrita.
+- De menor a mayor complejidad: por defecto la caja sola (Caja y Cartón); el producto (por ejemplo, Botella) y el separador se suman con botones Sin/Con, y sus recuadros quedan atenuados mientras no se usan.
 - Espesor por onda: E 2 mm, B 3 mm, C 4 mm.
 - Deslizadores que arrancan en el medio; botones y campos tipo pastilla; Reset en naranja.
 - Descargas DXF y CF2 en azul, sin zip. El DXF lleva sólo las líneas y las cotas principales.

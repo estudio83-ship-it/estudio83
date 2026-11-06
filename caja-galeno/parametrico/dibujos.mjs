@@ -19,52 +19,61 @@ const cota = (key, d, ar, tx) => '<g class="cota" data-var="' + key + '"><path d
 // Botella de vino bordelesa parada, en alzado, dibujada como el troquel: blanca con su contorno. Cuerpo recto
 // 60 % del alto, hombro 12 %, cuello con la cápsula y el anillo del pico arriba.
 // La forma queda fija (la botella del 6463: 306 × ⌀80, cuello ⌀31); sólo cambian los valores de las cotas.
-// Las medidas se escriben en campos sobre las cotas (botellaCampos da dónde va cada uno).
-const FORMA = { Lb: 306, Dc: 80, Dn: 31 };
-const BOT = { W: 326, H: 250, cx: 163, base: 176, alto: 160 };
+// Las medidas se escriben en campos sobre las cotas (botellaCampos da dónde va cada uno). La forma es
+// fija y un poco cónica, para mostrar las dos medidas del cuerpo: el ⌀ de la base y el ⌀ máximo, que en
+// las botellas cónicas está arriba, antes del radio del hombro.
+const FORMA = { Lb: 306, Dc: 66, Dm: 86, Dn: 31 };
+const BOT = { W: 326, H: 250, cx: 150, base: 176, alto: 160 };
+function botellaGeo() {
+  const s = Math.min(BOT.alto / FORMA.Lb, 84 / FORMA.Dm), len = FORMA.Lb * s;
+  return { s, len, Rb: (FORMA.Dc / 2) * s, Rm: (FORMA.Dm / 2) * s, rn: (FORMA.Dn / 2) * s, Y: (f) => BOT.base - f * len };
+}
 export function botellaCampos() {
-  const s = Math.min(BOT.alto / FORMA.Lb, 84 / FORMA.Dc), len = FORMA.Lb * s, R = (FORMA.Dc / 2) * s, rn = (FORMA.Dn / 2) * s;
+  const g = botellaGeo();
   return {
-    Lb: [BOT.cx - R - 72, BOT.base - len / 2],
+    Lb: [BOT.cx - g.Rm - 70, g.Y(0.5)],
     Dc: [BOT.cx, BOT.base + 32],
-    Dn: [BOT.cx + rn + 80, BOT.base - 0.78 * len],
-    n: [BOT.cx + R + 82, BOT.base - 0.3 * len],
+    Dm: [BOT.cx + g.Rm + 72, g.Y(0.6)],
+    Dn: [BOT.cx + g.rn + 86, g.Y(0.81)],
+    n: [BOT.cx + g.Rm + 72, g.Y(0.22)],
   };
 }
 export function botellaSvg(P) {
-  const { W, H, cx, base, alto } = BOT;
-  const s = Math.min(alto / FORMA.Lb, 84 / FORMA.Dc);
-  const len = FORMA.Lb * s, R = (FORMA.Dc / 2) * s, rn = (FORMA.Dn / 2) * s, top = base - len;
-  const Y = (f) => base - f * len;
-  const yb = Y(0.6), ys = Y(0.72), yc = Y(0.84), yN = Y(0.78), heel = Math.min(R * 0.3, 0.04 * len), ring = Math.max(2.2, 0.028 * len), rr = rn + Math.max(1.2, 1.6 * s), yr = top + ring;
+  const { W, H, cx, base } = BOT;
+  const { s, len, Rb, Rm, rn, Y } = botellaGeo();
+  const top = base - len;
+  const yb = Y(0.6), ys = Y(0.72), yc = Y(0.84), yN = Y(0.81), heel = Math.min(Rb * 0.3, 0.04 * len), ring = Math.max(2.2, 0.028 * len), rr = rn + Math.max(1.2, 1.6 * s), yr = top + ring;
   const k1 = yb - (yb - ys) * 0.55, k2 = ys + (yb - ys) * 0.45;
-  const silueta = "M" + r1(cx - R + heel) + " " + r1(base) + "L" + r1(cx + R - heel) + " " + r1(base) +
-    "Q" + r1(cx + R) + " " + r1(base) + " " + r1(cx + R) + " " + r1(base - heel) + "L" + r1(cx + R) + " " + r1(yb) +
-    "C" + r1(cx + R) + " " + r1(k1) + " " + r1(cx + rn) + " " + r1(k2) + " " + r1(cx + rn) + " " + r1(ys) +
+  // Cuerpo: de la base (⌀ base) se abre en recta hasta el ⌀ máximo, y de ahí el hombro curvo al cuello.
+  const silueta = "M" + r1(cx - Rb + heel) + " " + r1(base) + "L" + r1(cx + Rb - heel) + " " + r1(base) +
+    "Q" + r1(cx + Rb) + " " + r1(base) + " " + r1(cx + Rb) + " " + r1(base - heel) + "L" + r1(cx + Rm) + " " + r1(yb) +
+    "C" + r1(cx + Rm) + " " + r1(k1) + " " + r1(cx + rn) + " " + r1(k2) + " " + r1(cx + rn) + " " + r1(ys) +
     "L" + r1(cx + rn) + " " + r1(yr) + "L" + r1(cx + rr) + " " + r1(yr) + "L" + r1(cx + rr) + " " + r1(top) +
     "L" + r1(cx - rr) + " " + r1(top) + "L" + r1(cx - rr) + " " + r1(yr) + "L" + r1(cx - rn) + " " + r1(yr) + "L" + r1(cx - rn) + " " + r1(ys) +
-    "C" + r1(cx - rn) + " " + r1(k2) + " " + r1(cx - R) + " " + r1(k1) + " " + r1(cx - R) + " " + r1(yb) +
-    "L" + r1(cx - R) + " " + r1(base - heel) + "Q" + r1(cx - R) + " " + r1(base) + " " + r1(cx - R + heel) + " " + r1(base) + "Z";
+    "C" + r1(cx - rn) + " " + r1(k2) + " " + r1(cx - Rm) + " " + r1(k1) + " " + r1(cx - Rm) + " " + r1(yb) +
+    "L" + r1(cx - Rb) + " " + r1(base - heel) + "Q" + r1(cx - Rb) + " " + r1(base) + " " + r1(cx - Rb + heel) + " " + r1(base) + "Z";
   // Bordes de la cápsula y del anillo del pico, de lado a lado del cuello.
   const lineas = "M" + r1(cx - rn) + " " + r1(yc) + "H" + r1(cx + rn) + "M" + r1(cx - rn) + " " + r1(yr) + "H" + r1(cx + rn);
-  const q = botellaCampos(), xL = q.Lb[0], yD = q.Dc[1], xN = q.Dn[0] - 36;
-  const cAlto = cota("Lb", "M" + r1(cx - R - 3) + " " + r1(base) + "H" + r1(xL - 5) + "M" + r1(cx - rr - 3) + " " + r1(top) + "H" + r1(xL - 5) + "M" + r1(xL) + " " + r1(top) + "V" + r1(base), flechas(xL, top, xL, base), "");
-  const cDiam = cota("Dc", "M" + r1(cx - R) + " " + r1(base + 3) + "V" + r1(yD + 5) + "M" + r1(cx + R) + " " + r1(base + 3) + "V" + r1(yD + 5) + "M" + r1(cx - R) + " " + r1(yD) + "H" + r1(cx + R), flechas(cx - R, yD, cx + R, yD), "");
+  const q = botellaCampos(), xL = q.Lb[0], yD = q.Dc[1];
+  const cAlto = cota("Lb", "M" + r1(cx - Rb - 3) + " " + r1(base) + "H" + r1(xL - 5) + "M" + r1(cx - rr - 3) + " " + r1(top) + "H" + r1(xL - 5) + "M" + r1(xL) + " " + r1(top) + "V" + r1(base), flechas(xL, top, xL, base), "");
+  const cBase = cota("Dc", "M" + r1(cx - Rb) + " " + r1(base + 3) + "V" + r1(yD + 5) + "M" + r1(cx + Rb) + " " + r1(base + 3) + "V" + r1(yD + 5) + "M" + r1(cx - Rb) + " " + r1(yD) + "H" + r1(cx + Rb), flechas(cx - Rb, yD, cx + Rb, yD), "");
+  // ⌀ máximo: cota de lado a lado del cuerpo a la altura del hombro; la línea sigue hasta su campo.
+  const cMax = cota("Dm", "M" + r1(cx - Rm) + " " + r1(yb) + "H" + r1(q.Dm[0] - 36), flechas(cx - Rm, yb, cx + Rm, yb), "");
   // El cuello es chico: flechas por fuera, apuntando hacia adentro; la línea llega hasta su campo.
-  const cCue = cota("Dn", "M" + r1(cx - rn - 12) + " " + r1(yN) + "H" + r1(cx - rn) + "M" + r1(cx + rn) + " " + r1(yN) + "H" + r1(xN), punta(cx - rn, yN, -1, 0) + punta(cx + rn, yN, 1, 0), "");
-  // Rótulos chicos debajo de cada campo.
-  const rot = (key, t) => '<text class="rotulo" data-var="' + key + '" x="' + r1(q[key][0]) + '" y="' + r1(q[key][1] + 27) + '" text-anchor="middle">' + t + "</text>";
-  const rotulos = rot("Lb", "Alto") + rot("Dc", "⌀ botella") + rot("Dn", "⌀ cuello") + rot("n", "Cantidad");
-  return '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Botella de vino de ' + Math.round(P.Lb) + " mm de alto, ⌀" + Math.round(P.Dc) + " de cuerpo y ⌀" + Math.round(P.Dn) + " de cuello, " + Math.round(P.n) + ' en la caja">' +
-    '<path class="pieza" d="' + silueta + '"/><path class="filete" d="' + lineas + '"/>' + cAlto + cDiam + cCue + rotulos + "</svg>";
+  const cCue = cota("Dn", "M" + r1(cx - rn - 12) + " " + r1(yN) + "H" + r1(cx - rn) + "M" + r1(cx + rn) + " " + r1(yN) + "H" + r1(q.Dn[0] - 36), punta(cx - rn, yN, -1, 0) + punta(cx + rn, yN, 1, 0), "");
+  // Rótulos chicos de cada campo: debajo, salvo el del cuello, que va arriba para no tocar el ⌀ máximo.
+  const rot = (key, t, dy = 27) => '<text class="rotulo" data-var="' + key + '" x="' + r1(q[key][0]) + '" y="' + r1(q[key][1] + dy) + '" text-anchor="middle">' + t + "</text>";
+  const rotulos = rot("Lb", "Alto") + rot("Dc", "⌀ base") + rot("Dm", "⌀ máximo") + rot("Dn", "⌀ cuello", -19) + rot("n", "Cantidad");
+  return '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Botella de vino de ' + Math.round(P.Lb) + " mm de alto, ⌀" + Math.round(P.Dc) + " en la base, ⌀" + Math.round(P.Dm) + " máximo y ⌀" + Math.round(P.Dn) + " de cuello, " + Math.round(P.n) + ' en la caja">' +
+    '<path class="pieza" d="' + silueta + '"/><path class="filete" d="' + lineas + '"/>' + cAlto + cBase + cMax + cCue + rotulos + "</svg>";
 }
 
 // La caja armada en isométrico, a escala, dibujada como el troquel: largo L (sale de la botella), ancho H
 // (de la cantidad de botellas) y alto A (del diámetro).
 export function cajaSvg(P) {
-  const W = 326, Hv = 196, c = Math.cos(Math.PI / 6), sn = 0.5;
+  const W = 326, Hv = 168, c = Math.cos(Math.PI / 6), sn = 0.5;
   const L = P.L, Hb = P.H, A = P.A;
-  const s = Math.min(236 / ((L + Hb) * c), 136 / ((L + Hb) * sn + A));
+  const s = Math.min(220 / ((L + Hb) * c), 112 / ((L + Hb) * sn + A));
   const ox = W / 2 + 6 - ((L - Hb) * c * s) / 2, oy = (Hv - ((L + Hb) * sn + A) * s) / 2 - 2;
   // x: largo hacia la derecha-abajo; y: ancho hacia la izquierda-abajo; z: alto.
   const pt = (x, y, z) => [ox + (x - y) * c * s, oy + ((x + y) * sn - z + A) * s];
@@ -86,7 +95,7 @@ export function cajaSvg(P) {
   // Normales hacia afuera en pantalla: frente (y = H) baja a la izquierda, lado (x = L) baja a la derecha.
   const nAncho = [-sn, c], nLargo = [sn, c];
   const cAncho = paralela("H", pt(L, 0, 0), pt(L, Hb, 0), [nLargo[0], nLargo[1]], "H", Hb);
-  const cLargo = paralela("Lb", pt(0, Hb, 0), pt(L, Hb, 0), [nAncho[0], nAncho[1]], "L", L);
+  const cLargo = paralela("L", pt(0, Hb, 0), pt(L, Hb, 0), [nAncho[0], nAncho[1]], "L", L);
   const xa = pt(0, Hb, 0)[0] - 16;
   const cAlto = cota("A", "M" + P2(off(pt(0, Hb, 0), -3, 0)) + "H" + r1(xa - 5) + "M" + P2(off(pt(0, Hb, A), -3, 0)) + "H" + r1(xa - 5) + "M" + r1(xa) + " " + r1(pt(0, Hb, 0)[1]) + "V" + r1(pt(0, Hb, A)[1]), flechas(xa, pt(0, Hb, A)[1], xa, pt(0, Hb, 0)[1]), rotulo(xa - 6, (pt(0, Hb, 0)[1] + pt(0, Hb, A)[1]) / 2, "A", A, -90));
   return '<svg viewBox="0 0 ' + W + " " + Hv + '" role="img" aria-label="Caja de ' + Math.round(L) + " × " + Math.round(Hb) + " × " + Math.round(A) + ' mm (largo × ancho × alto)">' +
