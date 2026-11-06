@@ -466,7 +466,21 @@ function directa(text, file) {
     a.download = file;
     document.body.appendChild(a); a.click(); a.remove();
     say("Descarga iniciada: " + file + ".");
-  } catch (e) { say("No se pudo descargar."); }
+    enMarco();
+  } catch (e) { say("No se pudo descargar."); enMarco(); }
+}
+// Dentro de un marco (por ejemplo, una página de SharePoint que muestra el archivo incrustado) el
+// navegador puede bloquear la descarga sin avisar. Se ofrece abrir la página sola, donde sí descarga.
+function enMarco() {
+  let marco = true;
+  try { marco = window.self !== window.top; } catch (e) {}
+  if (!marco) return;
+  const st = document.getElementById("status");
+  st.textContent = "Si la descarga no empezó, ";
+  const ir = document.createElement("a");
+  ir.href = location.href; ir.target = "_blank"; ir.rel = "noopener";
+  ir.textContent = "abrí la página en una pestaña nueva";
+  st.appendChild(ir); st.appendChild(document.createTextNode(" y descargá desde ahí."));
 }
 async function download(text, ext) {
   const file = name() + "." + ext;
