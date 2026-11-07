@@ -665,7 +665,7 @@ function goTo(t){cancelAnimationFrame(sweep);const f0=freq,t0=performance.now(),
 function nextStation(dir){wake();if(vol<=0.02)animWheel(5*STEP);
   const eps=CAPTURE/2,list=dir>0?STATIONS.filter(s=>s.f>freq+eps):STATIONS.filter(s=>s.f<freq-eps).reverse();
   if(list.length)goTo(list[0].f);}
-const FIN={madera:{fill:'#7a4628',grain:1,sh:1},blanco:{fill:'#f3f1ec',grain:0,sh:.5,gloss:1},naranja:{fill:'#c9542b',grain:0,sh:.8}};
+const FIN={madera:{fill:'#7a4628',grain:1,sh:1},blanco:{fill:'#f3f1ec',grain:0,sh:.5,gloss:1},naranja:{fill:'#d8653f',grain:0,sh:.3,gloss:1},amarillo:{fill:'#ecb848',grain:0,sh:.26,gloss:1}};
 const finKeys=Object.keys(FIN);let finIdx=0;
 function setFinish(k){const o=FIN[k];bodyFill.setAttribute('fill',o.fill);grain.style.display=o.grain?'':'none';gloss.style.display=o.gloss?'':'none';bodyShade.setAttribute('opacity',o.sh);finIdx=finKeys.indexOf(k);try{localStorage.setItem('e83-cil',k);}catch(e){}}
 function cycleFinish(){finIdx=(finIdx+1)%finKeys.length;setFinish(finKeys[finIdx]);}
