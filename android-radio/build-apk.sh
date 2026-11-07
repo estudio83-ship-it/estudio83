@@ -2,7 +2,7 @@
 set -eo pipefail
 cd "$(dirname "$0")"
 SDK=${ANDROID_HOME:-$HOME/android-sdk}; BT=$SDK/build-tools/34.0.0; AJ=$SDK/platforms/android-34/android.jar; O=build/manual
-cp ../radio-cilindro-standalone.html app/src/main/assets/index.html
+python3 -c "import re,sys;s=open(\"../radio-cilindro-standalone.html\",encoding=\"utf-8\").read();s=re.sub(r\"<link rel=\\\"(manifest|icon|apple-touch-icon)\\\"[^>]*>\\n\",\"\",s);s=re.sub(r\"<script>if\\(.serviceWorker[^\\n]*</script>\\n\",\"\",s);open(\"app/src/main/assets/index.html\",\"w\",encoding=\"utf-8\").write(s)"
 rm -rf $O; mkdir -p $O/res $O/classes $O/dex $O/gen
 sed 's#<manifest #<manifest package="ar.estudio83.radio" #' app/src/main/AndroidManifest.xml > $O/AndroidManifest.xml
 $BT/aapt2 compile --dir app/src/main/res -o $O/res/res.zip
